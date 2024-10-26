@@ -14,7 +14,8 @@
 				"GitHub.copilot-chat",
 				"dbaeumer.vscode-eslint",
 				"VisualStudioExptTeam.vscodeintellicode",
-				"bradlc.vscode-tailwindcss"
+				"bradlc.vscode-tailwindcss",
+				"ms-azuretools.vscode-docker"
 			]
 		}
 	},
