@@ -1,11 +1,12 @@
-import Image from "next/image";
-
 export default function Home() {
   return (
-    <div>
-      <h1>Hello World</h1>
-      <Image src="/image.jpg" width={500} height={500} alt="Image" />
-      
-    </div>
+    <>
+    <header className="h-screen flex items-center justify-center text-center text-6xl bg-center">
+      <div>
+        <h1 className="text-indigo-800">Home</h1>
+        <p>Home page content</p>
+      </div>
+    </header>
+    </>
   );
 }

@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import "./globals.css";
 import { Inter } from 'next/font/google'
 import { ThemeProvider } from "@/components/theme-provider"
@@ -8,15 +7,6 @@ const inter = Inter({
   subsets: ['latin'],
   display: 'swap',
 })
-
-export const metadata: Metadata = {
-  title: "Soniic",
-  description: "Music Marketing Redefined",
-  twitter: {
-    site: "@MathesonStep",
-  }
-
-};
 
 export default function RootLayout({
   children,
