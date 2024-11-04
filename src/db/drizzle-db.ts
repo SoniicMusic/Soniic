@@ -1,7 +1,7 @@
 import { drizzle } from "drizzle-orm/mysql2";
 import mysql from "mysql2/promise";
 
-export default async function db() {
+export default async function conn() {
   const connection = await mysql.createConnection({
     host: process.env.DB_HOST,
     user: process.env.DB_USER,
@@ -12,4 +12,3 @@ export default async function db() {
   const db = drizzle(connection);
   return db;
 }
-

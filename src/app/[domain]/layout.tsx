@@ -1,4 +1,4 @@
-import "./globals.css";
+import type { Metadata } from "next";
 import { Inter } from 'next/font/google'
 import { ThemeProvider } from "@/components/theme-provider"
 
@@ -8,8 +8,17 @@ const inter = Inter({
   display: 'swap',
 })
 
-export default function RootLayout({
-  children,
+export const metadata: Metadata = {
+  title: "Soniic",
+  description: "Music Marketing Redefined",
+  twitter: {
+    site: "@MathesonStep",
+  }
+
+};
+
+export default function DomainLayout({
+    children,
 }: {
   children: React.ReactNode
 }) {
