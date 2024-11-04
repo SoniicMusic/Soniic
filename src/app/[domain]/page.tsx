@@ -1,14 +1,18 @@
-'use client';
+import { headers } from 'next/headers'
+import React from 'react';
 
-export default function Artist() {
+export default async function Page() {
+    const headersList = await headers()
+    const domain = headersList.get('host') || ''
+
   return (
-    <>
-    <header className="h-screen flex items-center justify-center text-center text-6xl bg-center">
-      <div>
-        <h1 className="text-indigo-800">Home</h1>
-        <p>Domain</p>
-      </div>
-    </header>
-    </>
-  );
+    <div className="p-4">
+      <h1 className="text-2xl font-bold mb-4">Welcome to our site</h1>
+      {domain ? (
+        <p className="text-lg">You are viewing the {domain} subdomain.</p>
+      ) : (
+        <p className="text-lg">You are on the main domain.</p>
+      )}
+    </div>
+  )
 }

@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+// import type { Metadata } from "next";
 import { Inter } from 'next/font/google'
 import { ThemeProvider } from "@/components/theme-provider"
 
@@ -8,14 +8,14 @@ const inter = Inter({
   display: 'swap',
 })
 
-export const metadata: Metadata = {
-  title: "Soniic",
-  description: "Music Marketing Redefined",
-  twitter: {
-    site: "@MathesonStep",
-  }
+// export const metadata: Metadata = {
+//   title: "Soniic",
+//   description: "Music Marketing Redefined",
+//   twitter: {
+//     site: "@MathesonStep",
+//   }
 
-};
+// };
 
 export default function DomainLayout({
     children,

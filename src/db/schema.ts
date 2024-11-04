@@ -99,6 +99,7 @@ export const artist_links = mysqlTable('artist_links', {
     url: varchar({ length: 255 }),
     icon: varchar({ length: 255 }),
     color: varchar({ length: 255 }),
+    order: int(),
 });
 
 // Albums Table
