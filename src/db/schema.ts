@@ -60,11 +60,10 @@ export const verificationTokens = pgTable(
 export const authenticators = pgTable(
   "authenticator",
   {
-    credentialID: text("credentialID").notNull().unique(),
-    userId: text("userId")
+    credentialid: text("credentialid").notNull(), // Changed to lowercase
+    userid: text("userid") // Changed to lowercase
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
-    providerAccountId: text("providerAccountId").notNull(),
     credentialPublicKey: text("credentialPublicKey").notNull(),
     counter: integer("counter").notNull(),
     credentialDeviceType: text("credentialDeviceType").notNull(),
@@ -72,11 +71,11 @@ export const authenticators = pgTable(
     transports: text("transports"),
   },
   (authenticator) => ({
-    compositePK: primaryKey({
-      columns: [authenticator.userId, authenticator.credentialID],
+    pk: primaryKey({
+      columns: [authenticator.userid, authenticator.credentialid],
     }),
   })
-)
+);
 
 // Matheson's Schema
 
@@ -89,7 +88,9 @@ export const artists = pgTable('artists', {
 
 // Artist Links Table
 export const artist_links = pgTable('artist_links', {
+    id: text().primaryKey().$defaultFn(() => crypto.randomUUID()),
     artist_id: text().references(() => artists.id),
+    name: text(),
     url: text(),
     icon: text(),
     color: text(),
