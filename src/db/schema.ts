@@ -1,37 +1,32 @@
-import { int, mysqlTable, varchar, primaryKey, timestamp, boolean } from 'drizzle-orm/mysql-core';
+import { integer, pgTable, text, timestamp, primaryKey, boolean } from 'drizzle-orm/pg-core';
 import type { AdapterAccountType } from 'next-auth/adapters';
 // AuthJS
-export const users = mysqlTable("user", {
-  id: varchar("id", { length: 255 })
+export const users = pgTable("user", {
+  id: text("id")
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
-  name: varchar("name", { length: 255 }),
-  email: varchar("email", { length: 255 }).unique(),
-  emailVerified: timestamp("emailVerified", {
-    mode: "date",
-    fsp: 3,
-  }),
-  image: varchar("image", { length: 255 }),
+  name: text("name"),
+  email: text("email").unique(),
+  emailVerified: timestamp("emailVerified", { mode: "date" }),
+  image: text("image"),
 })
  
-export const accounts = mysqlTable(
+export const accounts = pgTable(
   "account",
   {
-    userId: varchar("userId", { length: 255 })
+    userId: text("userId")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
-    type: varchar("type", { length: 255 })
-      .$type<AdapterAccountType>()
-      .notNull(),
-    provider: varchar("provider", { length: 255 }).notNull(),
-    providerAccountId: varchar("providerAccountId", { length: 255 }).notNull(),
-    refresh_token: varchar("refresh_token", { length: 255 }),
-    access_token: varchar("access_token", { length: 255 }),
-    expires_at: int("expires_at"),
-    token_type: varchar("token_type", { length: 255 }),
-    scope: varchar("scope", { length: 255 }),
-    id_token: varchar("id_token", { length: 2048 }),
-    session_state: varchar("session_state", { length: 255 }),
+    type: text("type").$type<AdapterAccountType>().notNull(),
+    provider: text("provider").notNull(),
+    providerAccountId: text("providerAccountId").notNull(),
+    refresh_token: text("refresh_token"),
+    access_token: text("access_token"),
+    expires_at: integer("expires_at"),
+    token_type: text("token_type"),
+    scope: text("scope"),
+    id_token: text("id_token"),
+    session_state: text("session_state"),
   },
   (account) => ({
     compoundKey: primaryKey({
@@ -40,19 +35,19 @@ export const accounts = mysqlTable(
   })
 )
  
-export const sessions = mysqlTable("session", {
-  sessionToken: varchar("sessionToken", { length: 255 }).primaryKey(),
-  userId: varchar("userId", { length: 255 })
+export const sessions = pgTable("session", {
+  sessionToken: text("sessionToken").primaryKey(),
+  userId: text("userId")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
   expires: timestamp("expires", { mode: "date" }).notNull(),
 })
  
-export const verificationTokens = mysqlTable(
+export const verificationTokens = pgTable(
   "verificationToken",
   {
-    identifier: varchar("identifier", { length: 255 }).notNull(),
-    token: varchar("token", { length: 255 }).notNull(),
+    identifier: text("identifier").notNull(),
+    token: text("token").notNull(),
     expires: timestamp("expires", { mode: "date" }).notNull(),
   },
   (verificationToken) => ({
@@ -62,76 +57,79 @@ export const verificationTokens = mysqlTable(
   })
 )
  
-export const authenticators = mysqlTable(
+export const authenticators = pgTable(
   "authenticator",
   {
-    credentialID: varchar("credentialID", { length: 255 }).notNull().unique(),
-    userId: varchar("userId", { length: 255 })
+    credentialID: text("credentialID").notNull().unique(),
+    userId: text("userId")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
-    providerAccountId: varchar("providerAccountId", { length: 255 }).notNull(),
-    credentialPublicKey: varchar("credentialPublicKey", {
-      length: 255,
-    }).notNull(),
-    counter: int("counter").notNull(),
-    credentialDeviceType: varchar("credentialDeviceType", {
-      length: 255,
-    }).notNull(),
+    providerAccountId: text("providerAccountId").notNull(),
+    credentialPublicKey: text("credentialPublicKey").notNull(),
+    counter: integer("counter").notNull(),
+    credentialDeviceType: text("credentialDeviceType").notNull(),
     credentialBackedUp: boolean("credentialBackedUp").notNull(),
-    transports: varchar("transports", { length: 255 }),
+    transports: text("transports"),
   },
   (authenticator) => ({
-    compositePk: primaryKey({
+    compositePK: primaryKey({
       columns: [authenticator.userId, authenticator.credentialID],
     }),
   })
 )
+
+// Matheson's Schema
+
 // Artists Table
-export const artists = mysqlTable('artists', {
-    id: varchar({length: 255}).primaryKey().$defaultFn(() => crypto.randomUUID()),
-    name: varchar({ length: 255 }),
-    domain: varchar({ length: 255 }),
+export const artists = pgTable('artists', {
+    id: text().primaryKey().$defaultFn(() => crypto.randomUUID()),
+    name: text(),
+    domain: text(),
 });
 
 // Artist Links Table
-export const artist_links = mysqlTable('artist_links', {
-    artist_id: varchar({ length: 255 }).references(() => artists.id),
-    url: varchar({ length: 255 }),
-    icon: varchar({ length: 255 }),
-    color: varchar({ length: 255 }),
-    order: int(),
+export const artist_links = pgTable('artist_links', {
+    artist_id: text().references(() => artists.id),
+    url: text(),
+    icon: text(),
+    color: text(),
+    order: integer(),
 });
 
 // Albums Table
-export const albums = mysqlTable('albums', {
-    upc: varchar({ length: 255 }).primaryKey(),
-    title: varchar({ length: 255 }),
-    release_date: varchar({ length: 255 }), // You can use DATE type if your library supports it
-    genre: varchar({ length: 100 }),
+export const albums = pgTable('albums', {
+  upc: text().primaryKey(),
+  title: text(),
+  release_date: text(), // You can use DATE type if your library supports it
+  genre: text(),
+  slug: text(),
+  cover_art: text(),
 });
 
-// Tracks Table
-export const tracks = mysqlTable('tracks', {
-    isrc: varchar({ length: 255 }).primaryKey(),
-    title: varchar({ length: 255 }),
-    album_upc: varchar({ length: 255 }).references(() => albums.upc),
-    slug: varchar({ length: 255 }),
+// Tracks Table (Modified)
+export const tracks = pgTable('tracks', {
+  isrc: text().primaryKey(),
+  title: text(),
+  album_upc: text().references(() => albums.upc).notNull(), // Required reference to album
+  slug: text(),
+  track_number: integer(), // New field to order tracks within album
+  // Removed cover_art since we'll use the album's cover_art
 });
 
 // Track Links Table
-export const track_links = mysqlTable('track_links', {
-    id: varchar({ length: 255 }).primaryKey().$defaultFn(() => crypto.randomUUID()),
-    track_isrc: varchar({ length: 255 }).references(() => tracks.isrc),
-    url: varchar({ length: 255 }),
-    icon: varchar({ length: 255 }),
-    color: varchar({ length: 255 }),
+export const track_links = pgTable('track_links', {
+    id: text().primaryKey().$defaultFn(() => crypto.randomUUID()),
+    track_isrc: text().references(() => tracks.isrc),
+    url: text(),
+    icon: text(),
+    color: text(),
 });
 
 // Track Artists Table
-export const track_artists = mysqlTable('track_artists', {
-    id: varchar({ length: 255 }).primaryKey().$defaultFn(() => crypto.randomUUID()),
-    track_isrc: varchar({ length: 255 }).references(() => tracks.isrc),
-    artist_id: varchar({ length: 255 }).references(() => artists.id),
+export const track_artists = pgTable('track_artists', {
+    id: text().primaryKey().$defaultFn(() => crypto.randomUUID()),
+    track_isrc: text().references(() => tracks.isrc),
+    artist_id: text().references(() => artists.id),
 });
 
 

@@ -19,6 +19,7 @@
     "next": "15.0.3-canary.5",
     "next-auth": "^5.0.0-beta.25",
     "next-themes": "^0.3.0",
+    "pg": "^8.13.1",
     "react": "19.0.0-rc-7c8e5e7a-20241101",
     "react-dom": "19.0.0-rc-7c8e5e7a-20241101",
     "tailwind-merge": "^2.5.4",
@@ -26,6 +27,7 @@
   },
   "devDependencies": {
     "@types/node": "^20",
+    "@types/pg": "^8.11.10",
     "@types/react": "npm:types-react@19.0.0-rc.1",
     "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1",
     "drizzle-kit": "^0.25.0",
