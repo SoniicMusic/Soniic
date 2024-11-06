@@ -84,6 +84,9 @@ export const artists = pgTable('artists', {
     id: text().primaryKey().$defaultFn(() => crypto.randomUUID()),
     name: text(),
     domain: text(),
+    avatar: text(),
+    bio: text(),
+    background_image: text(),
 });
 
 // Artist Links Table
