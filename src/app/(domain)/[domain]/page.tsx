@@ -3,7 +3,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import Image from 'next/image';
 import { getArtist, getDomain } from '@/lib/get-artist';
 import { Button } from '@/components/ui/button';
-import { SiX, SiFacebook, SiYoutube, SiInstagram } from '@icons-pack/react-simple-icons';
+import { SiX, SiFacebook, SiYoutube, SiInstagram, SiSpotify, SiSoundcloud, SiSnapchat, SiThreads } from '@icons-pack/react-simple-icons';
 
 async function ArtistCard() {
   const artistData = await getArtist();
@@ -12,6 +12,10 @@ async function ArtistCard() {
     { name: 'Twitter', url: `https://twitter.com/`, icon: SiX },
     { name: 'Facebook', url: `https://facebook.com/`, icon: SiFacebook },
     { name: 'YouTube', url: `https://youtube.com/`, icon: SiYoutube },
+    { name: 'Snapchat', url: `https://snapchat.com/`, icon: SiSnapchat },
+    { name: 'Threads', url: `https://threads.com/`, icon: SiThreads },
+    { name: 'Spotify', url: `https://spotify.com/`, icon: SiSpotify },
+    { name: 'SoundCloud', url: `https://soundcloud.com/`, icon: SiSoundcloud },
   ];
   return (
     <div 
