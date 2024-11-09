@@ -1,6 +1,6 @@
 import { headers } from 'next/headers';
 import conn from '@/db/drizzle-db';
-import { artists } from '@/db/schema';
+import { artists, artist_links } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 
 export async function getDomain() {
@@ -16,4 +16,12 @@ export async function getArtist() {
     ).execute()
     console.log(artist)
     return artist[0]
+  }
+export async function getArtistLinks() {
+    const artist = await getArtist()
+    const db = await conn()
+    const links = await db.select().from(artist_links).where(
+      eq(artist_links.artist_id, artist.id)
+    ).execute()
+    return links
   }
