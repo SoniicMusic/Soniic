@@ -14,8 +14,18 @@ async function ArtistCard() {
     { name: 'YouTube', url: `https://youtube.com/`, icon: SiYoutube },
   ];
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-600 to-purple-900 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md bg-white/10 backdrop-blur-md border-none text-white">
+    <div 
+      className="min-h-screen flex items-center justify-center bg-gradient-to-b from-blue-600 to-purple-900 relative"
+      style={{
+        backgroundImage: artistData.background_image ? `url(${artistData.background_image})` : undefined,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+      }}
+    >
+      {/* Overlay for better text readability */}
+      <div className="absolute inset-0 bg-black/50" />
+      
+      <Card className="w-screen min-h-screen bg-black/10 backdrop-blur-3xl border-none text-white p-4 relative z-10">
         <CardContent className="p-6">
           <div className="flex flex-col items-center mb-6">
             <Image
@@ -28,7 +38,8 @@ async function ArtistCard() {
             <h1 className="text-2xl font-bold mb-1">{artistData.name}</h1>
             {artistData.bio && <p className="text-center mb-4">{artistData.bio}</p>}
           </div>
-          <div className="space-y-3">
+          <div className="space-y-3 flex justify-center"> {/* Added flex and justify-center */}
+            <section className="flex flex-col space-y-4 w-full md:w-2/3 lg:w-1/2 max-w-xl"> {/* Added responsive widths */}
             {artistLinks.map((link) => (
               <Button
                 key={link.name}
@@ -42,6 +53,7 @@ async function ArtistCard() {
                 </a>
               </Button>
             ))}
+            </section>
           </div>
         </CardContent>
       </Card>
