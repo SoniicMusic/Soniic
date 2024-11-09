@@ -36,10 +36,9 @@ async function ArtistCard() {
               className="rounded-full shadow-lg"
             />
             <h1 className="text-3xl font-bold">{artistData.name}</h1>
-            {artistData.bio && <p className="text-center text-lg">{artistData.bio}</p>}
+            {artistData.bio && <p className="text-center text-lg px-3">{artistData.bio}</p>}
           </div>
-          
-          <section className="w-full mt-8 space-y-3"> {/* Increased spacing between buttons */}
+          <section className="w-full mt-8 space-y-4 px-2"> {/* Increased spacing between buttons */}
             {artistLinks.map((link) => (
               <Button
                 key={link.name}
