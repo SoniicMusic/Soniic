@@ -1,17 +1,17 @@
 import React, { Suspense } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import Image from 'next/image';
-import { AtSign } from "lucide-react"
 import { getArtist, getDomain } from '@/lib/get-artist';
 import { Button } from '@/components/ui/button';
+import { SiX, SiFacebook, SiYoutube, SiInstagram } from '@icons-pack/react-simple-icons';
 
 async function ArtistCard() {
   const artistData = await getArtist();
   const artistLinks = [
-    { name: 'Instagram', url: `https://instagram.com/`, icon: AtSign },
-    { name: 'Twitter', url: `https://twitter.com/`, icon: AtSign },
-    { name: 'Facebook', url: `https://facebook.com/`, icon: AtSign },
-    { name: 'YouTube', url: `https://youtube.com/`, icon: AtSign },
+    { name: 'Instagram', url: `https://instagram.com/`, icon: SiInstagram },
+    { name: 'Twitter', url: `https://twitter.com/`, icon: SiX },
+    { name: 'Facebook', url: `https://facebook.com/`, icon: SiFacebook },
+    { name: 'YouTube', url: `https://youtube.com/`, icon: SiYoutube },
   ];
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-600 to-purple-900 flex items-center justify-center p-4">
@@ -27,15 +27,6 @@ async function ArtistCard() {
             />
             <h1 className="text-2xl font-bold mb-1">{artistData.name}</h1>
             {artistData.bio && <p className="text-center mb-4">{artistData.bio}</p>}
-            <a
-              href={`https://${artistData.domain}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-300 hover:text-blue-100 transition-colors"
-            >
-              <AtSign className="inline mr-1" size={16} />
-              {artistData.domain}
-            </a>
           </div>
           <div className="space-y-3">
             {artistLinks.map((link) => (
