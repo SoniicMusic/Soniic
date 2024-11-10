@@ -19,7 +19,7 @@ async function ArtistCard(props: any) {
   ];
   return (
     <div 
-      className="min-h-screen flex items-center justify-center bg-gradient-to-b from-blue-600 to-purple-900 relative animate-in fade-in-0 duration-1000"
+      className="min-h-screen flex items-center justify-center bg-gradient-to-b from-blue-600 to-purple-900 relative animate-in fade-in-0 duration-3000"
       style={{
         backgroundImage: artistData.background_image ? `url(${artistData.background_image})` : undefined,
         backgroundSize: 'cover',
@@ -91,8 +91,11 @@ const artist = await getArtist()
   }
   else {
   return {
-    title: 'Welcome to our site',
-    description: 'A simple example of a domain-specific page',
+    title: 'Soniic',
+    description: 'Be Heard',
+    icons: {
+      icon: 'soniic.ico',
+    },
   }
 }
 };
