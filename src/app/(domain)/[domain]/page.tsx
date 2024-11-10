@@ -3,19 +3,19 @@ import { Card, CardContent } from '@/components/ui/card';
 import Image from 'next/image';
 import { getArtist, getDomain } from '@/lib/get-artist';
 import { Button } from '@/components/ui/button';
-import { SiX, SiFacebook, SiYoutube, SiInstagram, SiSpotify, SiSoundcloud, SiSnapchat, SiThreads } from '@icons-pack/react-simple-icons';
+import * as Icons from '@icons-pack/react-simple-icons';
 
 async function ArtistCard() {
   const artistData = await getArtist();
   const artistLinks = [
-    { name: 'Instagram', url: `https://instagram.com/`, icon: SiInstagram },
-    { name: 'Twitter', url: `https://twitter.com/`, icon: SiX },
-    { name: 'Facebook', url: `https://facebook.com/`, icon: SiFacebook },
-    { name: 'YouTube', url: `https://youtube.com/`, icon: SiYoutube },
-    { name: 'Snapchat', url: `https://snapchat.com/`, icon: SiSnapchat },
-    { name: 'Threads', url: `https://threads.com/`, icon: SiThreads },
-    { name: 'Spotify', url: `https://spotify.com/`, icon: SiSpotify },
-    { name: 'SoundCloud', url: `https://soundcloud.com/`, icon: SiSoundcloud },
+    { name: 'Instagram', url: `https://instagram.com/`, icon: Icons.SiInstagram },
+    { name: 'Twitter', url: `https://twitter.com/`, icon: Icons.SiX },
+    { name: 'Facebook', url: `https://facebook.com/`, icon: Icons.SiFacebook },
+    { name: 'YouTube', url: `https://youtube.com/`, icon: Icons.SiYoutube },
+    { name: 'Snapchat', url: `https://snapchat.com/`, icon: Icons.SiSnapchat },
+    { name: 'Threads', url: `https://threads.com/`, icon: Icons.SiThreads },
+    { name: 'Spotify', url: `https://spotify.com/`, icon: Icons.SiSpotify },
+    { name: 'SoundCloud', url: `https://soundcloud.com/`, icon: Icons.SiSoundcloud },
   ];
   return (
     <div 
@@ -79,10 +79,11 @@ const domain = await getDomain()
 const artist = await getArtist()
   if (domain) {
     return {
-      title: `Welcome to the ${domain} subdomain`,
-      description: 'A simple example of a domain-specific page',
-      Image: artist.avatar,
-      
+      title: `${artist.name} - Official Artist Page`,
+      description: '',
+      icons: {
+        icon: artist.background_image,
+      },
     }
   }
   else {
