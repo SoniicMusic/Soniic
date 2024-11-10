@@ -5,13 +5,17 @@ export default async function middleware(req: NextRequest) {
   const hostname = req.headers.get('host') || ''
   const domain = hostname.split(':')[0];
   console.log(`Domain: ${domain}`);
-  if (domain != process.env.APP_HOSTNAME) {
-    // Rewrite to `[domain]` route using the domain as the parameter
-    return NextResponse.rewrite(new URL(`/${domain}`, req.url));
+  // console.log(`Headers: ${JSON.stringify(req.headers)}`);
+  console.log(`URL: ${req.url}`);
+  if (domain === process.env.APP_HOSTNAME) {
+    // Pass through to the application
+    console.log(`Passing through to the application`);
+    return NextResponse.next();
   }
   else {
-  // Proceed with the request if no matching client is found
-  return NextResponse.next();
+    console.log(`Rewriting to ${domain}`);
+    // Rewrite to `[domain]` route using the domain as the parameter
+    return NextResponse.rewrite(new URL(`/${domain}`, req.url));
 }
 }
 

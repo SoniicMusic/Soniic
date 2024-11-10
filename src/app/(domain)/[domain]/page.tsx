@@ -1,11 +1,12 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import Image from 'next/image';
-import { getArtist, getDomain } from '@/lib/get-artist';
+import { getArtist } from '@/lib/get-artist';
 import { Button } from '@/components/ui/button';
 import * as Icons from '@icons-pack/react-simple-icons';
-async function ArtistCard() {
-  const artistData = await getArtist();
+async function ArtistCard(props: any) {
+  const artistData = props.artistData;
   const artistLinks = [
     { name: 'Instagram', url: `https://instagram.com/`, icon: Icons.SiInstagram },
     { name: 'Twitter', url: `https://twitter.com/`, icon: Icons.SiX },
@@ -66,15 +67,20 @@ async function ArtistCard() {
 }
 
 export default async function Page() {
+  const artistData = await getArtist();
+  if (!artistData) return (
+    <div className="min-h-screen flex items-center justify-center bg-black text-white">
+      <p>Artist not found</p>
+    </div>
+  );
   return (
-        <ArtistCard />
+        <ArtistCard artistData={artistData} />
   );
 }
 
 export async function generateMetadata() {
-const domain = await getDomain()
 const artist = await getArtist()
-  if (domain) {
+  if (artist) {
     return {
       title: `${artist.name} - Official Artist Page`,
       description: '',
