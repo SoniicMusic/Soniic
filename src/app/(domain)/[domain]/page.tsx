@@ -1,10 +1,9 @@
-import React, { Suspense } from 'react';
+import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import Image from 'next/image';
 import { getArtist, getDomain } from '@/lib/get-artist';
 import { Button } from '@/components/ui/button';
 import * as Icons from '@icons-pack/react-simple-icons';
-
 async function ArtistCard() {
   const artistData = await getArtist();
   const artistLinks = [
@@ -19,7 +18,7 @@ async function ArtistCard() {
   ];
   return (
     <div 
-      className="min-h-screen flex items-center justify-center bg-gradient-to-b from-blue-600 to-purple-900 relative"
+      className="min-h-screen flex items-center justify-center bg-gradient-to-b from-blue-600 to-purple-900 relative animate-in fade-in-0 duration-1000"
       style={{
         backgroundImage: artistData.background_image ? `url(${artistData.background_image})` : undefined,
         backgroundSize: 'cover',
@@ -68,12 +67,10 @@ async function ArtistCard() {
 
 export default async function Page() {
   return (
-      <Suspense fallback={<p>Loading...</p>}>
         <ArtistCard />
-      </Suspense>
   );
 }
- 
+
 export async function generateMetadata() {
 const domain = await getDomain()
 const artist = await getArtist()
@@ -92,6 +89,4 @@ const artist = await getArtist()
     description: 'A simple example of a domain-specific page',
   }
 }
- 
-
 };

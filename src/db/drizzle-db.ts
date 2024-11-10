@@ -7,5 +7,5 @@ export default async function conn() {
   });
   await client.connect();
   const db = drizzle(client);
-  return db;
+  return { db, client };
 }
