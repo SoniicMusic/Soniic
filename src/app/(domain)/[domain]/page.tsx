@@ -83,7 +83,7 @@ const artist = await getArtist()
   if (artist) {
     return {
       title: `${artist.name} - Official Artist Page`,
-      description: '',
+      description: artist.bio,
       icons: {
         icon: artist.background_image,
       },
