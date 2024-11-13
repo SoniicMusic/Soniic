@@ -77,7 +77,7 @@ const artist = await getArtist()
   if (artist) {
     return {
       title: `${artist.name} - Official Artist Page`,
-      description: artist.bio,
+      description: artist.bio || 'Official artist page for ' + artist.name + ' on Soniic',
       icons: {
         icon: artist.background_image,
       },
