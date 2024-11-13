@@ -110,6 +110,15 @@ export const albums = pgTable('albums', {
   cover_art: text(),
 });
 
+// Album Links Table
+export const album_links = pgTable('album_links', {
+    album_upc: text().references(() => albums.upc).primaryKey(),
+    name: text(),
+    url: text(),
+    icon: text(),
+    color: text(),
+});
+
 // Tracks Table (Modified)
 export const tracks = pgTable('tracks', {
   isrc: text().primaryKey(),
@@ -122,8 +131,7 @@ export const tracks = pgTable('tracks', {
 
 // Track Links Table
 export const track_links = pgTable('track_links', {
-    id: text().primaryKey().$defaultFn(() => crypto.randomUUID()),
-    track_isrc: text().references(() => tracks.isrc),
+    track_isrc: text().references(() => tracks.isrc).primaryKey(),
     url: text(),
     icon: text(),
     color: text(),
