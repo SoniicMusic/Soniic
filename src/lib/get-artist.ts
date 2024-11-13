@@ -19,10 +19,10 @@ export async function getArtist() {
   }
 export async function getArtistLinks() {
     const artist = await getArtist()
-    const {db, client }= await conn()
+    const {db, client} = await conn()
     const links = await db.select().from(artist_links).where(
       eq(artist_links.artist_id, artist.id)
     ).execute()
     client.end()
-    return links
+    return {artist, links}
   }
