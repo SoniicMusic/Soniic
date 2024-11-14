@@ -5,12 +5,20 @@ import Image from 'next/image';
 import { getArtist, getArtistLinks } from '@/lib/get-artist';
 import { Button } from '@/components/ui/button';
 import * as Icons from '@icons-pack/react-simple-icons';
+import * as motion from '@/lib/motion';
 async function ArtistCard(props: { artistData: any }) {
   const artistData = props.artistData.artist
   const artistLinks = props.artistData.links
   return (
-    <div 
-      className="min-h-screen flex items-center justify-center relative animate-in fade-in-0 duration-3000"
+    <motion.div
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1,
+      transition: { duration: 1.5,
+        delay: 0.5
+       }
+     }}
+    
+      className="min-h-screen flex items-center justify-center relative"
       style={{
         backgroundImage: artistData.background_image ? `url(${artistData.background_image})` : undefined,
         backgroundSize: 'cover',
@@ -19,7 +27,6 @@ async function ArtistCard(props: { artistData: any }) {
     >
       {/* Overlay for better text readability */}
       <div className="absolute inset-0 bg-black/50" />
-      
       <Card className="w-screen min-h-screen bg-black/10 backdrop-blur-3xl border-none text-white relative z-10">
         <CardContent className="container mx-auto max-w-lg px-2 py-8 flex flex-col items-center"> {/* Changed max-w-2xl to max-w-lg and px-4 to px-2 */}
           <div className="flex flex-col items-center space-y-6 w-full">
@@ -33,7 +40,18 @@ async function ArtistCard(props: { artistData: any }) {
             <h1 className="text-3xl font-bold">{artistData.name}</h1>
             {artistData.bio && <p className="text-center text-lg px-3">{artistData.bio}</p>}
           </div>
-          <section className="w-full mt-8 space-y-4 px-2"> {/* Increased spacing between buttons */}
+          <motion.section className="w-full mt-8 space-y-4 px-2"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1,
+              y: 0,
+              transition: { duration: 1.5,
+                delay: 0.5,
+                staggerChildren: 0.1
+               }
+             }}
+             whileHover={{ scale: 1.05 }}
+             whileTap={{ scale: 0.95 }}
+          > {/* Increased spacing between buttons */}
             {artistLinks.map((link: any) => {
               const Icon = (Icons as any)[link.icon];
               return (
@@ -53,10 +71,10 @@ async function ArtistCard(props: { artistData: any }) {
                 </Button>
               );
             })}
-          </section>
+          </motion.section>
         </CardContent>
       </Card>
-    </div>
+    </motion.div>
   );
 }
 
