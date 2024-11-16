@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "../globals.css";
 import { Inter } from 'next/font/google'
 import { ThemeProvider } from "@/components/theme-provider"
+import type { Viewport } from 'next'
 
 // If loading a variable font, you don't need to specify the font weight
 const inter = Inter({
@@ -14,9 +15,12 @@ export const metadata: Metadata = {
   description: "Music Marketing Redefined",
   twitter: {
     site: "@MathesonStep",
-  }
-
+  },
 };
+ 
+export const viewport: Viewport = {
+  themeColor: 'black',
+}
 
 export default function RootLayout({
   children,
