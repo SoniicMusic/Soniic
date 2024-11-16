@@ -3,32 +3,9 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import Image from 'next/image';
 import { getArtist, getArtistLinks } from '@/lib/get-artist';
-import { Button } from '@/components/ui/button';
-import * as Icons from '@icons-pack/react-simple-icons';
 import * as motion from '@/lib/motion';
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.5, // Controls delay between each child animation
-      delayChildren: 0.5    // Delays the start of all children animations
-    }
-  }
-};
+import Links from '@/components/links';
 
-const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 1.5,
-      delay: 0.5,
-      staggerChildren: 0.5, // Controls delay between each child animation
-    }
-  }
-};
 async function ArtistCard(props: { artistData: any }) {
   const artistData = props.artistData.artist
   const artistLinks = props.artistData.links
@@ -71,40 +48,7 @@ async function ArtistCard(props: { artistData: any }) {
             <h1 className="text-3xl font-bold">{artistData.name}</h1>
             {artistData.bio && <p className="text-center text-lg px-3">{artistData.bio}</p>}
           </motion.div>
-          <motion.section className="w-full mt-8 space-y-4 px-2"
-            initial="hidden"
-            animate="visible"
-            variants={containerVariants}
-          > {/* Increased spacing between buttons */}
-            {artistLinks.map((link: any) => {
-              const Icon = (Icons as any)[link.icon];
-              return (
-                <motion.div
-                key={link.name}
-                initial="hidden"
-                animate="visible"
-                variants={itemVariants}
-                 whileHover={{ scale: 1.05 }}
-                 whileTap={{ scale: 0.95 }}
-                >
-                <Button
-                  key={link.name}
-                  variant="outline"
-                  className="w-full bg-white/10 hover:bg-white/20 text-white border-white/30"
-                  asChild
-                >
-                  <a href={link.url} target="_blank" rel="noopener noreferrer" 
-                     className="flex items-center w-full h-full px-3 py-3"> {/* Removed justify-center */}
-                    <div className="flex items-center">
-                      <Icon className="mr-3 w-6 h-6" /> {/* Using w-6 h-6 instead of size prop */}
-                      <span className="text-lg font-semibold">{link.name}</span> {/* Removed text-center */}
-                    </div>
-                  </a>
-                </Button>
-               </motion.div>
-              );
-            })}
-          </motion.section>
+          <Links artistLinks={artistLinks} />
         </CardContent>
       </Card>
     </motion.div>
