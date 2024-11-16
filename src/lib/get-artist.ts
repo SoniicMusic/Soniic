@@ -19,6 +19,6 @@ export async function getArtistLinks() {
     const artist = await getArtist()
     const links = await db.select().from(artist_links).where(
       eq(artist_links.artist_id, artist.id)
-    ).execute()
+    ).orderBy(artist_links.order).execute()
     return {artist, links}
   }
