@@ -6,6 +6,7 @@ import { getArtist, getArtistLinks } from '@/lib/get-artist';
 import * as motion from '@/lib/motion';
 import Links from '@/components/links';
 
+
 async function ArtistCard(props: { artistData: any }) {
   const artistData = props.artistData.artist
   const artistLinks = props.artistData.links
@@ -38,6 +39,18 @@ async function ArtistCard(props: { artistData: any }) {
                }
              }}
           >
+            <motion.div
+              initial={{ opacity: 0, y: 10,
+                filter: 'blur(5px)'
+               }}
+              animate={{ opacity: 1,
+                y: 0,
+                filter: 'blur(0px)',
+                transition: { duration: 1.5,
+                  delay: 0.5
+                 }
+               }}
+            >
             <Image
               src={artistData.avatar || '/default-avatar.png'}
               alt={artistData.name || 'Artist'}
@@ -45,9 +58,42 @@ async function ArtistCard(props: { artistData: any }) {
               height={200}
               className="rounded-full shadow-lg"
             />
-            <h1 className="text-3xl font-bold">{artistData.name}</h1>
-            {artistData.bio && <p className="text-center text-lg px-3">{artistData.bio}</p>}
-          </motion.div>
+            </motion.div>
+
+            <motion.h1
+              initial={{ opacity: 0, y: 10, 
+                filter: 'blur(5px)'
+              }}
+              animate={{ opacity: 1,
+                y: 0,
+                filter: 'blur(0px)',
+                transition: { duration: 1.5,
+                  delay: 0.5
+                 }
+               }}
+
+             className="text-3xl font-bold">
+              {artistData.name}
+             </motion.h1>
+
+            {
+            artistData.bio && 
+            <motion.p 
+            className="text-center text-lg px-3"
+              initial={{ opacity: 0, y: 10, filter: 'blur(5px)'}}
+              animate={{ opacity: 1,
+                y: 0,
+                filter: 'blur(0px)',
+                transition: { duration: 1.5,
+                  delay: 0.5
+                 }
+               }}
+            >
+              {artistData.bio}
+            </motion.p>
+            }
+                      </motion.div>
+
           <Links artistLinks={artistLinks} />
         </CardContent>
       </Card>

@@ -2,29 +2,32 @@
 import { Button } from '@/components/ui/button';
 import * as Icons from '@icons-pack/react-simple-icons';
 import * as motion from '@/lib/motion';
+
 const containerVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      y: 0,
-      opacity: 1,
-      transition: {
-        delay: 1,
-        duration: 1.5,
-        staggerChildren: 1.5, // Controls delay between each child animation
-      }
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      delayChildren: 1,
+      staggerChildren: 0.2,
+      duration: 1.5
     }
-  };
-  
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.5,
-      }
+  }
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20, filter: 'blur(5px)'},
+  visible: {
+    opacity: 1,
+    y: 0,
+    filter: 'blur(0px)',
+    transition: {
+      duration: 0.5
     }
-  };
+  }
+};
+
 interface Link {
   name: string;
   url: string;
@@ -49,8 +52,6 @@ export default function Links(props: LinksProps) {
           return (
             <motion.ul
             key={link.name}
-            initial="hidden"
-            animate="visible"
             variants={itemVariants}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
