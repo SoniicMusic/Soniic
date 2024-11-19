@@ -17,6 +17,9 @@ export async function getArtist() {
   }
 export async function getArtistLinks() {
     const artist = await getArtist()
+    if (!artist) {
+      return null
+    }
     const links = await db.select().from(artist_links).where(
       eq(artist_links.artist_id, artist.id)
     ).orderBy(artist_links.order).execute()
