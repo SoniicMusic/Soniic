@@ -32,8 +32,9 @@
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
+    "**/*.js",
     ".next/types/**/*.ts"
-, "src/lib/lookup/applemusic.js"  ],
+,   ],
   "exclude": [
     "node_modules"
   ]

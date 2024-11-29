@@ -1,38 +1,50 @@
 'use client'
-
-import { useState, useEffect, useCallback } from 'react'
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Search, X } from 'lucide-react'
+import { searchSpotify } from '@/lib/lookup/spotify'
+import {  useMemo, useState, useTransition } from "react"
+import debounce from 'lodash/debounce'
+import SearchResult from "./searchResult"
 
 export default function SearchComponent() {
-  const [searchQuery, setSearchQuery] = useState('')
-  const [displayedResults, setDisplayedResults] = useState<string[]>([])
+  const [query, setQuery] = useState('')
+  const [results, setResults] = useState<{ tracks: object[]; albums: object[] }>({ tracks: [], albums: [] })
+  const [isPending, startTransition] = useTransition()
 
-  const filterResults = useCallback(() => {
-    const searchResults = [
-      "React Hooks: Simplify your code with functional components",
-      "Tailwind CSS: A utility-first framework for rapid UI development",
-      "Next.js: The React framework for production-grade applications",
-      "TypeScript: Add static typing to your JavaScript projects",
-      "GraphQL: A query language for your API",
-    ]
-    return searchResults.filter(result => result.toLowerCase().includes(searchQuery.toLowerCase()))
-  }, [searchQuery])
+  const handleSearch = (searchQuery: string) => {
+    startTransition(async () => {
+      try {
+        const searchResults = await searchSpotify(searchQuery)
+        setResults(searchResults || { tracks: [], albums: [] })
+      } catch (error) {
+        console.error('Error searching Spotify:', error)
+        setResults([])
+      }
+    })
+  }
 
-  useEffect(() => {
-    if (searchQuery) {
-        const timeout = setTimeout(() => {
-            setDisplayedResults(filterResults())
-        }, 500)
-        return () => clearTimeout(timeout)
-        }
-  }, [searchQuery, filterResults])
+  const debouncedSearch = useMemo(() => {
+    return debounce(handleSearch, 1000);
+  }, []);
 
+  
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // wait for user to stop typing
+
+    const newQuery = e.target.value
+    setQuery(newQuery)
+    if (newQuery) {
+      // debounce the search
+      debouncedSearch(newQuery)
+    } else {
+      setResults({ tracks: [], albums: [] })
+    }
+  }
   const handleClearSearch = () => {
-    setSearchQuery('')
-    setDisplayedResults([])
+    setQuery('')
+    setResults({ tracks: [], albums: [] })
   }
 
   return (
@@ -49,11 +61,11 @@ export default function SearchComponent() {
             type="search"
             placeholder="Search..."
             className="w-full pl-12 pr-4 py-6 bg-white/10 text-white placeholder-white/50 text-xl"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            value={query}
+            onChange={handleInputChange}
           />
           <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-white/50" size={24} />
-          {searchQuery && (
+          {query && (
             <Button
               variant="ghost"
               size="icon"
@@ -71,13 +83,23 @@ export default function SearchComponent() {
       <div className="h-[calc(100vh-5rem)] overflow-hidden">
         <ScrollArea className="h-full">
           <div className="max-w-6xl mx-auto p-4 space-y-4">
-            {displayedResults.map((result, index) => (
-              <div key={index} className="bg-white/5 backdrop-blur-sm rounded-lg p-4">
-                {result.split(searchQuery).map((part, index) => (
-                    <span key={index} className={index % 2 === 0 ? 'text-white' : 'text-primary'}>{part}</span>
-                ))}
-              </div>
+            {isPending && <p className="text-xl text-center font-bold">Loading...</p>}
+            {results.tracks.map((track) => (
+              <SearchResult
+                key={track.id}
+                title={track.title}
+                artists={track.artists}
+                coverUrl={track.coverUrl}
+              />
             ))}
+            {results.albums.map((album) => (
+              <SearchResult
+                key={album.id}
+                title={album.title}
+                artists={album.artists}
+                coverUrl={album.coverUrl}
+              />
+))}
           </div>
         </ScrollArea>
       </div>
