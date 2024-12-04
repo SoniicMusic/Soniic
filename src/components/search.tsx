@@ -50,9 +50,10 @@ export default function SearchComponent() {
   return (
     <div className="min-h-screen text-white overflow-hidden fixed inset-0 ">
       {/* Dark blue edge glows - with more center coverage */}
-      <div className="fixed bottom-0 left-0 w-full h-[15vh] bg-gradient-to-t from-blue-900/40 to-transparent blur-[100px]" />
+      {/* <div className="fixed bottom-0 left-0 w-full h-[15vh] bg-gradient-to-t from-blue-900/40 to-transparent blur-[100px]" />
       <div className="fixed left-0 top-0 w-[60vw] h-full bg-gradient-to-r from-blue-900/40 to-transparent blur-[100px]" />
-      <div className="fixed right-0 top-0 w-[60vw] h-full bg-gradient-to-l from-blue-900/40 to-transparent blur-[100px]" />
+      <div className="fixed right-0 top-0 w-[60vw] h-full bg-gradient-to-l from-blue-900/40 to-transparent blur-[100px]" /> */}
+      {/* Dark blue edge glows - with less center coverage */}
 
       {/* Search header - fixed position */}
       <div className="bg-black backdrop-blur-md p-4 sticky top-0 z-10">
@@ -82,19 +83,31 @@ export default function SearchComponent() {
       {/* Content area */}
       <div className="h-[calc(100vh-5rem)] overflow-hidden">
         <ScrollArea className="h-full">
-          <div className="max-w-6xl mx-auto p-4 space-y-4">
+          <div className="max-w-6xl mx-auto p-4 space-y-4 bg-black/50 rounded-md w-full">
             {isPending && <p className="text-xl text-center font-bold">Loading...</p>}
+            {results.tracks.length === 0 && results.albums.length === 0 && !isPending && (
+              <p className="text-xl text-center font-bold">No results found</p>
+            )}
+
+            {
+              results.tracks.length > 0 && <h2 className="text-xl font-bold sticky">Tracks</h2>
+            }
             {results.tracks.map((track) => (
               <SearchResult
                 key={track.id}
+                id={track.id}
                 title={track.title}
                 artists={track.artists}
                 coverUrl={track.coverUrl}
               />
             ))}
+            {
+              results.albums.length > 0 && <h2 className="text-xl font-bold sticky">Albums</h2>
+            }
             {results.albums.map((album) => (
               <SearchResult
                 key={album.id}
+                id={album.id}
                 title={album.title}
                 artists={album.artists}
                 coverUrl={album.coverUrl}

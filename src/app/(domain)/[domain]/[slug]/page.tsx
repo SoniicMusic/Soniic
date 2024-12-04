@@ -2,9 +2,10 @@
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import Image from 'next/image';
-import { getRelease, getReleaseLinks } from '@/lib/get-release';
+// import { getRelease, getReleaseLinks } from '@/lib/get-release';
 import { Button } from '@/components/ui/button';
 import * as Icons from '@icons-pack/react-simple-icons';
+import { notFound } from 'next/navigation';
 async function ArtistCard(props: { trackData: any }) {
   const trackData = props.trackData.info
   const artistLinks = props.trackData.links
@@ -61,6 +62,7 @@ async function ArtistCard(props: { trackData: any }) {
 }
 
 export default async function Page() {
+  try {
   const trackData = await getReleaseLinks();
   if (!trackData) return (
     <div className="min-h-screen flex items-center justify-center bg-black text-white">
@@ -70,9 +72,13 @@ export default async function Page() {
   return (
         <ArtistCard trackData={trackData} />
   );
+} catch {
+  notFound();
+}
 }
 
 export async function generateMetadata() {
+  
 const artist = await getRelease()
   if (artist) {
     return {

@@ -153,7 +153,6 @@ async function searchSpotify(query) {
     type: 'album',
     releaseDate: album.release_date
   }));
-
   return {
     tracks,
     albums

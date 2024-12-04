@@ -111,7 +111,7 @@ async function lookupArtistProfileImage(artistID) {
 	return profileImage;
 }
 
-exports = {
+export {
 	AppleMusiclookupISRC,
 	AppleMusicGetLink,
 	AppleMusicGetArtwork,
