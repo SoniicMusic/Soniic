@@ -158,6 +158,34 @@ async function searchSpotify(query) {
     albums
   };
 }
+// function that accepts spotify id and type and returns either the ISRC or UPC depending on the type
+async function getSpotifyUPC(id) {
+	const token = await getToken();
+	const url = `https://api.spotify.com/v1/album/${id}`;
+	const headers =	{
+		Authorization: 'Bearer ' + token,
+	};
+	const response = await fetch(url, { headers });
+	if (!response.ok) {
+		throw new Error(`HTTP error! status: ${response.statusText}`);
+	}
+	const data = await response.json();
+	return data.external_ids.upc;
+}
+
+async function getSpotifyISRC(id) {
+	const token = await getToken();
+	const url = `https://api.spotify.com/v1/tracks/${id}`;
+	const headers = {
+		Authorization: 'Bearer ' + token,
+	};
+	const response = await fetch(url, { headers });
+	if (!response.ok) {
+		throw new Error(`HTTP error! status: ${response.statusText}`);
+	}
+	const data = await response.json();
+	return data.external_ids.isrc;
+}
 
 export {
 	SpotifylookupISRC,
@@ -166,4 +194,6 @@ export {
 	getISRCSpotify,
 	getToken,
 	searchSpotify,
+	getSpotifyUPC,
+	getSpotifyISRC,
 };

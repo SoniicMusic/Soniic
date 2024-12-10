@@ -143,6 +143,12 @@ export const track_artists = pgTable('track_artists', {
     track_isrc: text().references(() => tracks.isrc),
     artist_id: text().references(() => artists.id),
 });
+// Tracks Albums Table
+export const track_albums = pgTable('track_albums', {
+    id: text().primaryKey().$defaultFn(() => crypto.randomUUID()),
+    track_isrc: text().references(() => tracks.isrc),
+    album_upc: text().references(() => albums.upc),
+});
 
 
 
