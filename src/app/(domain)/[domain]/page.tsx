@@ -92,7 +92,7 @@ async function ArtistCard(props: { artistData: any }) {
               {artistData.bio}
             </motion.p>
             }
-                      </motion.div>
+            </motion.div>
 
           <Links artistLinks={artistLinks} />
         </CardContent>

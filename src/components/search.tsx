@@ -7,7 +7,26 @@ import { searchSpotify } from '@/lib/lookup/spotify'
 import {  useMemo, useState, useTransition } from "react"
 import debounce from 'lodash/debounce'
 import SearchResult from "./searchResult"
+import * as motion from '@/lib/motion'
 
+const listVarients = {
+  hidden: { opacity: 0, x: -10 },
+  visible: { opacity: 1, x: 0 },
+  transition: {
+    duration: 1.5
+  }
+   }
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 1.5,
+      duration: 1.5
+    }
+  }
+}
 export default function SearchComponent() {
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<{ tracks: object[]; albums: object[] }>({ tracks: [], albums: [] })
@@ -47,6 +66,8 @@ export default function SearchComponent() {
     setResults({ tracks: [], albums: [] })
   }
 
+
+
   return (
     <div className="min-h-screen text-white overflow-hidden fixed inset-0 ">
       {/* Dark blue edge glows - with more center coverage */}
@@ -83,8 +104,11 @@ export default function SearchComponent() {
       {/* Content area */}
       <div className="h-[calc(100vh-5rem)] overflow-hidden">
         <ScrollArea className="h-full">
-          <div className="max-w-6xl mx-auto p-4 space-y-4 bg-black/50 rounded-md w-full">
-            {isPending && <p className="text-xl text-center font-bold">Loading...</p>}
+          <motion.div className="max-w-6xl mx-auto p-4 space-y-4 bg-black/50 rounded-md w-full"
+          initial="hidden"
+          animate="visible"
+          variants={containerVariants}
+          >
             {results.tracks.length === 0 && results.albums.length === 0 && !isPending && (
               <p className="text-xl text-center font-bold">No results found</p>
             )}
@@ -92,7 +116,12 @@ export default function SearchComponent() {
             {
               results.tracks.length > 0 && <h2 className="text-xl font-bold sticky">Tracks</h2>
             }
+
             {results.tracks.map((track) => (
+            <motion.div
+            key={track.id}
+            variants={listVarients}
+                        >
               <SearchResult
                 key={track.id}
                 id={track.id}
@@ -100,11 +129,17 @@ export default function SearchComponent() {
                 artists={track.artists}
                 coverUrl={track.coverUrl}
               />
+              </motion.div>
             ))}
             {
               results.albums.length > 0 && <h2 className="text-xl font-bold sticky">Albums</h2>
             }
             {results.albums.map((album) => (
+              <motion.div
+                      key={album.id}
+                      variants={listVarients}
+                      >
+
               <SearchResult
                 key={album.id}
                 id={album.id}
@@ -112,8 +147,9 @@ export default function SearchComponent() {
                 artists={album.artists}
                 coverUrl={album.coverUrl}
               />
+              </motion.div>
 ))}
-          </div>
+          </motion.div>
         </ScrollArea>
       </div>
     </div>
