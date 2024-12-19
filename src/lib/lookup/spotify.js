@@ -129,7 +129,6 @@ async function searchSpotify(query) {
 		Authorization: 'Bearer ' + token,
 	};
 	const response = await fetch(url, { headers });
-	console.log(response);
 	if (!response.ok) {
 		throw new Error(`HTTP error! status: ${response.statusText}`);
 	}

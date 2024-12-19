@@ -12,13 +12,15 @@ async function ArtistCard(props: { artistData: any }) {
   const artistLinks = props.artistData.links
   return (
     <motion.div
-    initial={{ opacity: 0 }}
-    animate={{ opacity: 1,
-      transition: { duration: 1.5,
-        delay: 0.5
-       }
-     }}
-    
+      initial={{ opacity: 0 }}
+      animate={{
+        opacity: 1,
+        transition: {
+          duration: 1.5,
+          delay: 0.5
+        }
+      }}
+
       className="min-h-screen flex items-center justify-center relative"
       style={{
         backgroundImage: artistData.background_image ? `url(${artistData.background_image})` : undefined,
@@ -32,67 +34,77 @@ async function ArtistCard(props: { artistData: any }) {
         <CardContent className="container mx-auto max-w-lg px-2 py-8 flex flex-col items-center"> {/* Changed max-w-2xl to max-w-lg and px-4 to px-2 */}
           <motion.div className="flex flex-col items-center space-y-6 w-full"
             initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1,
+            animate={{
+              opacity: 1,
               y: 0,
-              transition: { duration: 1.5,
+              transition: {
+                duration: 1.5,
                 delay: 0.5
-               }
-             }}
+              }
+            }}
           >
             <motion.div
-              initial={{ opacity: 0, y: 10,
+              initial={{
+                opacity: 0, y: 10,
                 filter: 'blur(5px)'
-               }}
-              animate={{ opacity: 1,
+              }}
+              animate={{
+                opacity: 1,
                 y: 0,
                 filter: 'blur(0px)',
-                transition: { duration: 1.5,
+                transition: {
+                  duration: 1.5,
                   delay: 0.5
-                 }
-               }}
+                }
+              }}
             >
-            <Image
-              src={artistData.avatar || '/default-avatar.png'}
-              alt={artistData.name || 'Artist'}
-              width={200}
-              height={200}
-              className="rounded-full shadow-lg"
-            />
+              <Image
+                src={artistData.avatar || '/default-avatar.png'}
+                alt={artistData.name || 'Artist'}
+                width={200}
+                height={200}
+                className="rounded-full shadow-lg"
+              />
             </motion.div>
 
             <motion.h1
-              initial={{ opacity: 0, y: 10, 
+              initial={{
+                opacity: 0, y: 10,
                 filter: 'blur(5px)'
               }}
-              animate={{ opacity: 1,
+              animate={{
+                opacity: 1,
                 y: 0,
                 filter: 'blur(0px)',
-                transition: { duration: 1.5,
+                transition: {
+                  duration: 1.5,
                   delay: 0.5
-                 }
-               }}
+                }
+              }}
 
-             className="text-3xl font-bold">
+              className="text-3xl font-bold">
               {artistData.name}
-             </motion.h1>
+            </motion.h1>
 
             {
-            artistData.bio && 
-            <motion.p 
-            className="text-center text-lg px-3"
-              initial={{ opacity: 0, y: 10, filter: 'blur(5px)'}}
-              animate={{ opacity: 1,
-                y: 0,
-                filter: 'blur(0px)',
-                transition: { duration: 1.5,
-                  delay: 0.5
-                 }
-               }}
-            >
-              {artistData.bio}
-            </motion.p>
+              artistData.bio &&
+              <motion.p
+                className="text-center text-lg px-3"
+                initial={{ opacity: 0, y: 10, filter: 'blur(5px)' }}
+                animate={{
+                  opacity: 1,
+                  y: 0,
+                  filter: 'blur(0px)',
+                  transition: {
+                    duration: 1.5,
+                    delay: 0.5
+                  }
+                }}
+              >
+                {artistData.bio}
+              </motion.p>
             }
-            </motion.div>
+          </motion.div>
 
           <Links artistLinks={artistLinks} />
         </CardContent>
@@ -109,12 +121,12 @@ export default async function Page() {
     </div>
   );
   return (
-        <ArtistCard artistData={artistData} />
+    <ArtistCard artistData={artistData} />
   );
 }
 
 export async function generateMetadata() {
-const artist = await getArtist()
+  const artist = await getArtist()
   if (artist) {
     return {
       title: `${artist.name} - Official Artist Page`,
@@ -125,12 +137,12 @@ const artist = await getArtist()
     }
   }
   else {
-  return {
-    title: 'Soniic',
-    description: 'Be Heard',
-    icons: {
-      icon: 'soniic.ico',
-    },
+    return {
+      title: 'Soniic',
+      description: 'Be Heard',
+      icons: {
+        icon: 'soniic.ico',
+      },
+    }
   }
-}
 };

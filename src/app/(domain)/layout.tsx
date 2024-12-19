@@ -9,24 +9,24 @@ const inter = Inter({
   subsets: ['latin'],
   display: 'swap',
 });
- 
+
 export const viewport: Viewport = {
   themeColor: '#0000',
 }
 export default function DomainLayout({
-    children,
+  children,
 }: {
   children: React.ReactNode
 }) {
   return (
     <html lang="en" className={inter.className} suppressHydrationWarning>
       <body>
-      <ThemeProvider
-        attribute="class"
-        defaultTheme="dark"
-      >
-      {children}
-      </ThemeProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="dark"
+        >
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );
