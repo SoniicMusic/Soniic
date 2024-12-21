@@ -11,9 +11,9 @@ const containerVariants = {
   visible: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.3,
-      delayChildren: 0.9,
-      duration: 0.5
+      delayChildren: 1,
+      staggerChildren: 0.2,
+      duration: 1.5
     }
   }
 }
@@ -24,40 +24,49 @@ export default function SearchResultsComponent(props: { results: { tracks: unkno
   const isPending = props.isPending
   return (
 
-    <motion.section className="max-w-6xl mx-auto p-4 space-y-4 bg-black/50 rounded-md w-full"
+    <motion.section className="max-w-6xl space-y-4"
       initial="hidden"
       animate="visible"
       variants={containerVariants}
     >
       {results.tracks.length === 0 && results.albums.length === 0 && !isPending && (
-        <p className="text-xl text-center font-bold">No results found</p>
+        <p className="text-xl text-center font-bold p-4">No results found</p>
       )}
 
       {
-        results.tracks.length > 0 && <h2 className="text-xl font-bold">Tracks</h2>
+        results.tracks.length > 0 &&
+        <h2 className="text-xl font-bold z-10 sticky top-0 p-2 items-center backdrop-blur-3xl">
+          Tracks
+        </h2>
       }
 
-      {results.tracks.map((track) => (
-        <motion.ul
-          key={track.id}
-          variants={listVarients}
-        >
-          <SearchResult
+      {results.tracks.map((track) => {
+        console.log(track)
+        return (
+          <motion.ul
             key={track.id}
-            id={track.id}
-            title={track.title}
-            artists={track.artists}
-            coverUrl={track.coverUrl}
-          />
-        </motion.ul>
-      ))}
+            variants={listVarients}
+            className='mr-2 ml-2'
+          >
+            <SearchResult
+              key={track.id}
+              id={track.id}
+              title={track.title}
+              artists={track.artists}
+              coverUrl={track.coverUrl}
+            />
+          </motion.ul>
+        )
+      }
+      )}
       {
-        results.albums.length > 0 && <h2 className="text-xl font-bold">Albums</h2>
+        results.albums.length > 0 && <h2 className="text-xl font-bold z-10 sticky top-0 p-2 items-center backdrop-blur-3xl">Albums</h2>
       }
       {results.albums.map((album) => (
         <motion.ul
           key={album.id}
           variants={listVarients}
+          className='mr-2 ml-2'
         >
 
           <SearchResult

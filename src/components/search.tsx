@@ -85,8 +85,10 @@ export default function SearchComponent() {
 
       {/* Content area */}
       <div className="h-[calc(100vh-5rem)] overflow-hidden">
-        <ScrollArea className="h-full">
+        <ScrollArea className="h-full w-full">
+          <section className="max-w-6xl space-y-4 w-full mx-auto mb-5">
           <SearchResultsComponent results={results} isPending={isPending} />
+          </section>
         </ScrollArea>
       </div>
     </div>
