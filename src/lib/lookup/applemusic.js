@@ -1,5 +1,4 @@
-import 'server-only';
-
+'use server';
 import jwt from 'jsonwebtoken';
 import fs from 'fs';
 

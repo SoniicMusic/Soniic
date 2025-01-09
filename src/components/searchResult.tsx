@@ -1,4 +1,5 @@
 
+import { testLookup } from '@/lib/createPage';
 import Image from 'next/image';
 
 interface SearchResultProps {
@@ -10,7 +11,9 @@ interface SearchResultProps {
 export default function SearchResult({ id, title, artists, coverUrl }: SearchResultProps) {
     const artistNames = artists.join(', ')
     return (
-        <a className="flex items-center space-x-4">
+        <a className="flex items-center space-x-4"
+        onMouseDown={() => testLookup(id)}
+        >
             <div className="flex items-center space-x-4">
                 <Image src={coverUrl} alt={title} width={64} height={64} className="rounded-md" />
                 <div>

@@ -23,7 +23,6 @@ export default function SearchResultsComponent(props: { results: { tracks: unkno
   const results = props.results
   const isPending = props.isPending
   return (
-
     <motion.section className="max-w-6xl space-y-4"
       initial="hidden"
       animate="visible"
@@ -35,7 +34,7 @@ export default function SearchResultsComponent(props: { results: { tracks: unkno
 
       {
         results.tracks.length > 0 &&
-        <h2 className="text-xl font-bold z-10 sticky top-0 p-2 items-center backdrop-blur-3xl">
+        <h2 className="text-xl font-bold z-10 sticky top-0 p-2 pl-5 items-center backdrop-blur-3xl">
           Tracks
         </h2>
       }
@@ -60,7 +59,7 @@ export default function SearchResultsComponent(props: { results: { tracks: unkno
       }
       )}
       {
-        results.albums.length > 0 && <h2 className="text-xl font-bold z-10 sticky top-0 p-2 items-center backdrop-blur-3xl">Albums</h2>
+        results.albums.length > 0 && <h2 className="text-xl font-bold z-10 sticky top-0 p-2 pl-5 items-center backdrop-blur-3xl">Albums</h2>
       }
       {results.albums.map((album) => (
         <motion.ul

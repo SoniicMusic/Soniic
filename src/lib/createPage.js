@@ -1,58 +1,46 @@
-    import { db } from '@/db/drizzle-db'; // Assuming this is your database instance
-    import {  } from '@/db/schema'; // Import your tables
-import { lookupUPC } from './magic-lookup';
+'use server';
+import { db } from '@/db/drizzle-db'; // Assuming this is your database instance
+import { track_artists, tracks, album_links, artist_links, artists, track_links } from '@/db/schema'; // Import your tables
+import { eq } from 'drizzle-orm';
+import { redirect } from 'next/navigation';
     
 export async function lookupExistingISRC(identifier) {
-  // Check in tracks table by ISRC
-  const trackData = await db
-    .select({
-      slug: tracks.slug,
-      domain: track_links.url, // Assuming track_links.url stores the domain
-    })
-    .from(tracks)
-    .innerJoin(track_links, track_links.track_isrc.eq(tracks.isrc)) // Join to get the domain
-    .where(tracks.isrc.eq(identifier))
-    .limit(1);
+  // Check in tracks 
+  const spotifyURL = 'https://open.spotify.com/track/' + identifier;
+  const track_isrc = await db.select({
+    track_isrc: track_links.track_isrc,
 
-  if (trackData.length > 0) {
-    return trackData[0];
   }
- return null;
-}
+  ).from(track_links).where(eq(track_links.url, spotifyURL)).limit(1);
+  if (track_isrc.length > 0) {
+ 
+  const track = await db.select().from(tracks).where(eq(tracks.isrc, track_isrc[0].track_isrc)).limit(1);
+  
+  console.log(track);
+  if (track.length > 0) {
+    // Found it lookup artist using the track_artist table
+    const artist = await db.select({
+      artist_id: track_artists.artist_id,
+    }
+    ).from(track_artists).where(eq(track_artists.track_isrc, track[0].isrc)).limit(1);
+    console.log(artist);
+    if (artist.length === 0) {
+      return null;
+    }
 
-export async function lookupExistingUPC(identifier) {
-      // Check in albums table by UPC
-  const albumData = await db
-  .select({
-    slug: albums.slug,
-    domain: album_links.url, // Assuming album_links.url stores the domain
-  })
-  .from(albums)
-  .innerJoin(album_links, album_links.album_upc.eq(albums.upc)) // Join to get the domain
-  .where(albums.upc.eq(identifier))
-  .limit(1);
+    // Found the artist now lookup the domain
+    const domain = await db.select({
+      artist_domain: artists.domain,
+    }
+    ).from(artists).where(eq(artists.id, artist[0].artist_id)).limit(1);
 
-if (albumData.length > 0) {
-  return albumData[0];
-}
-
-return null; // No match found
-}
-
-
-async function searchResultSelected(type, identifier) {
-  if (type === 'track') {
-    return lookupExistingISRC(identifier);
-  } else if (type === 'album') {
-    Existing_UPC = await lookupExistingUPC(identifier);
-    if (Existing_UPC) {
-      return Existing_UPC;
-    } 
+    return domain[0].artist_domain + '/' + track[0].slug;
   }
   return null;
 }
-async function createAlbumPage(UPC) {
-  const album = lookupUPC(UPC);
-    // Create a new album page
-    
+}
+
+export async function testLookup() {
+  const isrc = await lookupExistingISRC('1');
+  redirect('http://' + isrc);
 }

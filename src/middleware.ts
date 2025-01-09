@@ -4,7 +4,7 @@ import type { NextRequest } from 'next/server';
 export default async function middleware(req: NextRequest) {
   const hostname = req.headers.get('host') || '';
   const domain = hostname.split(':')[0];
-  const { searchParams } = new URL(req.url);
+  const { pathname, searchParams } = new URL(req.url);
   
   console.log(`Domain: ${domain}`);
   console.log(`URL: ${req.url}`);
@@ -14,14 +14,16 @@ export default async function middleware(req: NextRequest) {
     console.log(`Passing through to the application`);
     return NextResponse.next();
   } else {
-    const newUrl = new URL(`/${domain}`, req.url);
+    const newUrl = new URL(`/${domain}${pathname}`, req.url);
     // Preserve all query parameters
     searchParams.forEach((value, key) => {
       newUrl.searchParams.set(key, value);
     });
+    
 
     console.log(`Rewriting to ${newUrl.toString()}`);
     return NextResponse.rewrite(newUrl);
+
   }
 }
 
