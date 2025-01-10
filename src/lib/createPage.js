@@ -2,8 +2,8 @@
 import { db } from '@/db/drizzle-db'; // Assuming this is your database instance
 import { track_artists, tracks, album_links, artist_links, artists, track_links } from '@/db/schema'; // Import your tables
 import { eq } from 'drizzle-orm';
-import { redirect } from 'next/navigation';
-    
+import { dynamicRedirect } from './redirect';
+
 export async function lookupExistingISRC(identifier) {
   // Check in tracks 
   const spotifyURL = 'https://open.spotify.com/track/' + identifier;
@@ -42,5 +42,5 @@ export async function lookupExistingISRC(identifier) {
 
 export async function testLookup() {
   const isrc = await lookupExistingISRC('1');
-  redirect('http://' + isrc);
+  dynamicRedirect(isrc);
 }
