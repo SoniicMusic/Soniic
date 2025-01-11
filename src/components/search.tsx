@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Search, X } from 'lucide-react'
 import { searchSpotify } from '@/lib/lookup/spotify'
-import {  useMemo, useState, useTransition } from "react"
+import { useMemo, useState, useTransition } from "react"
 import debounce from 'lodash/debounce'
 import SearchResultsComponent from "./SearchResultAnimation"
 
@@ -30,7 +30,7 @@ export default function SearchComponent() {
     return debounce(handleSearch, 500);
   }, []);
 
-  
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     // wait for user to stop typing
 
@@ -87,7 +87,7 @@ export default function SearchComponent() {
       <div className="h-[calc(100vh-5rem)] overflow-hidden">
         <ScrollArea className="h-full w-full">
           <section className="max-w-6xl space-y-4 w-full mx-auto mb-5">
-          <SearchResultsComponent results={results} isPending={isPending} />
+            <SearchResultsComponent results={results} isPending={isPending} />
           </section>
         </ScrollArea>
       </div>
