@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@auth/drizzle-adapter": "^1.7.2",
-    "@icons-pack/react-simple-icons": "^10.2.0",
+    "@icons-pack/react-simple-icons": "^11.0.0",
     "@radix-ui/react-scroll-area": "^1.2.1",
     "@radix-ui/react-slot": "^1.1.0",
     "class-variance-authority": "^0.7.0",
