@@ -20,7 +20,7 @@
     "jsonwebtoken": "^9.0.2",
     "lodash": "^4.17.21",
     "lucide-react": "^0.453.0",
-    "motion": "^11.13.5",
+    "motion": "^11.17.0",
     "mysql2": "^3.11.3",
     "next": "^15.2.0-canary.1",
     "next-auth": "^5.0.0-beta.25",
