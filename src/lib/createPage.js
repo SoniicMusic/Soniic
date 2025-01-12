@@ -57,3 +57,6 @@ async function lookupPage(spotifyURL, type) {
   
   }
 }
+export async function testLookup() {
+  return ''
+}

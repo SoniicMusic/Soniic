@@ -16,8 +16,11 @@ export const metadata: Metadata = {
   twitter: {
     site: "@MathesonStep",
   },
-};
- 
+  icons: {
+    icon: '/soniic.png',
+  },
+}
+
 export const viewport: Viewport = {
   themeColor: 'black',
 }
@@ -30,12 +33,12 @@ export default function RootLayout({
   return (
     <html lang="en" className={inter.className} suppressHydrationWarning>
       <body>
-      <ThemeProvider
-        attribute="class"
-        defaultTheme="dark"
-      >
-      {children}
-      </ThemeProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="dark"
+        >
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );

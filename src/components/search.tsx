@@ -21,7 +21,7 @@ export default function SearchComponent() {
         setResults(searchResults || { tracks: [], albums: [] })
       } catch (error) {
         console.error('Error searching Spotify:', error)
-        setResults([])
+        setResults({ tracks: [], albums: [] })
       }
     })
   }
