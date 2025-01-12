@@ -46,6 +46,8 @@ export default function SearchResultsComponent(props: { results: { tracks: unkno
             key={track.id}
             variants={listVarients}
             className='mr-2 ml-2'
+            whileHover={{ x: 10 }}
+            whileTap={{ scale: 0.95 }}
           >
             <SearchResult
               key={track.id}
@@ -66,6 +68,8 @@ export default function SearchResultsComponent(props: { results: { tracks: unkno
           key={album.id}
           variants={listVarients}
           className='mr-2 ml-2'
+          whileHover={{ x: 10 }}
+          whileTap={{ scale: 0.95 }}
         >
 
           <SearchResult
