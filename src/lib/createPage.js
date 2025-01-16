@@ -3,6 +3,8 @@ import { db } from '@/db/drizzle-db'; // Assuming this is your database instance
 import { track_artists, tracks, album_links, artist_links, artists, track_links } from '@/db/schema'; // Import your tables
 import { eq } from 'drizzle-orm';
 import { dynamicRedirect } from './redirect';
+import { getISRCSpotify } from './lookup/spotify';
+import { lookupISRC } from './magic-lookup';
 
 async function getTrackIsrcFromUrl(spotifyURL) {
   const track_isrc = await db.select({
@@ -57,6 +59,11 @@ async function lookupPage(spotifyURL, type) {
   
   }
 }
+export async function createArtistPage(spotifyURL) {
+  return await lookupPage(spotifyURL, 'artist');
+}
 export async function testLookup() {
-  return ''
+const isrc = await getISRCSpotify('https://open.spotify.com/tracks/210JJAa9nJOgNa0YNrsT5g');
+const data = await lookupISRC(isrc, 'US');
+console.log(data);
 }

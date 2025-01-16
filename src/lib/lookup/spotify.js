@@ -53,13 +53,17 @@ async function getISRCSpotify(link) {
 	// extract spotify ID from the link
 	const id = link.split('/')[4].split('?')[0];
 	// get the ISRC from the spotify ID
+	console.log(id)
 
 	const url = `https://api.spotify.com/v1/tracks/${id}`;
 	const headers = {
 		Authorization: 'Bearer ' + token,
 	};
-	const { data } = await fetch(url, { headers });
-	console.log(data.external_ids.isrc);
+	const response = await fetch(url, { headers });
+	if (!response.ok) {
+		throw new Error(`HTTP error! status: ${response.statusText}`);
+	}
+	const data = await response.json();
 	return data.external_ids.isrc;
 }
 async function createToken() {

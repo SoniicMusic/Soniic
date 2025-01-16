@@ -45,8 +45,8 @@ async function TidalGetLink(ISRC, CountryCode) {
 }
 
 async function createToken() {
-	const client_id = env.Tidal.clientID;
-	const client_secret = env.Tidal.clientSecret;
+	const client_id = process.env.TIDAL_CLIENT_ID;
+	const client_secret = process.env.TIDAL_CLIENT_SECRET;
 	const response = await fetch('https://auth.tidal.com/v1/oauth2/token', {
 		method: 'POST',
 		body: new URLSearchParams({

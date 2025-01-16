@@ -37,7 +37,7 @@ async function generateJWT() {
 	const keyID = process.env.APPLE_MUSIC_KEY_ID;
 	const teamID = process.env.APPLE_MUSIC_TEAM_ID;
 	// Load the private key
-	const secret = fs.readFileSync(process.env.APPLE_MUSIC_AUTH_KEY_PATH, 'utf8');
+	const secret = fs.readFileSync(process.env.APPLE_MUSIC_KEY_PATH, 'utf8');
 	// Sign the JWT
 	const options = {
 		issuer: teamID,
@@ -92,8 +92,13 @@ async function lookupArtistName(artistID) {
 	const headers = {
 		Authorization: `Bearer ${appleMusicKey}`,
 	};
-	const { data } = await axios.get(url, { headers });
+	const response = await fetch(url, { headers });
+	if (!response.ok) {
+		throw new Error(`HTTP error! status: ${response.status}`);
+	}
+	const data = await response.json();
 	return data.data[0].attributes.name;
+
 }
 async function lookupArtistProfileImage(artistID) {
 	const appleMusicKey = await getJWT();
@@ -101,7 +106,11 @@ async function lookupArtistProfileImage(artistID) {
 	const headers = {
 		Authorization: `Bearer ${appleMusicKey}`,
 	};
-	const { data } = await axios.get(url, { headers });
+	const response = await fetch(url, { headers });
+	if (!response.ok) {
+		throw new Error(`HTTP error! status: ${response.status}`);
+	}
+	const data = await response.json();
 
 	// Get the highest quality artwork URL
 	const artwork = data.data[0].attributes.artwork;
