@@ -48,13 +48,8 @@ async function SpotifyGetLink(ISRC) {
     return data.external_urls.spotify;
 }
 
-async function getISRCSpotify(link) {
+async function getISRCSpotify(id) {
 	const token = await getToken();
-	// extract spotify ID from the link
-	const id = link.split('/')[4].split('?')[0];
-	// get the ISRC from the spotify ID
-	console.log(id)
-
 	const url = `https://api.spotify.com/v1/tracks/${id}`;
 	const headers = {
 		Authorization: 'Bearer ' + token,

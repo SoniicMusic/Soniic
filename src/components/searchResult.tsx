@@ -7,12 +7,13 @@ interface SearchResultProps {
     artists: string[];
     coverUrl: string;
     id: string;
+    type: 'track' | 'album';
 }
-export default function SearchResult({ id, title, artists, coverUrl }: SearchResultProps) {
+export default function SearchResult({ id, title, artists, coverUrl, type }: SearchResultProps) {
     const artistNames = artists.join(', ')
     return (
         <a className="flex items-center space-x-4"
-        onMouseDown={() => testLookup(id)}
+            onMouseDown={() => testLookup(id, type)}
         >
             <div className="flex items-center space-x-4">
                 <Image src={coverUrl} alt={title} width={64} height={64} className="rounded-md" />

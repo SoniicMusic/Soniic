@@ -55,6 +55,7 @@ export default function SearchResultsComponent(props: { results: { tracks: unkno
               title={track.title}
               artists={track.artists}
               coverUrl={track.coverUrl}
+              type={track.type}
             />
           </motion.ul>
         )
@@ -78,6 +79,7 @@ export default function SearchResultsComponent(props: { results: { tracks: unkno
             title={album.title}
             artists={album.artists}
             coverUrl={album.coverUrl}
+            type={album.type}
           />
         </motion.ul>
       ))}
