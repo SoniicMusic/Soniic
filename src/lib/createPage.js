@@ -59,15 +59,26 @@ async function lookupPage(spotifyURL, type) {
   
   }
 }
-export async function createArtistPage(spotifyURL) {
-  return await lookupPage(spotifyURL, 'artist');
-}
 export async function testLookup(identifier, type) {
   console.log('testLookup', identifier, type);
 if (type === 'track') {
 const isrc = await getISRCSpotify(identifier);
+const track = await lookupISRC(isrc, 'CA');
+console.log('track', track);  
+
+if (!isrc) 
+{
+ 
+  
+}
 }
 else if (type === 'album') {
-  const upc = await getUPCSpotify('https://open.spotify.com/album/4aawyAB9vmqN3uQ7FjRGTy');
+  const upc = await getUPCSpotify(identifier);
 }
+}
+
+async function addTrackToDB(trackData) {
+  const track = await db.insert(tracks).values(trackData).execute();
+  return track;
+  
 }

@@ -24,7 +24,7 @@ async function lookupISRC(ISRC: string, CountryCode: string) {
     });
 
     // Process Tidal artists
-    Tidal.resource.artists.forEach((artist: { name: string; id: string; }) => {
+    Tidal.relationships.artists.forEach((artist: { name: string; id: string; }) => {
         mapper.addArtist(artist.name, 'Tidal', artist.id);
     });
 

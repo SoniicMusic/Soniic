@@ -4,10 +4,11 @@ import fs from 'fs';
 async function TidalLookupISRC(ISRC, CountryCode) {
 	console.log('Tidal lookup');
 	const token = await getToken();
-	const url = 'https://openapi.tidal.com/tracks/byIsrc?';
+	const url = 'https://openapi.tidal.com/v2/tracks?';
 	const params = new URLSearchParams({
-		'isrc': ISRC,
+		'filter[isrc]': ISRC,
 		'countryCode': CountryCode,
+		'include': 'artists',
 	});
 	const headers = {
 		'Authorization': 'Bearer ' + token,
@@ -16,9 +17,11 @@ async function TidalLookupISRC(ISRC, CountryCode) {
 	};
 	const response = await fetch(url + params, { method: 'GET', headers: headers });
 	const data = await response.json();
+	console.dir(data);
 	return data.data[0];
 }
 async function TidalLookupUPC(UPC, CountryCode) {
+	CountryCode = CountryCode || 'US';
 	console.log('Tidal lookup');
 	const token = await getToken();
 	const url = 'https://openapi.tidal.com/albums/byBarcodeId?';
