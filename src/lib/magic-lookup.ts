@@ -24,7 +24,7 @@ async function lookupISRC(ISRC: string, CountryCode: string) {
     });
 
     // Process Tidal artists
-    Tidal.relationships.artists.forEach((artist: { name: string; id: string; }) => {
+    Tidal.artists.forEach((artist: { name: string; id: string; }) => {
         mapper.addArtist(artist.name, 'Tidal', artist.id);
     });
 
@@ -54,7 +54,7 @@ async function lookupISRC(ISRC: string, CountryCode: string) {
         IDs: {
             AppleMusic: AM ? AM.id : null,
             Spotify: Spotify ? Spotify.id : null,
-            Tidal: Tidal ? Tidal.resource.id : null,
+            Tidal: Tidal ? Tidal.id : null,
         },
     };
 }

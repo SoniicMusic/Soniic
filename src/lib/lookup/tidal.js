@@ -2,23 +2,46 @@
 import jwt from 'jsonwebtoken';
 import fs from 'fs';
 async function TidalLookupISRC(ISRC, CountryCode) {
-	console.log('Tidal lookup');
-	const token = await getToken();
-	const url = 'https://openapi.tidal.com/v2/tracks?';
-	const params = new URLSearchParams({
-		'filter[isrc]': ISRC,
-		'countryCode': CountryCode,
-		'include': 'artists',
-	});
-	const headers = {
-		'Authorization': 'Bearer ' + token,
-		'Content-Type': 'application/vnd.tidal.v1+json',
-		'Accept': 'application/vnd.tidal.v1+json',
-	};
-	const response = await fetch(url + params, { method: 'GET', headers: headers });
-	const data = await response.json();
-	console.dir(data);
-	return data.data[0];
+    console.log('Tidal lookup');
+    const token = await getToken();
+    const url = 'https://openapi.tidal.com/v2/tracks?';
+    const params = new URLSearchParams({
+        'filter[isrc]': ISRC,
+        'countryCode': CountryCode,
+        'include': 'artists',
+    });
+    const headers = {
+        'Authorization': 'Bearer ' + token,
+        'Content-Type': 'application/vnd.tidal.v1+json',
+        'Accept': 'application/vnd.tidal.v1+json',
+    };
+    const response = await fetch(url + params, { method: 'GET', headers: headers });
+    const data = await response.json();
+    const track = data.data[0];
+
+    // enrich track with artist info from the included array if available
+    if (data.included && track && track.relationships?.artists?.data?.length) {
+        const artistId = track.relationships.artists.data[0].id;
+        // find the matching artist in the included array
+        const artistDetail = data.included.find(
+            item => item.type === 'artists' && item.id === artistId
+        );
+        if (artistDetail) {
+            // Wrap artist data in an array for consistency
+            track.artists = [
+                {
+                    id: artistDetail.id,
+                    name: artistDetail.attributes.name,
+                }
+            ];
+        }
+    }
+
+    // remove relationships data
+    if (track.relationships) {
+        delete track.relationships;
+    }
+    return track;
 }
 async function TidalLookupUPC(UPC, CountryCode) {
 	CountryCode = CountryCode || 'US';
