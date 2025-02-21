@@ -52,7 +52,7 @@ async function lookupISRC(ISRC: string, CountryCode: string) {
         Colors: colors,
         ArtistLinks: artistIDs,
         TrackLinks: {
-            AppleMusic: AM ? 'https://music.apple.com/track/' + AM.id : null,
+            AppleMusic: AM ? 'https://music.apple.com/song/' + AM.id : null,
             Spotify: Spotify ? 'https://open.spotify.com/track/' + Spotify.id : null,
             Tidal: Tidal ? 'https://tidal.com/browse/track/' + Tidal.id : null,
         },
