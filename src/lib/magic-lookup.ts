@@ -15,17 +15,17 @@ async function lookupISRC(ISRC: string, CountryCode: string) {
     // Process Apple Music artists
     await Promise.all(AM.relationships.artists.data.map(async (artist: { id: string; }) => {
         const artistName = await lookupArtistName(artist.id);
-        mapper.addArtist(artistName, 'AppleMusic', artist.id);
+        mapper.addArtist(artistName, 'AppleMusic', 'https://music.apple.com/artist/' + artist.id);
     }));
 
     // Process Spotify artists
     Spotify.artists.forEach((artist: { name: string; id: string; }) => {
-        mapper.addArtist(artist.name, 'Spotify', artist.id);
+        mapper.addArtist(artist.name, 'Spotify', 'https://open.spotify.com/artist/' + artist.id);
     });
 
     // Process Tidal artists
     Tidal.artists.forEach((artist: { name: string; id: string; }) => {
-        mapper.addArtist(artist.name, 'Tidal', artist.id);
+        mapper.addArtist(artist.name, 'Tidal', 'https://tidal.com/browse/artist/' + artist.id);
     });
 
     const artistIDs = mapper.getArtistGroups();
@@ -50,11 +50,11 @@ async function lookupISRC(ISRC: string, CountryCode: string) {
         PreviewAudio: AM ? AM.attributes.previews[0].url : null,
         BackgroundImage: AM ? AM.attributes.artwork.url : null,
         Colors: colors,
-        ArtistIDs: artistIDs,
-        IDs: {
-            AppleMusic: AM ? AM.id : null,
-            Spotify: Spotify ? Spotify.id : null,
-            Tidal: Tidal ? Tidal.id : null,
+        ArtistLinks: artistIDs,
+        TrackLinks: {
+            AppleMusic: AM ? 'https://music.apple.com/track/' + AM.id : null,
+            Spotify: Spotify ? 'https://open.spotify.com/track/' + Spotify.id : null,
+            Tidal: Tidal ? 'https://tidal.com/browse/track/' + Tidal.id : null,
         },
     };
 }
@@ -110,10 +110,10 @@ async function lookupUPC(UPC: string, CountryCode: string) {
         BackgroundImage: AM ? AM.attributes.artwork.url : null,
         Colors: colors,
         ArtistIDs: artistIDs,
-        IDs: {
-            AppleMusic: AM ? AM.id : null,
-            Spotify: Spotify ? Spotify.id : null,
-            Tidal: Tidal ? Tidal.resource.id : null,
+        Links: {
+            AppleMusic: AM ? 'https://music.apple.com/album/' + AM.id : null,
+            Spotify: Spotify ? 'https://open.spotify.com/album/' + Spotify.id : null,
+            Tidal: Tidal ? 'https://tidal.com/browse/album/' + Tidal.id : null,
         },
     };
 }
