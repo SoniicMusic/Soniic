@@ -5,6 +5,7 @@ import { eq } from 'drizzle-orm';
 import { dynamicRedirect } from './redirect';
 import { getISRCSpotify } from './lookup/spotify';
 import { lookupISRC } from './magic-lookup';
+import { lookupArtistName } from './lookup/applemusic';
 
 async function getTrackIsrcFromUrl(spotifyURL) {
   const track_isrc = await db.select({
@@ -59,12 +60,23 @@ async function lookupPage(spotifyURL, type) {
   
   }
 }
+//
+async function addArtistsToDB(artists) {
+  // loop through artists and add them to the db
+  const artistIds = [];
+  for (let artist of artists) {
+    lookupArtistName(artist);
+    
+
+  }
+}
 export async function testLookup(identifier, type) {
   console.log('testLookup', identifier, type);
 if (type === 'track') {
 const isrc = await getISRCSpotify(identifier);
 const track = await lookupISRC(isrc, 'CA');
-console.log('track', track);  
+
+
 
 if (!isrc) 
 {

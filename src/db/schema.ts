@@ -104,7 +104,7 @@ export const artist_links = pgTable('artist_links', {
 export const albums = pgTable('albums', {
   upc: text().primaryKey(),
   title: text(),
-  release_date: text(), // You can use DATE type if your library supports it
+  release_date: text(),
   genre: text(),
   slug: text(),
   cover_art: text(),
