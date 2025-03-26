@@ -3,7 +3,45 @@ import { SpotifylookupISRC, SpotifylookupUPC } from './lookup/spotify.js';
 import { TidalLookupISRC, TidalLookupUPC } from './lookup/tidal.js';
 import { ArtistMapper } from './artist-mapper.js';
 
-async function lookupISRC(ISRC: string, CountryCode: string) {
+// Define type definitions
+export interface TrackLinks {
+    AppleMusic?: string;
+    Spotify?: string;
+    Tidal?: string;
+}
+
+export interface LookupISRCResult {
+    TrackName: string | null;
+    ISRC: string | null;
+    Duration: number | null;
+    AlbumName: string | null;
+    genreNames: string[] | null;
+    ReleaseDate: string | null;
+    PreviewAudio: string | null;
+    BackgroundImage: string | null;
+    Colors: { [key: string]: string };
+    ArtistLinks: { [key: string]: any };
+    TrackLinks: TrackLinks;
+}
+
+export interface UPCLinks {
+    AppleMusic?: string;
+    Spotify?: string;
+    Tidal?: string;
+}
+
+export interface LookupUPCResult {
+    AlbumName: string | null;
+    genreNames: string[] | null;
+    ReleaseDate: string | null;
+    PreviewAudio: string | null;
+    BackgroundImage: string | null;
+    Colors: { [key: string]: string };
+    ArtistIDs: { [artistName: string]: { [platform: string]: string } };
+    Links: UPCLinks;
+}
+
+async function lookupISRC(ISRC: string, CountryCode: string): Promise<LookupISRCResult> {
     const [AM, Spotify, Tidal] = await Promise.all([
         AppleMusiclookupISRC(ISRC, CountryCode),
         SpotifylookupISRC(ISRC),
@@ -52,15 +90,14 @@ async function lookupISRC(ISRC: string, CountryCode: string) {
         Colors: colors,
         ArtistLinks: artistIDs,
         TrackLinks: {
-            AppleMusic: AM ? 'https://music.apple.com/song/' + AM.id : null,
-            Spotify: Spotify ? 'https://open.spotify.com/track/' + Spotify.id : null,
-            Tidal: Tidal ? 'https://tidal.com/browse/track/' + Tidal.id : null,
+            AppleMusic: AM ? 'https://music.apple.com/song/' + AM.id : undefined,
+            Spotify: Spotify ? 'https://open.spotify.com/track/' + Spotify.id : undefined,
+            Tidal: Tidal ? 'https://tidal.com/browse/track/' + Tidal.id : undefined,
         },
     };
 }
 
-async function lookupUPC(UPC: string, CountryCode: string) {
-    // Start all asynchronous operations concurrently
+async function lookupUPC(UPC: string, CountryCode: string): Promise<LookupUPCResult> {
     const [AM, Spotify, Tidal] = await Promise.all([
         AppleMusiclookupUPC(UPC, CountryCode),
         SpotifylookupUPC(UPC),
@@ -71,7 +108,6 @@ async function lookupUPC(UPC: string, CountryCode: string) {
     // Extracting Apple Music artist IDs
     const appleMusicArtists = AM.relationships.artists.data;
     await Promise.all(appleMusicArtists.map(async (artist: { id: string; }) => {
-        // lookup the artist ID and find the name
         const artistID = artist.id;
         const artistName = await lookupArtistName(artistID);
         if (!artistIDs[artistName]) artistIDs[artistName] = {};
@@ -111,9 +147,9 @@ async function lookupUPC(UPC: string, CountryCode: string) {
         Colors: colors,
         ArtistIDs: artistIDs,
         Links: {
-            AppleMusic: AM ? 'https://music.apple.com/album/' + AM.id : null,
-            Spotify: Spotify ? 'https://open.spotify.com/album/' + Spotify.id : null,
-            Tidal: Tidal ? 'https://tidal.com/browse/album/' + Tidal.id : null,
+            AppleMusic: AM ? 'https://music.apple.com/album/' + AM.id : undefined,
+            Spotify: Spotify ? 'https://open.spotify.com/album/' + Spotify.id : undefined,
+            Tidal: Tidal ? 'https://tidal.com/browse/album/' + Tidal.id : undefined,
         },
     };
 }
