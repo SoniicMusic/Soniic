@@ -33,7 +33,7 @@
   },
   "devDependencies": {
     "@types/jsonwebtoken": "^9.0.9",
-    "@types/lodash": "^4.17.13",
+    "@types/lodash": "^4.17.16",
     "@types/node": "^22.10.5",
     "@types/pg": "^8.11.10",
     "@types/react": "19.0.1",
