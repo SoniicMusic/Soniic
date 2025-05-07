@@ -53,9 +53,9 @@ export default function SearchComponent() {
   return (
     <div className="min-h-screen text-white overflow-hidden fixed inset-0 ">
       {/* Dark blue edge glows - with more center coverage */}
-      {/* <div className="fixed bottom-0 left-0 w-full h-[15vh] bg-gradient-to-t from-blue-900/40 to-transparent blur-[100px]" />
-      <div className="fixed left-0 top-0 w-[60vw] h-full bg-gradient-to-r from-blue-900/40 to-transparent blur-[100px]" />
-      <div className="fixed right-0 top-0 w-[60vw] h-full bg-gradient-to-l from-blue-900/40 to-transparent blur-[100px]" /> */}
+      {/* <div className="fixed bottom-0 left-0 w-full h-[15vh] bg-linear-to-t from-blue-900/40 to-transparent blur-[100px]" />
+      <div className="fixed left-0 top-0 w-[60vw] h-full bg-linear-to-r from-blue-900/40 to-transparent blur-[100px]" />
+      <div className="fixed right-0 top-0 w-[60vw] h-full bg-linear-to-l from-blue-900/40 to-transparent blur-[100px]" /> */}
       {/* Dark blue edge glows - with less center coverage */}
 
       {/* Search header - fixed position */}

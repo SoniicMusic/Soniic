@@ -5,7 +5,7 @@ import { eq } from 'drizzle-orm';
 import slugify from 'slugify';
 import { LookupUPCResult } from '../magic-lookup';
 import { getPlatformColor } from '../utils/platform-config';
-import { getSpotifyUPC } from '../lookup/spotify.js';
+import { getSpotifyUPC } from '../lookup/spotify';
 
 /**
  * Retrieves an album by its UPC

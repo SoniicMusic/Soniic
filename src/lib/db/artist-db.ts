@@ -2,7 +2,7 @@
 import { db } from '../../db/drizzle-db';
 import { artists, artist_links } from '../../db/schema';
 import { eq } from 'drizzle-orm';
-import { lookupArtistProfileImage } from '../lookup/applemusic.js';
+import { lookupArtistProfileImage } from '../lookup/applemusic';
 import slugify from 'slugify';
 import { getPlatformColor, getPlatformOrder } from '../utils/platform-config';
 

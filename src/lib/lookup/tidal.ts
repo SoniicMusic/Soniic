@@ -46,7 +46,7 @@ async function TidalLookupISRC(ISRC: string, CountryCode: string): Promise<Tidal
     const headers = {
         'Authorization': 'Bearer ' + token,
         'Content-Type': 'application/vnd.tidal.v1+json',
-        'Accept': 'application/vnd.tidal.v1+json',
+        'Accept': 'application/vnd.api+json',
     };
     const response = await fetch(url + params, { method: 'GET', headers: headers });
     const data = await response.json() as TidalResponse;
