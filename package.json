@@ -38,7 +38,7 @@
     "@types/pg": "^8.11.10",
     "@types/react": "19.0.1",
     "@types/react-dom": "19.0.2",
-    "drizzle-kit": "^0.25.0",
+    "drizzle-kit": "^0.31.1",
     "eslint": "^9.18.0",
     "eslint-config-next": "15.1.4",
     "postcss": "^8",
