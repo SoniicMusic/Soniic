@@ -12,7 +12,6 @@ export function dynamicRedirect(url: string) {
     const path = url.split('/').slice(1).join('/');
     redirect(`http://${domain}:3000/${path}`);
   } else {
-
     console.warn('No redirect for this environment');
   }
 
