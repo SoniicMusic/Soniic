@@ -1,7 +1,7 @@
-import { AppleMusiclookupISRC, AppleMusiclookupUPC, lookupArtistName } from './lookup/applemusic.js';
-import { SpotifylookupISRC, SpotifylookupUPC } from './lookup/spotify.js';
-import { TidalLookupISRC, TidalLookupUPC } from './lookup/tidal.js';
-import { ArtistMapper } from './artist-mapper.js';
+import { AppleMusiclookupISRC, AppleMusiclookupUPC, lookupArtistName } from './lookup/applemusic';
+import { SpotifylookupISRC, SpotifylookupUPC } from './lookup/spotify';
+import { TidalLookupISRC, TidalLookupUPC } from './lookup/tidal';
+import { ArtistMapper } from './artist-mapper';
 
 // Define type definitions
 export interface TrackLinks {
@@ -31,6 +31,7 @@ export interface UPCLinks {
 }
 
 export interface LookupUPCResult {
+    UPC: string | null;  // Added UPC field
     AlbumName: string | null;
     genreNames: string[] | null;
     ReleaseDate: string | null;
@@ -139,6 +140,7 @@ async function lookupUPC(UPC: string, CountryCode: string): Promise<LookupUPCRes
     }
     // Return the results
     return {
+        UPC: UPC,  // Add the UPC to the result
         AlbumName: AM ? AM.attributes.name : null,
         genreNames: AM ? AM.attributes.genreNames : null,
         ReleaseDate: AM ? AM.attributes.releaseDate : null,

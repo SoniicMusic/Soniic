@@ -2,7 +2,34 @@
 import jwt from 'jsonwebtoken';
 import fs from 'fs';
 
-async function AppleMusiclookupISRC(ISRC, CountryCode) {
+// Type definitions
+interface AppleMusicTrack {
+  attributes: {
+    url: string;
+    artwork: {
+      url: string;
+    };
+  };
+}
+
+interface AppleMusicArtist {
+  attributes: {
+    name: string;
+    artwork: {
+      url: string;
+    };
+  };
+}
+
+interface AppleMusicResponse {
+  data: AppleMusicTrack[];
+}
+
+interface AppleMusicArtistResponse {
+  data: AppleMusicArtist[];
+}
+
+async function AppleMusiclookupISRC(ISRC: string, CountryCode: string): Promise<AppleMusicTrack> {
 	console.log('Apple Music lookup');
 	const appleMusicKey = await getJWT();
 	const url = `https://api.music.apple.com/v1/catalog/${CountryCode}/songs?filter[isrc]=${ISRC}`;
@@ -14,10 +41,11 @@ async function AppleMusiclookupISRC(ISRC, CountryCode) {
 	if (!response.ok) {
 		throw new Error(`HTTP error! status: ${response.status}`);
 	}
-	const data = await response.json();
+	const data = await response.json() as AppleMusicResponse;
 	return data.data[0];
 }
-async function AppleMusiclookupUPC(UPC, CountryCode) {
+
+async function AppleMusiclookupUPC(UPC: string, CountryCode: string): Promise<AppleMusicTrack> {
 	console.log('Apple Music lookup');
 	const appleMusicKey = await getJWT();
 	const url = `https://api.music.apple.com/v1/catalog/${CountryCode}/albums?filter[upc]=${UPC}`;
@@ -29,15 +57,16 @@ async function AppleMusiclookupUPC(UPC, CountryCode) {
 	if (!response.ok) {
 		throw new Error(`HTTP error! status: ${response.status}`);
 	}
-	const data = await response.json();
+	const data = await response.json() as AppleMusicResponse;
 	return data.data[0];
 }
+
 // generate a new JWT
-async function generateJWT() {
+async function generateJWT(): Promise<void> {
 	const keyID = process.env.APPLE_MUSIC_KEY_ID;
 	const teamID = process.env.APPLE_MUSIC_TEAM_ID;
 	// Load the private key
-	const secret = fs.readFileSync(process.env.APPLE_MUSIC_KEY_PATH, 'utf8');
+	const secret = fs.readFileSync(process.env.APPLE_MUSIC_KEY_PATH as string, 'utf8');
 	// Sign the JWT
 	const options = {
 		issuer: teamID,
@@ -47,20 +76,21 @@ async function generateJWT() {
 		header: {
 			kid: keyID,
 		},
-	};
+	} as jwt.SignOptions;
 
 	const newJWT = jwt.sign({}, secret, options);
 	// write the JWT to a file
 	fs.writeFileSync('./keys/AppleMusicKey', newJWT);
 }
+
 // ensure JWT isn't expired
-async function getJWT() {
+async function getJWT(): Promise<string> {
 	if (!fs.existsSync('./keys/AppleMusicKey')) {
 		console.log('JWT not found, generating new JWT');
 		await generateJWT();
 	}
 	const JWT = fs.readFileSync('./keys/AppleMusicKey', 'utf8');
-	const decoded = jwt.decode(JWT, { complete: true });
+	const decoded = jwt.decode(JWT, { complete: true }) as jwt.JwtPayload;
 	const now = Math.floor(Date.now() / 1000);
 	if (decoded.payload.exp < now) {
 		await generateJWT();
@@ -72,7 +102,8 @@ async function getJWT() {
 		return JWT;
 	}
 }
-async function AppleMusicGetLink(ISRC, CountryCode) {
+
+async function AppleMusicGetLink(ISRC: string, CountryCode: string): Promise<string> {
 	const data = await AppleMusiclookupISRC(ISRC, CountryCode);
 	// strip the link from the response
 	const link = data.attributes.url;
@@ -80,27 +111,15 @@ async function AppleMusicGetLink(ISRC, CountryCode) {
 	const countryLink = link.replace(CountryCode, '{countryCode}');
 	return countryLink;
 }
-async function AppleMusicGetArtwork(ISRC, CountryCode) {
+
+async function AppleMusicGetArtwork(ISRC: string, CountryCode: string): Promise<string> {
 	const data = await AppleMusiclookupISRC(ISRC, CountryCode);
 	// strip the link from the response
 	const artwork = data.attributes.artwork.url;
 	return artwork;
 }
-async function lookupArtistName(artistID) {
-	const appleMusicKey = await getJWT();
-	const url = `https://api.music.apple.com/v1/catalog/ca/artists/${artistID}`;
-	const headers = {
-		Authorization: `Bearer ${appleMusicKey}`,
-	};
-	const response = await fetch(url, { headers });
-	if (!response.ok) {
-		throw new Error(`HTTP error! status: ${response.status}`);
-	}
-	const data = await response.json();
-	return data.data[0].attributes.name;
 
-}
-async function lookupArtistProfileImage(artistID) {
+async function lookupArtistName(artistID: string): Promise<string> {
 	const appleMusicKey = await getJWT();
 	const url = `https://api.music.apple.com/v1/catalog/ca/artists/${artistID}`;
 	const headers = {
@@ -110,7 +129,21 @@ async function lookupArtistProfileImage(artistID) {
 	if (!response.ok) {
 		throw new Error(`HTTP error! status: ${response.status}`);
 	}
-	const data = await response.json();
+	const data = await response.json() as AppleMusicArtistResponse;
+	return data.data[0].attributes.name;
+}
+
+async function lookupArtistProfileImage(artistID: string): Promise<string> {
+	const appleMusicKey = await getJWT();
+	const url = `https://api.music.apple.com/v1/catalog/ca/artists/${artistID}`;
+	const headers = {
+		Authorization: `Bearer ${appleMusicKey}`,
+	};
+	const response = await fetch(url, { headers });
+	if (!response.ok) {
+		throw new Error(`HTTP error! status: ${response.status}`);
+	}
+	const data = await response.json() as AppleMusicArtistResponse;
 
 	// Get the highest quality artwork URL
 	const artwork = data.data[0].attributes.artwork;

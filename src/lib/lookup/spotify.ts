@@ -1,6 +1,82 @@
 'use server'
 import * as fs from 'node:fs';
-async function SpotifylookupISRC(ISRC) {
+
+// Type definitions
+interface SpotifyImage {
+    url: string;
+    height: number;
+    width: number;
+}
+
+interface SpotifyArtist {
+    id: string;
+    name: string;
+}
+
+interface SpotifyTrack {
+    id: string;
+    name: string;
+    external_urls: {
+        spotify: string;
+    };
+    external_ids: {
+        isrc: string;
+    };
+    album: {
+        images: SpotifyImage[];
+    };
+    artists: SpotifyArtist[];
+}
+
+interface SpotifyAlbum {
+    id: string;
+    name: string;
+    external_urls: {
+        spotify: string;
+    };
+    external_ids: {
+        upc: string;
+    };
+    images: SpotifyImage[];
+    artists: SpotifyArtist[];
+    release_date: string;
+}
+
+interface SpotifyTrackResponse {
+    tracks: {
+        items: SpotifyTrack[];
+    };
+}
+
+interface SpotifyAlbumResponse {
+    albums: {
+        items: SpotifyAlbum[];
+    };
+}
+
+interface SpotifySearchResult {
+    tracks: {
+        id: string;
+        title: string;
+        artists: string[];
+        coverUrl: string;
+        type: 'track';
+    }[];
+    albums: {
+        id: string;
+        title: string;
+        artists: string[];
+        coverUrl: string;
+        type: 'album';
+        releaseDate: string;
+    }[];
+}
+
+interface SpotifyTokenResponse {
+    access_token: string;
+}
+
+async function SpotifylookupISRC(ISRC: string): Promise<SpotifyTrack | null> {
     try {
         console.log('Spotify lookup');
         const token = await getToken();
@@ -12,7 +88,7 @@ async function SpotifylookupISRC(ISRC) {
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
-        const data = await response.json();
+        const data = await response.json() as SpotifyTrackResponse;
         return data.tracks.items[0];
     }
     catch (error) {
@@ -21,7 +97,7 @@ async function SpotifylookupISRC(ISRC) {
     }
 }
 
-async function SpotifylookupUPC(UPC) {
+async function SpotifylookupUPC(UPC: string): Promise<SpotifyAlbum | null> {
     try {
         console.log('Spotify lookup');
         const token = await getToken();
@@ -33,7 +109,7 @@ async function SpotifylookupUPC(UPC) {
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
-        const data = await response.json();
+        const data = await response.json() as SpotifyAlbumResponse;
         return data.albums.items[0];
     }
     catch (error) {
@@ -42,13 +118,13 @@ async function SpotifylookupUPC(UPC) {
     }
 }
 
-async function SpotifyGetLink(ISRC) {
+async function SpotifyGetLink(ISRC: string): Promise<string | null> {
     const data = await SpotifylookupISRC(ISRC);
     if (!data) return null;
     return data.external_urls.spotify;
 }
 
-async function getISRCSpotify(id) {
+async function getISRCSpotify(id: string): Promise<string> {
 	const token = await getToken();
 	const url = `https://api.spotify.com/v1/tracks/${id}`;
 	const headers = {
@@ -58,12 +134,13 @@ async function getISRCSpotify(id) {
 	if (!response.ok) {
 		throw new Error(`HTTP error! status: ${response.statusText}`);
 	}
-	const data = await response.json();
+	const data = await response.json() as SpotifyTrack;
 	return data.external_ids.isrc;
 }
-async function createToken() {
-	const client_id = process.env.SPOTIFY_CLIENT_ID;
-	const client_secret = process.env.SPOTIFY_CLIENT_SECRET;
+
+async function createToken(): Promise<string> {
+	const client_id = process.env.SPOTIFY_CLIENT_ID as string;
+	const client_secret = process.env.SPOTIFY_CLIENT_SECRET as string;
 	const response = await fetch('https://accounts.spotify.com/api/token', {
 		method: 'POST',
 		body: new URLSearchParams({
@@ -75,17 +152,17 @@ async function createToken() {
 		},
 	});
 
-	const data = await response.json();
+	const data = await response.json() as SpotifyTokenResponse;
 	fs.writeFileSync('./keys/SpotifyKey', data.access_token);
 	return data.access_token;
 }
 
-async function getToken() {
+async function getToken(): Promise<string> {
 	try {
 		const UserID = process.env.SPOTIFY_USER_ID;
 		if (!fs.existsSync('./keys/SpotifyKey')) {
 			console.log('Token not found, generating new token');
-			await createToken();
+			return await createToken();
 		}
 		const token = fs.readFileSync('./keys/SpotifyKey', 'utf8');
 		// check if the token is expired
@@ -107,21 +184,22 @@ async function getToken() {
 		}
 		catch (error) {
 			console.error(error);
+			throw error;
 		}
-
 	}
 	catch (error) {
 		console.error(error);
+		throw error;
 	}
 }
 
-async function searchSpotify(query) {
+async function searchSpotify(query: string): Promise<SpotifySearchResult> {
 	const token = await getToken();
 	
 	const url = `https://api.spotify.com/v1/search?` + new URLSearchParams({
 		q: query,
 		type: 'track,album',
-		limit: 10,
+		limit: '10',
 	}).toString();
 
 	const headers = {
@@ -131,15 +209,18 @@ async function searchSpotify(query) {
 	if (!response.ok) {
 		throw new Error(`HTTP error! status: ${response.statusText}`);
 	}
-	const data = await response.json();
-// write the data to a file
+	const data = await response.json() as {
+        tracks: { items: SpotifyTrack[] },
+        albums: { items: SpotifyAlbum[] }
+    };
+
   // Extract tracks
   const tracks = data.tracks.items.map(track => ({
     id: track.id,
     title: track.name,
     artists: track.artists.map(artist => artist.name),
     coverUrl: track.album.images[1]?.url || track.album.images[0]?.url,
-    type: 'track'
+    type: 'track' as const
   }));
 
   // Extract albums
@@ -148,18 +229,19 @@ async function searchSpotify(query) {
     title: album.name,
     artists: album.artists.map(artist => artist.name),
     coverUrl: album.images[1]?.url || album.images[0]?.url,
-    type: 'album',
+    type: 'album' as const,
     releaseDate: album.release_date
   }));
+
   return {
     tracks,
     albums
   };
 }
-// function that accepts spotify id and type and returns either the ISRC or UPC depending on the type
-async function getSpotifyUPC(id) {
+
+async function getSpotifyUPC(id: string): Promise<string> {
 	const token = await getToken();
-	const url = `https://api.spotify.com/v1/album/${id}`;
+	const url = `https://api.spotify.com/v1/albums/${id}`;
 	const headers =	{
 		Authorization: 'Bearer ' + token,
 	};
@@ -167,11 +249,11 @@ async function getSpotifyUPC(id) {
 	if (!response.ok) {
 		throw new Error(`HTTP error! status: ${response.statusText}`);
 	}
-	const data = await response.json();
+	const data = await response.json() as SpotifyAlbum;
 	return data.external_ids.upc;
 }
 
-async function getSpotifyISRC(id) {
+async function getSpotifyISRC(id: string): Promise<string> {
 	const token = await getToken();
 	const url = `https://api.spotify.com/v1/tracks/${id}`;
 	const headers = {
@@ -181,7 +263,7 @@ async function getSpotifyISRC(id) {
 	if (!response.ok) {
 		throw new Error(`HTTP error! status: ${response.statusText}`);
 	}
-	const data = await response.json();
+	const data = await response.json() as SpotifyTrack;
 	return data.external_ids.isrc;
 }
 
