@@ -85,11 +85,10 @@ export async function lookupAlbumUPC(spotifyId: string): Promise<string> {
     if (upc) {
       return upc;
     }
-    
-    // If we couldn't get a UPC, create a placeholder one
-    return `spotify-${spotifyId}`;
+    throw new Error('UPC not found for the given Spotify ID');
   } catch (error) {
-    console.error('Error getting album UPC:', error);
-    return `spotify-${spotifyId}`;
+    console.error('Error looking up UPC:', error);
+    throw error;
   }
+  
 }
