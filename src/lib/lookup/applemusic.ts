@@ -4,10 +4,27 @@ import fs from 'fs';
 
 // Type definitions
 interface AppleMusicTrack {
+  id: string;
   attributes: {
+    name: string;
+    isrc: string;
+    durationInMillis: number;
+    albumName: string;
+    genreNames: string[];
+    releaseDate: string;
+    previews: { url: string }[];
     url: string;
     artwork: {
       url: string;
+      [key: string]: any; // For the color properties
+    };
+  };
+  relationships: {
+    artists: {
+      data: { id: string }[];
+    };
+    tracks?: {
+      data: AppleMusicTrack[];
     };
   };
 }
@@ -72,9 +89,10 @@ async function generateJWT(): Promise<void> {
 		issuer: teamID,
 		// Max time specified by Apple (6 months)
 		expiresIn: '182d',
-		algorithm: 'ES256',
+		algorithm: 'ES256' as const,
 		header: {
 			kid: keyID,
+			alg: 'ES256'
 		},
 	} as jwt.SignOptions;
 

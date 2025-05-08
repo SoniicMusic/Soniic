@@ -6,27 +6,65 @@ import fs from 'fs';
 interface TidalArtist {
     id: string;
     name: string;
+    attributes?: {
+        name: string;
+        profilePicture?: string;
+    };
+    type?: string;
+    url?: string;
 }
 
 interface TidalTrack {
     id: string;
     attributes?: {
         // Track attributes from the API
+        name?: string;
+        duration?: number;
+        releaseDate?: string;
+        isrc?: string;
+        title?: string;
+        artistName?: string;
     };
     resource?: {
         tidalUrl: string;
     };
     artists?: TidalArtist[];
+    included?: {
+        artists?: { id: string; name: string; }[];
+    };
     relationships?: {
         artists?: {
-            data?: { id: string }[];
+            data?: { id: string; type?: string }[];
+        };
+        albums?: {
+            data?: { id: string; type?: string }[];
         };
     };
 }
 
 interface TidalAlbum {
     id: string;
-    // Other album properties
+    attributes?: {
+        title?: string;
+        releaseDate?: string;
+        upc?: string;
+        numberOfTracks?: number;
+        duration?: number;
+        audioQuality?: string;
+        copyright?: string;
+    };
+    resource?: {
+        tidalUrl: string;
+    };
+    artists?: TidalArtist[];
+    included?: {
+        artists?: { id: string; name: string; }[];
+    };
+    relationships?: {
+        artists?: {
+            data?: { id: string; type?: string }[];
+        };
+    };
 }
 
 interface TidalResponse {
@@ -54,26 +92,28 @@ async function TidalLookupISRC(ISRC: string, CountryCode: string): Promise<Tidal
 
     // enrich track with artist info from the included array if available
     if (data.included && track && track.relationships?.artists?.data?.length) {
-        const artistId = track.relationships.artists.data[0].id;
-        // find the matching artist in the included array
-        const artistDetail = data.included.find(
-            item => item.type === 'artists' && item.id === artistId
-        );
-        if (artistDetail) {
-            // Wrap artist data in an array for consistency
-            track.artists = [
-                {
-                    id: artistDetail.id,
+        // Get all artist IDs from the relationships
+        const artistIds = track.relationships.artists.data.map(artist => artist.id);
+        
+        // Find all matching artists in the included array
+        const artistDetails = artistIds.map(artistId => 
+            data.included?.find(item => item.type === 'artists' && item.id === artistId)
+        ).filter(Boolean); // Remove any undefined values
+        
+        if (artistDetails.length > 0) {
+            // Map artist details to our TidalArtist interface
+            track.artists = artistDetails.map(artistDetail => ({
+                id: artistDetail.id,
+                name: artistDetail.attributes.name,
+                type: artistDetail.type,
+                attributes: {
                     name: artistDetail.attributes.name,
+                    profilePicture: artistDetail.attributes.profilePicture?.uri
                 }
-            ];
+            }));
         }
     }
-
-    // remove relationships data
-    if (track.relationships) {
-        delete track.relationships;
-    }
+    
     return track;
 }
 
@@ -93,8 +133,39 @@ async function TidalLookupUPC(UPC: string, CountryCode: string = 'US'): Promise<
     };
     const response = await fetch(url + params, { method: 'GET', headers: headers });
     const data = await response.json() as TidalResponse;
-    return console.log('Tidal response', data) as unknown as TidalAlbum;
-    // data.data[0] as unknown as TidalAlbum;
+    console.log('Tidal response', data);
+    
+    if (!data.data || data.data.length === 0) {
+        throw new Error('No album found for UPC: ' + UPC);
+    }
+    
+    const album = data.data[0] as unknown as TidalAlbum;
+    
+    // Enrich album with artist info from the included array if available
+    if (data.included && album && album.relationships?.artists?.data?.length) {
+        // Get all artist IDs from the relationships
+        const artistIds = album.relationships.artists.data.map(artist => artist.id);
+        
+        // Find all matching artists in the included array
+        const artistDetails = artistIds.map(artistId => 
+            data.included?.find(item => item.type === 'artists' && item.id === artistId)
+        ).filter(Boolean); // Remove any undefined values
+        
+        if (artistDetails.length > 0) {
+            // Map artist details to our TidalArtist interface
+            album.artists = artistDetails.map(artistDetail => ({
+                id: artistDetail.id,
+                name: artistDetail.attributes.name,
+                type: artistDetail.type,
+                attributes: {
+                    name: artistDetail.attributes.name,
+                    profilePicture: artistDetail.attributes.profilePicture?.uri
+                }
+            }));
+        }
+    }
+    
+    return album;
 }
 
 async function TidalGetLink(ISRC: string, CountryCode: string): Promise<string> {

@@ -1,6 +1,23 @@
 import * as motion from '@/lib/motion'
 import SearchResult from './searchResult'
 
+// Define interfaces for our track and album types
+interface TrackResult {
+  id: string;
+  title: string;
+  artists: string[];
+  coverUrl: string;
+  type: 'track' | 'album';  // Updated to match exact type union
+}
+
+interface AlbumResult {
+  id: string;
+  title: string;
+  artists: string[];
+  coverUrl: string;
+  type: 'track' | 'album';  // Updated to match exact type union
+}
+
 const listVarients = {
   hidden: { opacity: 0, x: -10 },
   visible: { opacity: 1, x: 0 },
@@ -19,7 +36,7 @@ const containerVariants = {
 }
 
 
-export default function SearchResultsComponent(props: { results: { tracks: unknown[], albums: unknown[] }, isPending: boolean }) {
+export default function SearchResultsComponent(props: { results: { tracks: TrackResult[], albums: AlbumResult[] }, isPending: boolean }) {
   const results = props.results
   const isPending = props.isPending
   return (

@@ -2,7 +2,7 @@
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import Image from 'next/image';
-// import { getRelease, getReleaseLinks } from '@/lib/get-release';
+import { getReleaseLinks, getRelease } from '@/lib/get-artist';
 import { Button } from '@/components/ui/button';
 import * as Icons from '@icons-pack/react-simple-icons';
 import { notFound } from 'next/navigation';

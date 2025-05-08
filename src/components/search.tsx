@@ -8,10 +8,26 @@ import { useMemo, useState, useTransition } from "react"
 import debounce from 'lodash/debounce'
 import SearchResultsComponent from "./SearchResultAnimation"
 
+// Define interfaces for our track and album types to match with SearchResultAnimation
+interface TrackResult {
+  id: string;
+  title: string;
+  artists: string[];
+  coverUrl: string;
+  type: 'track' | 'album';
+}
+
+interface AlbumResult {
+  id: string;
+  title: string;
+  artists: string[];
+  coverUrl: string;
+  type: 'track' | 'album';
+}
 
 export default function SearchComponent() {
   const [query, setQuery] = useState('')
-  const [results, setResults] = useState<{ tracks: object[]; albums: object[] }>({ tracks: [], albums: [] })
+  const [results, setResults] = useState<{ tracks: TrackResult[]; albums: AlbumResult[] }>({ tracks: [], albums: [] })
   const [isPending, startTransition] = useTransition()
 
   const handleSearch = (searchQuery: string) => {

@@ -25,3 +25,23 @@ export async function getArtistLinks() {
     ).orderBy(artist_links.order).execute()
     return {artist, links}
   }
+
+// These functions are needed for the [domain]/[slug]/page.tsx file
+export async function getReleaseLinks() {
+  const artist = await getArtist();
+  if (!artist) {
+    return null;
+  }
+  const links = await db.select().from(artist_links).where(
+    eq(artist_links.artist_id, artist.id)
+  ).orderBy(artist_links.order).execute();
+  
+  return {
+    info: artist,
+    links: links
+  };
+}
+
+export async function getRelease() {
+  return await getArtist();
+}
