@@ -10,7 +10,6 @@ import { getPlatformColor, getPlatformOrder } from '../utils/platform-config';
  * Adds or updates an artist in the database and creates platform links
  */
 export async function addArtistLink(artistName: string, platforms: Record<string, string>) {
-  console.log('Adding artist', artistName, platforms);
   
   // Check if artist already exists
   let artist = await db.query.artists.findFirst({

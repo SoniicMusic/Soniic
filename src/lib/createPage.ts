@@ -26,12 +26,14 @@ export async function testLookup(identifier: string, type: "track" | "album") {
       }
       // Add track to database
       const savedTrack = await addTrack(track, albumUPC);
+      console.log('Saved track:', savedTrack);
+      if (!savedTrack) {
+        throw new Error('Failed to save track');
+      }
       
       // Process artists and link them to the track
       for (const artist in track.ArtistLinks) {
-        const platforms = track.ArtistLinks[artist];
-        console.log('artist', artist, platforms);
-        
+        const platforms = track.ArtistLinks[artist];        
         // Add the artist and get the artist record
         const artistRecord = await addArtistLink(artist, platforms);
         

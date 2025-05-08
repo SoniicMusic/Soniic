@@ -1,4 +1,4 @@
-import { integer, pgTable, text, timestamp, primaryKey, boolean } from 'drizzle-orm/pg-core';
+import { integer, pgTable, text, timestamp, primaryKey, boolean, unique } from 'drizzle-orm/pg-core';
 import type { AdapterAccountType } from 'next-auth/adapters';
 // AuthJS
 export const users = pgTable("user", {
@@ -112,7 +112,7 @@ export const albums = pgTable('albums', {
 
 // Album Links Table
 export const album_links = pgTable('album_links', {
-    album_upc: text().references(() => albums.upc).primaryKey(),
+    album_upc: text().references(() => albums.upc),
     name: text(),
     url: text(),
     icon: text(),
@@ -131,7 +131,7 @@ export const tracks = pgTable('tracks', {
 
 // Track Links Table
 export const track_links = pgTable('track_links', {
-    track_isrc: text().references(() => tracks.isrc).primaryKey(),
+    track_isrc: text().references(() => tracks.isrc),
     url: text(),
     icon: text(),
     color: text(),
@@ -142,7 +142,10 @@ export const track_artists = pgTable('track_artists', {
     id: text().primaryKey().$defaultFn(() => crypto.randomUUID()),
     track_isrc: text().references(() => tracks.isrc),
     artist_id: text().references(() => artists.id),
-});
+}, (track_artist) => ({
+    uniqueTrackArtist: unique().on(track_artist.track_isrc, track_artist.artist_id)
+}));
+
 // Tracks Albums Table
 export const track_albums = pgTable('track_albums', {
     id: text().primaryKey().$defaultFn(() => crypto.randomUUID()),

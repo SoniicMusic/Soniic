@@ -11,7 +11,7 @@ import { getPlatformColor } from '../utils/platform-config';
  * Adds or updates a track in the database
  */
 export async function addTrack(trackData: LookupISRCResult, albumUPC: string) {
-  console.log('Adding track', trackData.TrackName);
+  console.log('Adding track', trackData);
   
   try {
     // Check if track already exists
@@ -38,14 +38,25 @@ export async function addTrack(trackData: LookupISRCResult, albumUPC: string) {
     }
     
     // Now create the track
-    const [newTrack] = await db.insert(tracks).values({
+    await db.insert(tracks).values({
       isrc: trackData.ISRC as string,
       title: trackData.TrackName || 'Unknown Track',
       album_upc: albumUPC,
       slug: slugify(trackData.TrackName || 'Unknown Track', { lower: true }),
       track_number: 1, // Default track number, would be set properly in a real implementation
-    }).returning();
+    }).onConflictDoNothing();
+    // Fetch the newly created track to get its ID
+    const newTrack = await db.query.tracks.findFirst({
+      where: eq(tracks.isrc, trackData.ISRC as string)
+    });
+    // Log the new track for debugging
     
+    console.log('New track:', newTrack);
+    
+    if (!newTrack) {
+      throw new Error('Failed to retrieve the newly created track');
+    }
+    console.log('New track created:', newTrack);
     // Connect track to album
     await db.insert(track_albums).values({
       track_isrc: newTrack.isrc,
@@ -54,15 +65,17 @@ export async function addTrack(trackData: LookupISRCResult, albumUPC: string) {
     
     // Add track links
     if (trackData.TrackLinks) {
+      console.log('Adding track links');
       for (const [platform, url] of Object.entries(trackData.TrackLinks)) {
-        if (url) {
-          await db.insert(track_links).values({
-            track_isrc: newTrack.isrc,
-            url: url,
-            icon: platform.toLowerCase(),
-            color: getPlatformColor(platform),
-          }).onConflictDoNothing();
-        }
+        console.log('Adding track link', platform, url);
+
+        const color = getPlatformColor(platform);
+        await db.insert(track_links).values({
+          track_isrc: newTrack.isrc,
+          url,
+          icon: platform,
+          color,
+        })
       }
     }
     
@@ -78,10 +91,24 @@ export async function addTrack(trackData: LookupISRCResult, albumUPC: string) {
  */
 export async function linkArtistToTrack(trackISRC: string, artistId: string) {
   try {
+    // First check if this track-artist relationship already exists
+    const existingRelation = await db.query.track_artists.findFirst({
+      where: (track_artist) => 
+        eq(track_artist.track_isrc, trackISRC) && 
+        eq(track_artist.artist_id, artistId)
+    });
+    
+    if (existingRelation) {
+      // Relationship already exists, no need to create it again
+      console.log(`Artist ${artistId} is already linked to track ${trackISRC}`);
+      return true;
+    }
+    
+    // Create the relationship since it doesn't exist yet
     await db.insert(track_artists).values({
       track_isrc: trackISRC,
       artist_id: artistId
-    }).onConflictDoNothing();
+    });
     
     return true;
   } catch (error) {
