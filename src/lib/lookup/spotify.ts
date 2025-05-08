@@ -24,6 +24,7 @@ interface SpotifyTrack {
     };
     album: {
         images: SpotifyImage[];
+        id: string;
     };
     artists: SpotifyArtist[];
 }
@@ -238,8 +239,22 @@ async function searchSpotify(query: string): Promise<SpotifySearchResult> {
     albums
   };
 }
-
-async function getSpotifyUPC(id: string): Promise<string> {
+async function getSpotifyUPCTrack(id: string): Promise<string> {
+    const token = await getToken();
+    const url = `https://api.spotify.com/v1/tracks/${id}`;
+    const headers = {
+        Authorization: 'Bearer ' + token,
+    };
+    const response = await fetch(url, { headers });
+    if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.statusText}`);
+    }
+    const data = await response.json() as SpotifyTrack;
+    const albumId = data.album.id;
+    const upc = await getSpotifyUPCAlbum(albumId);
+    return upc;
+}
+async function getSpotifyUPCAlbum(id: string): Promise<string> {
 	const token = await getToken();
 	const url = `https://api.spotify.com/v1/albums/${id}`;
 	const headers =	{
@@ -274,6 +289,7 @@ export {
 	getISRCSpotify,
 	getToken,
 	searchSpotify,
-	getSpotifyUPC,
+	getSpotifyUPCAlbum,
+    getSpotifyUPCTrack,
 	getSpotifyISRC,
 };

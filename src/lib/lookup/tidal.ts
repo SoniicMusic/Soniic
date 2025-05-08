@@ -39,17 +39,17 @@ async function TidalLookupISRC(ISRC: string, CountryCode: string): Promise<Tidal
     const token = await getToken();
     const url = 'https://openapi.tidal.com/v2/tracks?';
     const params = new URLSearchParams({
-        'filter[isrc]': ISRC,
         'countryCode': CountryCode,
         'include': 'artists',
+        'filter[isrc]': ISRC,
     });
     const headers = {
         'Authorization': 'Bearer ' + token,
-        'Content-Type': 'application/vnd.tidal.v1+json',
         'Accept': 'application/vnd.api+json',
     };
     const response = await fetch(url + params, { method: 'GET', headers: headers });
     const data = await response.json() as TidalResponse;
+    console.log('Tidal response', data);
     const track = data.data[0];
 
     // enrich track with artist info from the included array if available
@@ -79,20 +79,21 @@ async function TidalLookupISRC(ISRC: string, CountryCode: string): Promise<Tidal
 
 async function TidalLookupUPC(UPC: string, CountryCode: string = 'US'): Promise<TidalAlbum> {
     console.log('Tidal lookup');
+    console.log('UPC', UPC);
     const token = await getToken();
-    const url = 'https://openapi.tidal.com/albums/byBarcodeId?';
+    const url = 'https://openapi.tidal.com/v2/albums?';
     const params = new URLSearchParams({
-        'barcodeId': UPC,
         'countryCode': CountryCode,
+        'filter[barcodeId]': UPC,
     });
     const headers = {
         'Authorization': 'Bearer ' + token,
-        'Content-Type': 'application/vnd.tidal.v1+json',
         'Accept': 'application/vnd.tidal.v1+json',
     };
     const response = await fetch(url + params, { method: 'GET', headers: headers });
     const data = await response.json() as TidalResponse;
-    return data.data[0] as unknown as TidalAlbum;
+    return console.log('Tidal response', data) as unknown as TidalAlbum;
+    // data.data[0] as unknown as TidalAlbum;
 }
 
 async function TidalGetLink(ISRC: string, CountryCode: string): Promise<string> {

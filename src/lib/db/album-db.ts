@@ -5,7 +5,6 @@ import { eq } from 'drizzle-orm';
 import slugify from 'slugify';
 import { LookupUPCResult } from '../magic-lookup';
 import { getPlatformColor } from '../utils/platform-config';
-import { getSpotifyUPC } from '../lookup/spotify';
 
 /**
  * Retrieves an album by its UPC
@@ -73,22 +72,4 @@ export async function getAlbumLinksByUPC(upc: string) {
   ).execute();
   
   return links;
-}
-
-/**
- * Looks up UPC by Spotify album ID
- */
-export async function lookupAlbumUPC(spotifyId: string): Promise<string> {
-  try {
-    // First try to get UPC from Spotify
-    const upc = await getSpotifyUPC(spotifyId);
-    if (upc) {
-      return upc;
-    }
-    throw new Error('UPC not found for the given Spotify ID');
-  } catch (error) {
-    console.error('Error looking up UPC:', error);
-    throw error;
-  }
-  
 }

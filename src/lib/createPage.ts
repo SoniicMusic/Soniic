@@ -1,9 +1,9 @@
 'use server';
-import { getISRCSpotify, getSpotifyUPC } from './lookup/spotify';
+import { getISRCSpotify, getSpotifyUPCAlbum, getSpotifyUPCTrack } from './lookup/spotify';
 import { lookupISRC, lookupUPC } from './magic-lookup';
 import { addArtistLink } from './db/artist-db';
 import { addTrack, linkArtistToTrack } from './db/track-db';
-import { lookupAlbumUPC, addAlbum } from './db/album-db';
+import { addAlbum } from './db/album-db';
 
 /**
  * Main function to test looking up and saving a song or album
@@ -18,9 +18,12 @@ export async function testLookup(identifier: string, type: "track" | "album") {
       // Look up track across platforms
       const track = await lookupISRC(isrc, 'CA');
       
-      // Look up the album UPC (or create a placeholder)
-      const albumUPC = await lookupAlbumUPC(identifier.split('/').pop() || identifier);
+      // Look up the album UPC directly from Spotify
+      const albumUPC = await getSpotifyUPCTrack(identifier);
       
+      if (!albumUPC) {
+        throw new Error('UPC not found for the given Spotify ID');
+      }
       // Add track to database
       const savedTrack = await addTrack(track, albumUPC);
       
@@ -46,7 +49,7 @@ export async function testLookup(identifier: string, type: "track" | "album") {
     }
     else if (type === 'album') {
       // Get UPC from Spotify
-      const upc = await getSpotifyUPC(identifier);
+      const upc = await getSpotifyUPCAlbum(identifier);
       
       if (!upc) {
         return {

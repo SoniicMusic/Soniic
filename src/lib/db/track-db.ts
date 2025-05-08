@@ -3,8 +3,8 @@ import { db } from '../../db/drizzle-db';
 import { tracks, track_artists, track_links, track_albums } from '../../db/schema';
 import { eq } from 'drizzle-orm';
 import slugify from 'slugify';
-import { getAlbumByUPC } from './album-db';
-import { LookupISRCResult } from '../magic-lookup';
+import { addAlbum, getAlbumByUPC } from './album-db';
+import { LookupISRCResult, lookupUPC } from '../magic-lookup';
 import { getPlatformColor } from '../utils/platform-config';
 
 /**
@@ -25,9 +25,16 @@ export async function addTrack(trackData: LookupISRCResult, albumUPC: string) {
     
     // Ensure album exists
     const album = await getAlbumByUPC(albumUPC);
+
     
     if (!album) {
-      throw new Error(`Album with UPC ${albumUPC} not found`);
+      const albumdata = await lookupUPC(albumUPC, 'US')
+      if (!albumdata) {
+        throw new Error('Album not found');
+      }
+      else {
+        await addAlbum(albumdata);
+      }
     }
     
     // Now create the track
