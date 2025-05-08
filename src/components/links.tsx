@@ -33,6 +33,7 @@ interface Link {
   url: string;
   icon: string;
 }
+Icons.SiApplemusic
 
 interface LinksProps {
   artistLinks: Link[];
@@ -49,6 +50,7 @@ export default function Links(props: LinksProps) {
       {artistLinks.map((link: Link) => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const Icon = (Icons as any)[link.icon];
+        console.log('icon', Icon);
         return (
           <motion.ul
             key={link.name}

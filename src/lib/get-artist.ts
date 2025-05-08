@@ -10,6 +10,7 @@ export async function getDomain() {
   }
 export async function getArtist() {
     const domain = await getDomain()
+    console.log('domain', domain)
     const artist = await db.select().from(artists).where(
       eq(artists.domain, domain)
     ).execute()
@@ -17,6 +18,7 @@ export async function getArtist() {
   }
 export async function getArtistLinks() {
     const artist = await getArtist()
+    console.log('artist', artist)
     if (!artist) {
       return null
     }
