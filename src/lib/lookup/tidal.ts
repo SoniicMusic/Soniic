@@ -85,10 +85,11 @@ async function TidalLookupUPC(UPC: string, CountryCode: string = 'US'): Promise<
     const params = new URLSearchParams({
         'countryCode': CountryCode,
         'filter[barcodeId]': UPC,
+        'include': 'artists',
     });
     const headers = {
         'Authorization': 'Bearer ' + token,
-        'Accept': 'application/vnd.tidal.v1+json',
+        'Accept': 'application/vnd.api+json',
     };
     const response = await fetch(url + params, { method: 'GET', headers: headers });
     const data = await response.json() as TidalResponse;
