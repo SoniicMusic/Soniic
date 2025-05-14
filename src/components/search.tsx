@@ -4,9 +4,10 @@ import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Search, X } from 'lucide-react'
 import { searchSpotify } from '@/lib/lookup/spotify'
-import { useMemo, useState, useTransition } from "react"
+import { useEffect, useMemo, useState, useTransition } from "react"
 import debounce from 'lodash/debounce'
 import SearchResultsComponent from "./SearchResultAnimation"
+import { useRouter, useSearchParams } from 'next/navigation'
 
 // Define interfaces for our track and album types to match with SearchResultAnimation
 interface TrackResult {
@@ -26,7 +27,10 @@ interface AlbumResult {
 }
 
 export default function SearchComponent() {
-  const [query, setQuery] = useState('')
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const initialQuery = searchParams.get('q') || ''
+  const [query, setQuery] = useState(initialQuery)
   const [results, setResults] = useState<{ tracks: TrackResult[]; albums: AlbumResult[] }>({ tracks: [], albums: [] })
   const [isPending, startTransition] = useTransition()
 
@@ -46,25 +50,30 @@ export default function SearchComponent() {
     return debounce(handleSearch, 500);
   }, []);
 
+  useEffect(() => {
+    if (initialQuery) {
+      handleSearch(initialQuery);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialQuery]); // Only run on initial mount if initialQuery exists
+
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // wait for user to stop typing
-
     const newQuery = e.target.value
     setQuery(newQuery)
     if (newQuery) {
-      // debounce the search
+      router.replace(`/search?q=${encodeURIComponent(newQuery)}`, { scroll: false })
       debouncedSearch(newQuery)
     } else {
+      router.replace('/search', { scroll: false })
       setResults({ tracks: [], albums: [] })
     }
   }
   const handleClearSearch = () => {
     setQuery('')
+    router.replace('/search', { scroll: false })
     setResults({ tracks: [], albums: [] })
   }
-
-
 
   return (
     <div className="min-h-screen text-white overflow-hidden fixed inset-0 ">
