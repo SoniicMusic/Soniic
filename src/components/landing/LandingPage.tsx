@@ -2,7 +2,6 @@
 
 import HeroSection from '@/components/landing/HeroSection';
 import LandingLayout from '@/components/landing/LandingLayout';
-import Footer from '@/components/landing/Footer';
 import ArtistShowcase from '@/components/landing/ArtistShowcase';
 import { Search, Music, Share2 } from 'lucide-react';
 
@@ -104,16 +103,7 @@ export default function Home() {
     ctaHref: "/search"
   };
   
-  const footerConfig = {
-    logoSrc: "/soniic.png",
-    links: [
-      { label: "About", href: "#" },
-      { label: "Privacy", href: "#" },
-      { label: "Terms", href: "#" },
-      { label: "Contact", href: "#" }
-    ],
-    copyright: "© 2025 Soniic. All rights reserved."
-  };
+  // Footer has been moved to root layout
 
   return (
     <>
@@ -121,7 +111,6 @@ export default function Home() {
         <HeroSection {...heroConfig} />
         <FeaturesSection />
         <ArtistShowcase {...artistShowcaseConfig} />
-        <Footer {...footerConfig} />
       </LandingLayout>
     </>
   );

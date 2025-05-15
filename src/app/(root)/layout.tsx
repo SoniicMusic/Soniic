@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "../globals.css";
 import { Inter } from 'next/font/google'
 import { ThemeProvider } from "@/components/theme-provider"
+import Footer from "@/components/shared/Footer"
 import type { Viewport } from 'next'
 
 // If loading a variable font, you don't need to specify the font weight
@@ -39,6 +40,7 @@ export default function RootLayout({
           defaultTheme="dark"
         >
           {children}
+          <Footer />
         </ThemeProvider>
       </body>
     </html>
