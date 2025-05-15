@@ -11,10 +11,11 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
-  title: "Soniic",
-  description: "Music Marketing Redefined",
+  title: "Soniic - Find Music Across All Platforms",
+  description: "Search and share music across Spotify, Apple Music, Tidal and more. Artists can create customized pages with their branding.",
   twitter: {
     site: "@MathesonStep",
+    card: "summary_large_image"
   },
   icons: {
     icon: '/soniic.png',
