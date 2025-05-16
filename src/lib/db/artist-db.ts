@@ -1,6 +1,6 @@
 'use server';
 import { db } from '../../db/drizzle-db';
-import { artists, artist_links } from '../../db/schema';
+import { artists, artist_links, domains } from '../../db/schema';
 import { eq } from 'drizzle-orm';
 import { lookupArtistProfileImage } from '../lookup/applemusic';
 import slugify from 'slugify';
@@ -31,8 +31,13 @@ export async function addArtistLink(artistName: string, platforms: Record<string
         name: artistName,
         avatar: artistProfileImage,
         background_image: artistProfileImage,
-        domain: slugify(artistName, { lower: true }),
       }).returning();
+      
+      // Create a subdomain entry for the artist
+      await db.insert(domains).values({
+        artist_id: newArtist.id,
+        subdomain: slugify(artistName, { lower: true }),
+      });
       
       artist = newArtist;
       
@@ -109,11 +114,21 @@ export async function addArtistLink(artistName: string, platforms: Record<string
 }
 
 /**
- * Gets an artist by their domain
+ * Gets an artist by their subdomain
  */
-export async function getArtistByDomain(domain: string) {
+export async function getArtistByDomain(subdomain: string) {
+  // First, find the domain entry matching the subdomain
+  const domainRecord = await db.select().from(domains).where(
+    eq(domains.subdomain, subdomain)
+  ).execute();
+  
+  if (!domainRecord || domainRecord.length === 0) {
+    return null;
+  }
+  
+  // Now get the artist using the artist_id from the domains table
   const artist = await db.select().from(artists).where(
-    eq(artists.domain, domain)
+    eq(artists.id, domainRecord[0].artist_id)
   ).execute();
   
   return artist[0];

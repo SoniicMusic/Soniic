@@ -3,7 +3,7 @@ import { getISRCSpotify, getSpotifyUPCAlbum, getSpotifyUPCTrack } from './lookup
 import { lookupISRC, lookupUPC } from './magic-lookup';
 import { addArtistLink } from './db/artist-db';
 import { addTrack, linkArtistToTrack } from './db/track-db';
-import { addAlbum } from './db/album-db';
+import { addAlbum, getAlbumByUPC } from './db/album-db';
 
 /**
  * Main function to test looking up and saving a song or album
@@ -24,6 +24,20 @@ export async function testLookup(identifier: string, type: "track" | "album") {
       if (!albumUPC) {
         throw new Error('UPC not found for the given Spotify ID');
       }
+      
+      // Check if the album exists first
+      let album = await getAlbumByUPC(albumUPC);
+      
+      // If album doesn't exist, look it up and create it
+      if (!album) {
+        const albumData = await lookupUPC(albumUPC, 'CA');
+        if (albumData) {
+          album = await addAlbum(albumData);
+        } else {
+          throw new Error('Failed to fetch album data for UPC: ' + albumUPC);
+        }
+      }
+      
       // Add track to database
       const savedTrack = await addTrack(track, albumUPC);
       console.log('Saved track:', savedTrack);
@@ -60,6 +74,16 @@ export async function testLookup(identifier: string, type: "track" | "album") {
         };
       }
       
+      // Check if album already exists
+      let existingAlbum = await getAlbumByUPC(upc);
+      if (existingAlbum) {
+        return {
+          success: true,
+          message: `Album already exists: ${existingAlbum.title}`,
+          album: existingAlbum
+        };
+      }
+      
       // Look up album across platforms
       const album = await lookupUPC(upc, 'CA');
       
@@ -83,7 +107,11 @@ export async function testLookup(identifier: string, type: "track" | "album") {
         }
         
         // Add artist to database
-        await addArtistLink(artistName, platforms);
+        const artistRecord = await addArtistLink(artistName, platforms);
+        
+        // If we were implementing album-artist relationships, we'd link them here
+        // Since your schema update doesn't include an album_artists table,
+        // we're assuming this relationship is implied through tracks
       }
       
       return {

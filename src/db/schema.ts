@@ -83,7 +83,6 @@ export const authenticators = pgTable(
 export const artists = pgTable('artists', {
     id: text().primaryKey().$defaultFn(() => crypto.randomUUID()),
     name: text(),
-    domain: text(),
     avatar: text(),
     bio: text(),
     background_image: text(),
@@ -126,8 +125,7 @@ export const tracks = pgTable('tracks', {
   title: text(),
   album_upc: text().references(() => albums.upc).notNull(), // Required reference to album
   slug: text(),
-  track_number: integer(), // New field to order tracks within album
-  // Removed cover_art since we'll use the album's cover_art
+  // Removed track_number and cover_art - we'll use the album's cover_art
 });
 
 // Track Links Table
@@ -154,7 +152,11 @@ export const track_albums = pgTable('track_albums', {
     track_isrc: text().references(() => tracks.isrc),
     album_upc: text().references(() => albums.upc),
 });
-
+export const domains = pgTable('domains', {
+    artist_id: text().primaryKey().references(() => artists.id),
+    subdomain: text().notNull(),
+    custom_domain: text(),
+});
 
 
 

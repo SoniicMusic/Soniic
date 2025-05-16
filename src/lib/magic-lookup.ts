@@ -53,51 +53,64 @@ async function lookupISRC(ISRC: string, CountryCode: string): Promise<LookupISRC
     console.log('Lookup ISRC:', Tidal.artists);
 
     // Process Apple Music artists
-    await Promise.all(AM.relationships.artists.data.map(async (artist: { id: string; }) => {
-        const artistName = await lookupArtistName(artist.id);
-        mapper.addArtist(artistName, 'AppleMusic', 'https://music.apple.com/artist/' + artist.id);
+    const appleMusicArtistData = AM?.relationships?.artists?.data || [];
+    await Promise.all(appleMusicArtistData.map(async (artist: { id: string; }) => {
+        if (artist?.id) {
+            const artistName = await lookupArtistName(artist.id);
+            if (artistName) {
+                mapper.addArtist(artistName, 'AppleMusic', 'https://music.apple.com/artist/' + artist.id);
+            }
+        }
     }));
 
     // Process Spotify artists if available
-    if (Spotify && Spotify.artists) {
+    if (Spotify?.artists) {
         Spotify.artists.forEach((artist: { name: string; id: string; }) => {
-            mapper.addArtist(artist.name, 'Spotify', 'https://open.spotify.com/artist/' + artist.id);
+            if (artist?.name && artist?.id) {
+                mapper.addArtist(artist.name, 'Spotify', 'https://open.spotify.com/artist/' + artist.id);
+            }
         });
     }
 
     // Process Tidal artists - updated to handle new structure
-    if (Tidal.artists && Tidal.artists.length > 0) {
+    if (Tidal?.artists && Tidal.artists.length > 0) {
         Tidal.artists.forEach((artist) => {
-            mapper.addArtist(artist.name, 'Tidal', 'https://tidal.com/browse/artist/' + artist.id);
+            if (artist?.name && artist?.id) {
+                mapper.addArtist(artist.name, 'Tidal', 'https://tidal.com/browse/artist/' + artist.id);
+            }
         });
-    } else if (Tidal.included) {
+    } else if (Tidal?.included) {
         // Fallback to old structure if needed
         Tidal.included.artists?.forEach((artist: { name: string; id: string; }) => {
-            mapper.addArtist(artist.name, 'Tidal', 'https://tidal.com/browse/artist/' + artist.id);
+            if (artist?.name && artist?.id) {
+                mapper.addArtist(artist.name, 'Tidal', 'https://tidal.com/browse/artist/' + artist.id);
+            }
         });
     }
 
     const artistIDs = mapper.getArtistGroups();
 
     // Get Colors
-    const artwork = AM.attributes.artwork;
     const colors: { [key: string]: string } = {};
-
-    for (const key in artwork) {
-        if (key.endsWith('Color')) {
-            colors[key] = artwork[key];
+    const artwork = AM?.attributes?.artwork;
+    
+    if (artwork) {
+        for (const key in artwork) {
+            if (key.endsWith('Color')) {
+                colors[key] = artwork[key];
+            }
         }
     }
     // Return the results
     return {
-        TrackName: AM ? AM.attributes.name : null,
-        ISRC: AM ? AM.attributes.isrc : null,
-        Duration: AM ? AM.attributes.durationInMillis : null,
-        AlbumName: AM ? AM.attributes.albumName : null,
-        genreNames: AM ? AM.attributes.genreNames : null,
-        ReleaseDate: AM ? AM.attributes.releaseDate : null,
-        PreviewAudio: AM ? AM.attributes.previews[0].url : null,
-        BackgroundImage: AM ? AM.attributes.artwork.url : null,
+        TrackName: AM?.attributes?.name || null,
+        ISRC: AM?.attributes?.isrc || null,
+        Duration: AM?.attributes?.durationInMillis || null,
+        AlbumName: AM?.attributes?.albumName || null,
+        genreNames: AM?.attributes?.genreNames || null,
+        ReleaseDate: AM?.attributes?.releaseDate || null,
+        PreviewAudio: AM?.attributes?.previews?.[0]?.url || null,
+        BackgroundImage: AM?.attributes?.artwork?.url || null,
         Colors: colors,
         ArtistLinks: artistIDs,
         TrackLinks: {
@@ -117,57 +130,70 @@ async function lookupUPC(UPC: string, CountryCode: string): Promise<LookupUPCRes
     const artistIDs: { [key: string]: { [key: string]: string } } = {};
 
     // Extracting Apple Music artist IDs
-    const appleMusicArtists = AM.relationships.artists.data;
+    const appleMusicArtists = AM?.relationships?.artists?.data || [];
     await Promise.all(appleMusicArtists.map(async (artist: { id: string; }) => {
-        const artistID = artist.id;
-        const artistName = await lookupArtistName(artistID);
-        if (!artistIDs[artistName]) artistIDs[artistName] = {};
-        artistIDs[artistName]['AppleMusic'] = artistID;
+        if (artist?.id) {
+            const artistID = artist.id;
+            const artistName = await lookupArtistName(artistID);
+            if (artistName) {
+                if (!artistIDs[artistName]) artistIDs[artistName] = {};
+                artistIDs[artistName]['AppleMusic'] = artistID;
+            }
+        }
     }));
 
     // Extract artist IDs from Spotify if available
-    if (Spotify && Spotify.artists) {
+    if (Spotify?.artists) {
         Spotify.artists.forEach((artist: { name: string; id: string; }) => {
-            const artistName = artist.name;
-            if (!artistIDs[artistName]) artistIDs[artistName] = {};
-            artistIDs[artistName]['Spotify'] = artist.id;
+            if (artist?.name && artist?.id) {
+                const artistName = artist.name;
+                if (!artistIDs[artistName]) artistIDs[artistName] = {};
+                artistIDs[artistName]['Spotify'] = artist.id;
+            }
         });
     }
 
     // Extract artist IDs from Tidal with improved handling
-    if (Tidal.artists && Tidal.artists.length > 0) {
+    if (Tidal?.artists && Tidal.artists.length > 0) {
         // Use the new artists array structure
         Tidal.artists.forEach((artist) => {
-            const artistName = artist.name;
-            if (!artistIDs[artistName]) artistIDs[artistName] = {};
-            artistIDs[artistName]['Tidal'] = artist.id;
+            if (artist?.name && artist?.id) {
+                const artistName = artist.name;
+                if (!artistIDs[artistName]) artistIDs[artistName] = {};
+                artistIDs[artistName]['Tidal'] = artist.id;
+            }
         });
-    } else if (Tidal.included && Tidal.included.artists) {
+    } else if (Tidal?.included?.artists) {
         // Fallback to old structure if needed
         Tidal.included.artists.forEach((artist: { name: string; id: string; }) => {
-            const artistName = artist.name;
-            if (!artistIDs[artistName]) artistIDs[artistName] = {};
-            artistIDs[artistName]['Tidal'] = artist.id;
+            if (artist?.name && artist?.id) {
+                const artistName = artist.name;
+                if (!artistIDs[artistName]) artistIDs[artistName] = {};
+                artistIDs[artistName]['Tidal'] = artist.id;
+            }
         });
     }
 
     // Get Colors
-    const artwork = AM.attributes.artwork;
     const colors: { [key: string]: string } = {};
+    const artwork = AM?.attributes?.artwork;
 
-    for (const key in artwork) {
-        if (key.endsWith('Color')) {
-            colors[key] = artwork[key];
+    if (artwork) {
+        for (const key in artwork) {
+            if (key.endsWith('Color')) {
+                colors[key] = artwork[key];
+            }
         }
     }
+    
     // Return the results
     return {
         UPC: UPC,  // Add the UPC to the result
-        AlbumName: AM ? AM.attributes.name : null,
-        genreNames: AM ? AM.attributes.genreNames : null,
-        ReleaseDate: AM ? AM.attributes.releaseDate : null,
-        PreviewAudio: AM && AM.relationships.tracks?.data?.[0]?.attributes?.previews?.[0]?.url || null,
-        BackgroundImage: AM ? AM.attributes.artwork.url : null,
+        AlbumName: AM?.attributes?.name || null,
+        genreNames: AM?.attributes?.genreNames || null,
+        ReleaseDate: AM?.attributes?.releaseDate || null,
+        PreviewAudio: AM?.relationships?.tracks?.data?.[0]?.attributes?.previews?.[0]?.url || null,
+        BackgroundImage: AM?.attributes?.artwork?.url || null,
         Colors: colors,
         ArtistIDs: artistIDs,
         Links: {

@@ -43,7 +43,6 @@ export async function addTrack(trackData: LookupISRCResult, albumUPC: string) {
       title: trackData.TrackName || 'Unknown Track',
       album_upc: albumUPC,
       slug: slugify(trackData.TrackName || 'Unknown Track', { lower: true }),
-      track_number: 1, // Default track number, would be set properly in a real implementation
     }).onConflictDoNothing();
     // Fetch the newly created track to get its ID
     const newTrack = await db.query.tracks.findFirst({
