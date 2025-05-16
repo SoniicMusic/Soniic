@@ -88,6 +88,20 @@ async function TidalLookupISRC(ISRC: string, CountryCode: string): Promise<Tidal
     const response = await fetch(url + params, { method: 'GET', headers: headers });
     const data = await response.json() as TidalResponse;
     console.log('Tidal response', data);
+    
+    if (!data.data || data.data.length === 0) {
+        console.warn('No track found in Tidal for ISRC: ' + ISRC);
+        // Return an empty track object instead of failing
+        return {
+            id: '',
+            attributes: {
+                isrc: ISRC,
+                name: '',
+                title: ''
+            }
+        } as TidalTrack;
+    }
+    
     const track = data.data[0];
 
     // enrich track with artist info from the included array if available
@@ -136,7 +150,16 @@ async function TidalLookupUPC(UPC: string, CountryCode: string = 'US'): Promise<
     console.log('Tidal response', data);
     
     if (!data.data || data.data.length === 0) {
-        throw new Error('No album found for UPC: ' + UPC);
+        console.warn('No album found in Tidal for UPC: ' + UPC);
+        // Return an empty album object instead of throwing an error
+        return {
+            id: '',
+            attributes: {
+                title: '',
+                releaseDate: '',
+                upc: UPC
+            }
+        } as TidalAlbum;
     }
     
     const album = data.data[0] as unknown as TidalAlbum;

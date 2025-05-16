@@ -2,17 +2,29 @@ import { redirect } from "next/navigation";
 
 const NODE_ENV = process.env.NODE_ENV;
 
-export function dynamicRedirect(url: string) {
+/**
+ * Builds a URL for redirection based on environment
+ * @param url The relative URL to redirect to
+ * @returns The fully qualified URL for redirection
+ */
+export function buildRedirectUrl(url: string): string {
   if (NODE_ENV === 'production') {
-    redirect(`https://${url}`);
+    return `https://${url}`;
   } else if (NODE_ENV === 'development') {
-    // Redirect in development
-    // get domain from beginning of url and add port before the rest of the url
+    // Build redirect URL for development
     const domain = url.split('/')[0];
     const path = url.split('/').slice(1).join('/');
-    redirect(`http://${domain}:3000/${path}`);
+    return `http://${domain}.localhost:3000/${path}`;
   } else {
-    console.warn('No redirect for this environment');
+    console.warn('Unknown environment for redirection');
+    return url;
   }
+}
 
-  }
+/**
+ * Performs a redirect - Use this in client components or pages, not in server actions
+ * @param url The URL to redirect to
+ */
+export function dynamicRedirect(url: string) {
+  redirect(buildRedirectUrl(url));
+}

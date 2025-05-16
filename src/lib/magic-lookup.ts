@@ -43,14 +43,25 @@ export interface LookupUPCResult {
 }
 
 async function lookupISRC(ISRC: string, CountryCode: string): Promise<LookupISRCResult> {
-    const [AM, Spotify, Tidal] = await Promise.all([
+    // Use Promise.allSettled instead of Promise.all to handle rejections from individual platforms
+    const results = await Promise.allSettled([
         AppleMusiclookupISRC(ISRC, CountryCode),
         SpotifylookupISRC(ISRC),
         TidalLookupISRC(ISRC, CountryCode),
     ]);
+    
+    // Extract results, using default empty values if a promise was rejected
+    const AM = results[0].status === 'fulfilled' ? results[0].value : null;
+    const Spotify = results[1].status === 'fulfilled' ? results[1].value : null;
+    const Tidal = results[2].status === 'fulfilled' ? results[2].value : null;
+    
+    // Log any rejections for debugging
+    if (results[0].status === 'rejected') console.warn('Apple Music lookup failed:', results[0].reason);
+    if (results[1].status === 'rejected') console.warn('Spotify lookup failed:', results[1].reason);
+    if (results[2].status === 'rejected') console.warn('Tidal lookup failed:', results[2].reason);
 
     const mapper = new ArtistMapper();
-    console.log('Lookup ISRC:', Tidal.artists);
+    console.log('Lookup ISRC:', Tidal?.artists);
 
     // Process Apple Music artists
     const appleMusicArtistData = AM?.relationships?.artists?.data || [];
@@ -122,11 +133,22 @@ async function lookupISRC(ISRC: string, CountryCode: string): Promise<LookupISRC
 }
 
 async function lookupUPC(UPC: string, CountryCode: string): Promise<LookupUPCResult> {
-    const [AM, Spotify, Tidal] = await Promise.all([
+    // Use Promise.allSettled instead of Promise.all to handle rejections from individual platforms
+    const results = await Promise.allSettled([
         AppleMusiclookupUPC(UPC, CountryCode),
         SpotifylookupUPC(UPC),
         TidalLookupUPC(UPC, CountryCode),
     ]);
+    
+    // Extract results, using default empty values if a promise was rejected
+    const AM = results[0].status === 'fulfilled' ? results[0].value : null;
+    const Spotify = results[1].status === 'fulfilled' ? results[1].value : null;
+    const Tidal = results[2].status === 'fulfilled' ? results[2].value : null;
+    
+    // Log any rejections for debugging
+    if (results[0].status === 'rejected') console.warn('Apple Music lookup failed:', results[0].reason);
+    if (results[1].status === 'rejected') console.warn('Spotify lookup failed:', results[1].reason);
+    if (results[2].status === 'rejected') console.warn('Tidal lookup failed:', results[2].reason);
     const artistIDs: { [key: string]: { [key: string]: string } } = {};
 
     // Extracting Apple Music artist IDs

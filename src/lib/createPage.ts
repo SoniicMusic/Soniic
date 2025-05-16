@@ -4,6 +4,10 @@ import { lookupISRC, lookupUPC } from './magic-lookup';
 import { addArtistLink } from './db/artist-db';
 import { addTrack, linkArtistToTrack } from './db/track-db';
 import { addAlbum, getAlbumByUPC } from './db/album-db';
+import { buildRedirectUrl } from './redirect';
+import { db } from '@/db/drizzle-db';
+import { domains, artists, tracks, track_artists } from '@/db/schema';
+import { eq } from 'drizzle-orm';
 
 /**
  * Main function to test looking up and saving a song or album
@@ -31,7 +35,14 @@ export async function testLookup(identifier: string, type: "track" | "album") {
       // If album doesn't exist, look it up and create it
       if (!album) {
         const albumData = await lookupUPC(albumUPC, 'CA');
-        if (albumData) {
+        // As long as we have a UPC, we can continue even if some platforms didn't have data
+        // We just need basic album info that could come from any of the platforms
+        if (albumData && albumData.UPC) {
+          // Use fallback data if needed
+          if (!albumData.AlbumName) {
+            albumData.AlbumName = "Unknown Album";
+            console.warn(`No album name found for UPC: ${albumUPC}, using fallback`);
+          }
           album = await addAlbum(albumData);
         } else {
           throw new Error('Failed to fetch album data for UPC: ' + albumUPC);
@@ -57,6 +68,37 @@ export async function testLookup(identifier: string, type: "track" | "album") {
         }
       }
       
+      // Find the primary artist to determine which domain to redirect to
+      const firstArtist = Object.keys(track.ArtistLinks)[0];
+      if (firstArtist) {
+        const artistRecord = await db.query.artists.findFirst({
+          where: eq(artists.name, firstArtist)
+        });
+        
+        if (artistRecord) {
+          // Get the domain for this artist
+          const artistId = artistRecord.id;
+          const domainRecord = await db.select().from(domains).where(
+            eq(domains.artist_id, artistId)
+          ).execute();
+          
+          if (domainRecord && domainRecord.length > 0) {
+            // Build the redirect URL
+            const domain = domainRecord[0].subdomain;
+            const slug = savedTrack.slug;
+            
+            // Return success with redirect URL
+            return {
+              success: true,
+              message: `Successfully added track: ${track.TrackName}`,
+              track: savedTrack,
+              redirectUrl: buildRedirectUrl(`${domain}/${slug}`)
+            };
+          }
+        }
+      }
+      
+      // Return data without redirect if we couldn't determine a redirect URL
       return {
         success: true,
         message: `Successfully added track: ${track.TrackName}`,
@@ -77,6 +119,37 @@ export async function testLookup(identifier: string, type: "track" | "album") {
       // Check if album already exists
       let existingAlbum = await getAlbumByUPC(upc);
       if (existingAlbum) {
+        // Find an artist associated with this album to determine which domain to redirect to
+        // This lookup is a bit complex since we don't have a direct album-artist relationship
+        // We'll try to find a track in this album first, then look up an artist from that track
+        const albumTracks = await db.select().from(tracks).where(
+          eq(tracks.album_upc, existingAlbum.upc)
+        ).execute();
+        
+        if (albumTracks && albumTracks.length > 0) {
+          const trackArtists = await db.select().from(track_artists).where(
+            eq(track_artists.track_isrc, albumTracks[0].isrc)
+          ).execute();
+          
+          if (trackArtists && trackArtists.length > 0 && trackArtists[0].artist_id) {
+            // Use a string variable to work around the type check
+            const artistId = trackArtists[0].artist_id as string;
+            const domainRecords = await db.select().from(domains).where(
+              eq(domains.artist_id, artistId)
+            ).execute();
+            
+            if (domainRecords && domainRecords.length > 0) {
+              // Return success with redirect URL
+              return {
+                success: true,
+                message: `Album already exists: ${existingAlbum.title}`,
+                album: existingAlbum,
+                redirectUrl: buildRedirectUrl(`${domainRecords[0].subdomain}/${existingAlbum.slug}`)
+              };
+            }
+          }
+        }
+        
         return {
           success: true,
           message: `Album already exists: ${existingAlbum.title}`,
@@ -114,6 +187,38 @@ export async function testLookup(identifier: string, type: "track" | "album") {
         // we're assuming this relationship is implied through tracks
       }
       
+      // Find the primary artist to determine which domain to redirect to
+      const firstArtistName = Object.keys(album.ArtistIDs)[0];
+      
+      if (firstArtistName) {
+        const artistRecords = await db.select().from(artists).where(
+          eq(artists.name, firstArtistName)
+        ).execute();
+        
+        if (artistRecords && artistRecords.length > 0) {
+          // Get the domain for this artist
+          const artistId = artistRecords[0].id;
+          const domainRecords = await db.select().from(domains).where(
+            eq(domains.artist_id, artistId)
+          ).execute();
+          
+          if (domainRecords && domainRecords.length > 0) {
+            // Build the redirect URL
+            const domain = domainRecords[0].subdomain;
+            const slug = savedAlbum.slug;
+            
+            // Return success with redirect URL
+            return {
+              success: true,
+              message: `Successfully added album: ${album.AlbumName}`,
+              album: savedAlbum,
+              redirectUrl: buildRedirectUrl(`${domain}/${slug}`)
+            };
+          }
+        }
+      }
+      
+      // Return data without redirect if we couldn't determine a redirect URL
       return {
         success: true,
         message: `Successfully added album: ${album.AlbumName}`,
