@@ -206,6 +206,7 @@ async function lookupArtistName(artistID: string): Promise<string> {
 			console.warn(`No artist data found for ID: ${artistID}`);
 			return `Unknown Artist (${artistID})`;
 		}
+		console.log(`Successfully found artist: ${data.data[0].attributes.name} (${artistID})`);
 		return data.data[0].attributes.name;
 	} catch (error) {
 		console.error(`Error looking up artist name: ${error}`);

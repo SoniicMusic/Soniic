@@ -10,27 +10,37 @@ import { getPlatformColor, getPlatformOrder } from '../utils/platform-config';
  * Adds or updates an artist in the database and creates platform links
  */
 export async function addArtistLink(artistName: string, platforms: Record<string, string>) {
+  console.log(`Adding artist: ${artistName} with platforms:`, platforms);
+  
+  if (!artistName || artistName.startsWith('Unknown Artist')) {
+    console.warn(`Skipping invalid artist name: ${artistName}`);
+    return null;
+  }
   
   // Check if artist already exists
   let artist = await db.query.artists.findFirst({
     where: eq(artists.name, artistName)
   });
   
+  console.log(`Artist lookup result:`, artist);
+  
   if (!artist && platforms.AppleMusic) {
     // If artist doesn't exist in database, create a new one with Apple Music details
     // Extract Apple Music artist ID from URL
     const appleMusicId = platforms.AppleMusic.split('/').pop() as string;
+    console.log(`Creating new artist from Apple Music ID: ${appleMusicId}`);
     
     try {
       // Get artist profile image and name from Apple Music
       const artistProfileImage = await lookupArtistProfileImage(appleMusicId);
+      console.log(`Got profile image: ${artistProfileImage ? 'Yes' : 'No'}`);
       // Use the same image as both avatar and background for now
       
       // Create artist record
       const [newArtist] = await db.insert(artists).values({
         name: artistName,
-        avatar: artistProfileImage,
-        background_image: artistProfileImage,
+        avatar: artistProfileImage || '',
+        background_image: artistProfileImage || '',
       }).returning();
       
       // Create a subdomain entry for the artist

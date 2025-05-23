@@ -87,12 +87,12 @@ export async function testLookup(identifier: string, type: "track" | "album") {
             const domain = domainRecord[0].subdomain;
             const slug = savedTrack.slug;
             
-            // Return success with redirect URL
+            // Return success with redirect URL using the new format with '/track/'
             return {
               success: true,
               message: `Successfully added track: ${track.TrackName}`,
               track: savedTrack,
-              redirectUrl: buildRedirectUrl(`${domain}/${slug}`)
+              redirectUrl: buildRedirectUrl(`${domain}/track/${slug}`)
             };
           }
         }
@@ -139,12 +139,12 @@ export async function testLookup(identifier: string, type: "track" | "album") {
             ).execute();
             
             if (domainRecords && domainRecords.length > 0) {
-              // Return success with redirect URL
+              // Return success with redirect URL with the new format including '/album/'
               return {
                 success: true,
                 message: `Album already exists: ${existingAlbum.title}`,
                 album: existingAlbum,
-                redirectUrl: buildRedirectUrl(`${domainRecords[0].subdomain}/${existingAlbum.slug}`)
+                redirectUrl: buildRedirectUrl(`${domainRecords[0].subdomain}/album/${existingAlbum.slug}`)
               };
             }
           }
@@ -207,12 +207,12 @@ export async function testLookup(identifier: string, type: "track" | "album") {
             const domain = domainRecords[0].subdomain;
             const slug = savedAlbum.slug;
             
-            // Return success with redirect URL
+            // Return success with redirect URL using the new format with '/album/'
             return {
               success: true,
               message: `Successfully added album: ${album.AlbumName}`,
               album: savedAlbum,
-              redirectUrl: buildRedirectUrl(`${domain}/${slug}`)
+              redirectUrl: buildRedirectUrl(`${domain}/album/${slug}`)
             };
           }
         }

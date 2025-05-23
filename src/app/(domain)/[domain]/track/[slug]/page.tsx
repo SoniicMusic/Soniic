@@ -2,11 +2,12 @@
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import Image from 'next/image';
-import { getReleaseLinks, getRelease, getDomain } from '@/lib/get-artist';
+import { getTrackLinks, getTrackBySlug } from '@/lib/get-artist';
 import { Button } from '@/components/ui/button';
 import * as Icons from '@icons-pack/react-simple-icons';
-import { notFound, redirect } from 'next/navigation';
-async function ArtistCard(props: { trackData: any }) {
+import { notFound } from 'next/navigation';
+
+async function TrackCard(props: { trackData: any }) {
   const trackData = props.trackData.info
   const artistLinks = props.trackData.links
   return (
@@ -22,7 +23,7 @@ async function ArtistCard(props: { trackData: any }) {
       <div className="absolute inset-0 bg-black/50" />
 
       <Card className="w-screen min-h-screen bg-black/10 backdrop-blur-3xl border-none text-white relative z-10">
-        <CardContent className="container mx-auto max-w-lg px-2 py-8 flex flex-col items-center"> {/* Changed max-w-2xl to max-w-lg and px-4 to px-2 */}
+        <CardContent className="container mx-auto max-w-lg px-2 py-8 flex flex-col items-center">
           <div className="flex flex-col items-center space-y-6 w-full">
             <Image
               src={trackData.avatar || '/default-avatar.png'}
@@ -34,7 +35,7 @@ async function ArtistCard(props: { trackData: any }) {
             <h1 className="text-3xl font-bold">{trackData.name}</h1>
             {trackData.bio && <p className="text-center text-lg px-3">{trackData.bio}</p>}
           </div>
-          <section className="w-full mt-8 space-y-4 px-2"> {/* Increased spacing between buttons */}
+          <section className="w-full mt-8 space-y-4 px-2">
             {artistLinks.map((link: any, index: number) => {
               const Icon = (Icons as any)[link.icon];
               
@@ -51,14 +52,14 @@ async function ArtistCard(props: { trackData: any }) {
                   asChild
                 >
                   <a href={link.url} target="_blank" rel="noopener noreferrer"
-                    className="flex items-center w-full h-full px-3 py-3"> {/* Removed justify-center */}
+                    className="flex items-center w-full h-full px-3 py-3">
                     <div className="flex items-center">
                       {Icon ? (
                         <Icon className="mr-3 w-6 h-6" />
                       ) : (
                         <div className="mr-3 w-6 h-6 bg-white/20 rounded" />
                       )}
-                      <span className="text-lg font-semibold">{link.name}</span> {/* Removed text-center */}
+                      <span className="text-lg font-semibold">{link.name}</span>
                     </div>
                   </a>
                 </Button>
@@ -72,21 +73,42 @@ async function ArtistCard(props: { trackData: any }) {
 }
 
 export default async function Page({ params }: { params: Promise<{ slug: string }> }) {
-  // Redirect from old URL pattern to new URL pattern
-  const { slug } = await params;
-  const domain = await getDomain();
-  
-  console.log('Redirecting from old format:', slug, 'on domain:', domain);
-  
-  // For backward compatibility, we'll redirect to the /track/ version
-  // In the future, we could check if this is a track or album and redirect accordingly
-  redirect(`/track/${slug}`);
+  try {
+    const { slug } = await params;
+    const trackData = await getTrackLinks(slug);
+    if (!trackData) return (
+      <div className="min-h-screen flex items-center justify-center bg-black text-white">
+        <p>Track not found</p>
+      </div>
+    );
+    return (
+      <TrackCard trackData={trackData} />
+    );
+  } catch (error) {
+    console.error('Error loading track:', error);
+    notFound();
+  }
 }
 
-export async function generateMetadata() {
-  // Simple metadata for redirect page
-  return {
-    title: 'Redirecting...',
-    description: 'Redirecting to new page format',
-  };
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const track = await getTrackBySlug(slug);
+  if (track) {
+    return {
+      title: `${track.title} - Track Page`,
+      description: `Listen to ${track.title} on Soniic`,
+      icons: {
+        icon: 'soniic.ico',
+      },
+    }
+  }
+  else {
+    return {
+      title: 'Soniic',
+      description: 'Be Heard',
+      icons: {
+        icon: 'soniic.ico',
+      },
+    }
+  }
 };
