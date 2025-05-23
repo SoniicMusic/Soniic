@@ -37,7 +37,7 @@ export async function addAlbum(albumData: LookupUPCResult) {
       title: albumData.AlbumName || 'Unknown Album',
       release_date: albumData.ReleaseDate || new Date().toISOString().split('T')[0],
       genre: albumData.genreNames && albumData.genreNames.length > 0 ? albumData.genreNames[0] : 'Unknown',
-      slug: slugify(albumData.AlbumName || 'Unknown Album', { lower: true }),
+      slug: slugify(albumData.AlbumName || 'Unknown Album', { lower: true, strict: true }),
       cover_art: albumData.BackgroundImage?.replace('{w}x{h}', '600x600') || '',
     }).returning();
     

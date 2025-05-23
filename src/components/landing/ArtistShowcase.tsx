@@ -4,6 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Music, Share2, Globe, Palette } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import * as Icons from '@icons-pack/react-simple-icons';
 
 interface ArtistShowcaseProps {
   title: string;
@@ -32,10 +33,10 @@ export default function ArtistShowcase({
   artistBio = "Electronic music producer and DJ based in Los Angeles. New album \"Neon Dreams\" out now on all platforms.",
   artistDomain = "artist.soniic.com",
   artistLinks = [
-    { name: "Spotify", url: "#", icon: "spotify", color: "#1DB954" },
-    { name: "Apple Music", url: "#", icon: "applemusic", color: "#FA324A" },
-    { name: "Latest Album", url: "#", icon: "youtube", color: "#FF0000" },
-    { name: "Instagram", url: "#", icon: "instagram", color: "#E1306C" }
+    { name: "Spotify", url: "#", icon: "SiSpotify", color: "#1DB954" },
+    { name: "Apple Music", url: "#", icon: "SiApplemusic", color: "#FA324A" },
+    { name: "Latest Album", url: "#", icon: "SiYoutube", color: "#FF0000" },
+    { name: "Instagram", url: "#", icon: "SiInstagram", color: "#E1306C" }
   ],
   ctaText = "Create Your Artist Page",
   ctaHref = "/search"
@@ -75,19 +76,25 @@ export default function ArtistShowcase({
 
                   {/* Artist Links - In exact style from your components */}
                   <section className="w-full mt-8 space-y-4 px-2">
-                    {artistLinks.map((link, idx) => (
-                      <Button
-                        key={idx}
-                        className="w-full flex items-center justify-start gap-2 h-12 px-4"
-                        style={{ backgroundColor: link.color }}
-                      >
-                        {link.icon === "spotify" && <Music size={20} />}
-                        {link.icon === "applemusic" && <Music size={20} />}
-                        {link.icon === "youtube" && <Music size={20} />}
-                        {link.icon === "instagram" && <Share2 size={20} />}
-                        <span>{link.name}</span>
-                      </Button>
-                    ))}
+                    {artistLinks.map((link, idx) => {
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                      const Icon = (Icons as any)[link.icon];
+                      
+                      return (
+                        <Button
+                          key={idx}
+                          className="w-full flex items-center justify-start gap-2 h-12 px-4"
+                          style={{ backgroundColor: link.color }}
+                        >
+                          {Icon ? (
+                            <Icon className="w-5 h-5" />
+                          ) : (
+                            <Music size={20} />
+                          )}
+                          <span>{link.name}</span>
+                        </Button>
+                      );
+                    })}
                   </section>
                 </div>
               </div>

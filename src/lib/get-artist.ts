@@ -88,14 +88,10 @@ export async function getRelease() {
 export async function getTrackBySlug(slug: string) {
   console.log('Getting track by slug:', slug);
   
-  // First get the artist for this domain
-  const artist = await getArtist();
-  if (!artist) {
-    console.log('No artist found for domain');
-    return null;
-  }
+  // First try to get the artist for this domain
+  const domainArtist = await getArtist();
   
-  // Find track by slug
+  // Find track by slug regardless of domain
   const track = await db.select().from(tracks).where(
     eq(tracks.slug, slug)
   ).execute();
@@ -103,6 +99,23 @@ export async function getTrackBySlug(slug: string) {
   if (!track || track.length === 0) {
     console.log('No track found with slug:', slug);
     return null;
+  }
+  
+  // If we have a domain artist, verify this track belongs to them
+  if (domainArtist) {
+    const trackArtistRelation = await db.select().from(track_artists).where(
+      eq(track_artists.track_isrc, track[0].isrc)
+    ).execute();
+    
+    // Check if this track belongs to the current domain's artist
+    const belongsToCurrentArtist = trackArtistRelation.some(
+      relation => relation.artist_id === domainArtist.id
+    );
+    
+    if (!belongsToCurrentArtist) {
+      console.log('Track found but does not belong to current domain artist');
+      return null;
+    }
   }
   
   console.log('Found track:', track[0]);
@@ -120,17 +133,34 @@ export async function getTrackLinks(slug: string) {
     eq(track_links.track_isrc, track.isrc)
   ).execute();
   
-  // Get the artist for this track
-  const trackArtistRelation = await db.select().from(track_artists).where(
-    eq(track_artists.track_isrc, track.isrc)
-  ).execute();
+  // Get the artist for this track - try domain artist first, then track artist
+  let artist = await getArtist(); // Try to get domain artist first
   
-  let artist = null;
-  if (trackArtistRelation.length > 0) {
-    const artistResult = await db.select().from(artists).where(
-      eq(artists.id, trackArtistRelation[0].artist_id!)
+  if (!artist) {
+    // If no domain artist, get the first artist associated with this track
+    const trackArtistRelation = await db.select().from(track_artists).where(
+      eq(track_artists.track_isrc, track.isrc)
     ).execute();
-    artist = artistResult[0];
+    
+    if (trackArtistRelation.length > 0) {
+      const artistResult = await db.select().from(artists).where(
+        eq(artists.id, trackArtistRelation[0].artist_id!)
+      ).execute();
+      artist = artistResult[0];
+      console.log('No domain artist found, using track artist:', artist?.name);
+    }
+  }
+  
+  // If still no artist, create a fallback
+  if (!artist) {
+    console.log('No artist found for track, using fallback');
+    artist = {
+      id: 'unknown',
+      name: 'Unknown Artist',
+      avatar: null,
+      bio: null,
+      background_image: null
+    };
   }
   
   return {
@@ -147,14 +177,10 @@ export async function getTrackLinks(slug: string) {
 export async function getAlbumBySlug(slug: string) {
   console.log('Getting album by slug:', slug);
   
-  // First get the artist for this domain
-  const artist = await getArtist();
-  if (!artist) {
-    console.log('No artist found for domain');
-    return null;
-  }
+  // First try to get the artist for this domain
+  const domainArtist = await getArtist();
   
-  // Find album by slug
+  // Find album by slug regardless of domain
   const album = await db.select().from(albums).where(
     eq(albums.slug, slug)
   ).execute();
@@ -163,6 +189,9 @@ export async function getAlbumBySlug(slug: string) {
     console.log('No album found with slug:', slug);
     return null;
   }
+  
+  // If we have a domain artist, we could add verification here if needed
+  // For now, we'll allow any album to be accessed from any domain
   
   console.log('Found album:', album[0]);
   return album[0];

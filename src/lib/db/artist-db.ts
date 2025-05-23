@@ -4,7 +4,7 @@ import { artists, artist_links, domains } from '../../db/schema';
 import { eq } from 'drizzle-orm';
 import { lookupArtistProfileImage } from '../lookup/applemusic';
 import slugify from 'slugify';
-import { getPlatformColor, getPlatformOrder } from '../utils/platform-config';
+import { getPlatformColor, getPlatformOrder, getPlatformIcon } from '../utils/platform-config';
 
 /**
  * Adds or updates an artist in the database and creates platform links
@@ -46,7 +46,7 @@ export async function addArtistLink(artistName: string, platforms: Record<string
       // Create a subdomain entry for the artist
       await db.insert(domains).values({
         artist_id: newArtist.id,
-        subdomain: slugify(artistName, { lower: true }),
+        subdomain: slugify(artistName, { lower: true, strict: true }),
       });
       
       artist = newArtist;
@@ -57,7 +57,7 @@ export async function addArtistLink(artistName: string, platforms: Record<string
           artist_id: artist.id,
           name: platform,
           url: url,
-          icon: platform.toLowerCase(), // Assuming icons are named after platform names
+          icon: getPlatformIcon(platform),
           color: getPlatformColor(platform),
           order: getPlatformOrder(platform),
         });
@@ -109,7 +109,7 @@ export async function addArtistLink(artistName: string, platforms: Record<string
             artist_id: artist.id,
             name: platform,
             url: url,
-            icon: platform.toLowerCase(),
+            icon: getPlatformIcon(platform),
             color: getPlatformColor(platform),
             order: getPlatformOrder(platform),
           });

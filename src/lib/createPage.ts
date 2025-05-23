@@ -78,21 +78,42 @@ export async function testLookup(identifier: string, type: "track" | "album") {
         if (artistRecord) {
           // Get the domain for this artist
           const artistId = artistRecord.id;
-          const domainRecord = await db.select().from(domains).where(
+          let domainRecord = await db.select().from(domains).where(
             eq(domains.artist_id, artistId)
           ).execute();
+          
+          // If no domain exists, create one
+          if (!domainRecord || domainRecord.length === 0) {
+            console.log('No domain found for artist, creating one:', firstArtist);
+            const slugify = (await import('slugify')).default;
+            const subdomain = slugify(firstArtist, { lower: true, strict: true });
+            
+            await db.insert(domains).values({
+              artist_id: artistId,
+              subdomain: subdomain,
+            });
+            
+            // Fetch the newly created domain
+            domainRecord = await db.select().from(domains).where(
+              eq(domains.artist_id, artistId)
+            ).execute();
+          }
           
           if (domainRecord && domainRecord.length > 0) {
             // Build the redirect URL
             const domain = domainRecord[0].subdomain;
             const slug = savedTrack.slug;
+            const redirectPath = `${domain}/track/${slug}`;
+            const redirectUrl = buildRedirectUrl(redirectPath);
+            
+            console.log('Building track redirect:', { domain, slug, redirectPath, redirectUrl });
             
             // Return success with redirect URL using the new format with '/track/'
             return {
               success: true,
               message: `Successfully added track: ${track.TrackName}`,
               track: savedTrack,
-              redirectUrl: buildRedirectUrl(`${domain}/track/${slug}`)
+              redirectUrl: redirectUrl
             };
           }
         }
@@ -134,18 +155,132 @@ export async function testLookup(identifier: string, type: "track" | "album") {
           if (trackArtists && trackArtists.length > 0 && trackArtists[0].artist_id) {
             // Use a string variable to work around the type check
             const artistId = trackArtists[0].artist_id as string;
-            const domainRecords = await db.select().from(domains).where(
+            let domainRecords = await db.select().from(domains).where(
               eq(domains.artist_id, artistId)
             ).execute();
             
+            // If no domain exists, create one for this artist
+            if (!domainRecords || domainRecords.length === 0) {
+              // Get the artist name to create the domain
+              const artistRecord = await db.select().from(artists).where(
+                eq(artists.id, artistId)
+              ).execute();
+              
+              if (artistRecord && artistRecord.length > 0) {
+                console.log('No domain found for existing album artist, creating one:', artistRecord[0].name);
+                const slugify = (await import('slugify')).default;
+                const artistName = artistRecord[0].name || 'unknown-artist';
+                const subdomain = slugify(artistName, { lower: true, strict: true });
+                
+                await db.insert(domains).values({
+                  artist_id: artistId,
+                  subdomain: subdomain,
+                });
+                
+                // Fetch the newly created domain
+                domainRecords = await db.select().from(domains).where(
+                  eq(domains.artist_id, artistId)
+                ).execute();
+              }
+            }
+            
             if (domainRecords && domainRecords.length > 0) {
+              const redirectPath = `${domainRecords[0].subdomain}/album/${existingAlbum.slug}`;
+              const redirectUrl = buildRedirectUrl(redirectPath);
+              
+              console.log('Building existing album redirect:', { 
+                subdomain: domainRecords[0].subdomain, 
+                slug: existingAlbum.slug, 
+                redirectPath, 
+                redirectUrl 
+              });
+              
               // Return success with redirect URL with the new format including '/album/'
               return {
                 success: true,
                 message: `Album already exists: ${existingAlbum.title}`,
                 album: existingAlbum,
-                redirectUrl: buildRedirectUrl(`${domainRecords[0].subdomain}/album/${existingAlbum.slug}`)
+                redirectUrl: redirectUrl
               };
+            }
+          }
+        }
+        
+        // If no tracks found in the album, we need to look up the album data to get artist info
+        console.log('No tracks found for existing album, looking up album data to get artists');
+        const albumData = await lookupUPC(upc, 'CA');
+        
+        if (albumData && albumData.ArtistIDs) {
+          // Process artists for the album to ensure they exist and have domains
+          for (const artistName in albumData.ArtistIDs) {
+            const platforms: Record<string, string> = {};
+            
+            // Convert artist IDs to URLs for each platform
+            const artistIds = albumData.ArtistIDs[artistName];
+            if (artistIds.AppleMusic) {
+              platforms.AppleMusic = `https://music.apple.com/artist/${artistIds.AppleMusic}`;
+            }
+            if (artistIds.Spotify) {
+              platforms.Spotify = `https://open.spotify.com/artist/${artistIds.Spotify}`;
+            }
+            if (artistIds.Tidal) {
+              platforms.Tidal = `https://tidal.com/browse/artist/${artistIds.Tidal}`;
+            }
+            
+            // Add artist to database (this will create a domain if needed)
+            await addArtistLink(artistName, platforms);
+          }
+          
+          // Now try to find the primary artist for redirect
+          const firstArtistName = Object.keys(albumData.ArtistIDs)[0];
+          if (firstArtistName) {
+            const artistRecords = await db.select().from(artists).where(
+              eq(artists.name, firstArtistName)
+            ).execute();
+            
+            if (artistRecords && artistRecords.length > 0) {
+              // Get the domain for this artist
+              const artistId = artistRecords[0].id;
+              let domainRecords = await db.select().from(domains).where(
+                eq(domains.artist_id, artistId)
+              ).execute();
+              
+              // If no domain exists, create one
+              if (!domainRecords || domainRecords.length === 0) {
+                console.log('No domain found for existing album artist (no tracks), creating one:', firstArtistName);
+                const slugify = (await import('slugify')).default;
+                const subdomain = slugify(firstArtistName, { lower: true, strict: true });
+                
+                await db.insert(domains).values({
+                  artist_id: artistId,
+                  subdomain: subdomain,
+                });
+                
+                // Fetch the newly created domain
+                domainRecords = await db.select().from(domains).where(
+                  eq(domains.artist_id, artistId)
+                ).execute();
+              }
+              
+              if (domainRecords && domainRecords.length > 0) {
+                const redirectPath = `${domainRecords[0].subdomain}/album/${existingAlbum.slug}`;
+                const redirectUrl = buildRedirectUrl(redirectPath);
+                
+                console.log('Building existing album redirect (no tracks):', { 
+                  subdomain: domainRecords[0].subdomain, 
+                  slug: existingAlbum.slug, 
+                  redirectPath, 
+                  redirectUrl 
+                });
+                
+                // Return success with redirect URL
+                return {
+                  success: true,
+                  message: `Album already exists: ${existingAlbum.title}`,
+                  album: existingAlbum,
+                  redirectUrl: redirectUrl
+                };
+              }
             }
           }
         }
@@ -198,21 +333,42 @@ export async function testLookup(identifier: string, type: "track" | "album") {
         if (artistRecords && artistRecords.length > 0) {
           // Get the domain for this artist
           const artistId = artistRecords[0].id;
-          const domainRecords = await db.select().from(domains).where(
+          let domainRecords = await db.select().from(domains).where(
             eq(domains.artist_id, artistId)
           ).execute();
+          
+          // If no domain exists, create one
+          if (!domainRecords || domainRecords.length === 0) {
+            console.log('No domain found for album artist, creating one:', firstArtistName);
+            const slugify = (await import('slugify')).default;
+            const subdomain = slugify(firstArtistName, { lower: true, strict: true });
+            
+            await db.insert(domains).values({
+              artist_id: artistId,
+              subdomain: subdomain,
+            });
+            
+            // Fetch the newly created domain
+            domainRecords = await db.select().from(domains).where(
+              eq(domains.artist_id, artistId)
+            ).execute();
+          }
           
           if (domainRecords && domainRecords.length > 0) {
             // Build the redirect URL
             const domain = domainRecords[0].subdomain;
             const slug = savedAlbum.slug;
+            const redirectPath = `${domain}/album/${slug}`;
+            const redirectUrl = buildRedirectUrl(redirectPath);
+            
+            console.log('Building new album redirect:', { domain, slug, redirectPath, redirectUrl });
             
             // Return success with redirect URL using the new format with '/album/'
             return {
               success: true,
               message: `Successfully added album: ${album.AlbumName}`,
               album: savedAlbum,
-              redirectUrl: buildRedirectUrl(`${domain}/album/${slug}`)
+              redirectUrl: redirectUrl
             };
           }
         }

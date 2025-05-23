@@ -5,7 +5,7 @@ import { eq } from 'drizzle-orm';
 import slugify from 'slugify';
 import { addAlbum, getAlbumByUPC } from './album-db';
 import { LookupISRCResult, lookupUPC } from '../magic-lookup';
-import { getPlatformColor } from '../utils/platform-config';
+import { getPlatformColor, getPlatformIcon } from '../utils/platform-config';
 
 /**
  * Adds or updates a track in the database
@@ -42,7 +42,7 @@ export async function addTrack(trackData: LookupISRCResult, albumUPC: string) {
       isrc: trackData.ISRC as string,
       title: trackData.TrackName || 'Unknown Track',
       album_upc: albumUPC,
-      slug: slugify(trackData.TrackName || 'Unknown Track', { lower: true }),
+      slug: slugify(trackData.TrackName || 'Unknown Track', { lower: true, strict: true }),
     }).onConflictDoNothing();
     // Fetch the newly created track to get its ID
     const newTrack = await db.query.tracks.findFirst({
@@ -69,10 +69,11 @@ export async function addTrack(trackData: LookupISRCResult, albumUPC: string) {
         console.log('Adding track link', platform, url);
 
         const color = getPlatformColor(platform);
+        const icon = getPlatformIcon(platform);
         await db.insert(track_links).values({
           track_isrc: newTrack.isrc,
           url,
-          icon: platform,
+          icon,
           color,
         })
       }

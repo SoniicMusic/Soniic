@@ -17,15 +17,19 @@ export default function SearchResult({ id, title, artists, coverUrl, type }: Sea
     const handleClick = async () => {
         try {
             setIsLoading(true);
+            console.log('Starting lookup for:', { id, type });
+            
             // Call testLookup and handle the response
             const result = await testLookup(id, type);
+            console.log('Lookup result:', result);
             
             // If successful and we have a redirectUrl, navigate to it
             if (result.success && result.redirectUrl) {
+                console.log('Redirecting to:', result.redirectUrl);
                 window.location.href = result.redirectUrl;
             } else {
                 // Show message if there's no redirect URL
-                console.log('Lookup successful but no redirect URL available');
+                console.log('Lookup successful but no redirect URL available. Result:', result);
                 setIsLoading(false);
             }
         } catch (error) {

@@ -94,10 +94,10 @@ export default function Home() {
     artistBio: "Electronic music producer and DJ based in Los Angeles. New album \"Neon Dreams\" out now on all platforms.",
     artistDomain: "artist.soniic.com",
     artistLinks: [
-      { name: "Spotify", url: "#", icon: "spotify", color: "#1DB954" },
-      { name: "Apple Music", url: "#", icon: "applemusic", color: "#FA324A" },
-      { name: "Latest Album", url: "#", icon: "youtube", color: "#FF0000" },
-      { name: "Instagram", url: "#", icon: "instagram", color: "#E1306C" }
+      { name: "Spotify", url: "#", icon: "SiSpotify", color: "#1DB954" },
+      { name: "Apple Music", url: "#", icon: "SiApplemusic", color: "#FA324A" },
+      { name: "Latest Album", url: "#", icon: "SiYoutube", color: "#FF0000" },
+      { name: "Instagram", url: "#", icon: "SiInstagram", color: "#E1306C" }
     ],
     ctaText: "Create Your Artist Page",
     ctaHref: "/search"
