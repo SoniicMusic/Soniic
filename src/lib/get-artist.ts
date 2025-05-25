@@ -133,6 +133,15 @@ export async function getTrackLinks(slug: string) {
     eq(track_links.track_isrc, track.isrc)
   ).execute();
   
+  // Get the album for this track to get cover art
+  let album = null;
+  if (track.album_upc) {
+    const albumResult = await db.select().from(albums).where(
+      eq(albums.upc, track.album_upc)
+    ).execute();
+    album = albumResult[0] || null;
+  }
+  
   // Get the artist for this track - try domain artist first, then track artist
   let artist = await getArtist(); // Try to get domain artist first
   
@@ -167,7 +176,8 @@ export async function getTrackLinks(slug: string) {
     info: {
       ...artist,
       name: track.title, // Use track title as the main name
-      track: track
+      track: track,
+      album: album // Include album data for cover art
     },
     links: links
   };

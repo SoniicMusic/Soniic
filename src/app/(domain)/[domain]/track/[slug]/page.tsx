@@ -19,6 +19,12 @@ interface TrackInfo {
     album_upc: string;
     slug: string | null;
   };
+  album?: {
+    upc: string;
+    title: string | null;
+    cover_art: string | null;
+    slug: string | null;
+  } | null;
 }
 
 interface TrackLink {
@@ -42,7 +48,7 @@ async function TrackCard(props: { trackData: TrackData }) {
     <div
       className="min-h-screen flex items-center justify-center relative animate-in fade-in-0 duration-3000"
       style={{
-        backgroundImage: trackData.background_image ? `url(${trackData.background_image})` : undefined,
+        backgroundImage: trackData.album?.cover_art ? `url(${trackData.album?.cover_art})` : undefined,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
       }}
@@ -54,8 +60,8 @@ async function TrackCard(props: { trackData: TrackData }) {
         <CardContent className="container mx-auto max-w-lg px-2 py-8 flex flex-col items-center">
           <div className="flex flex-col items-center space-y-6 w-full">
             <Image
-              src={trackData.avatar || '/default-avatar.png'}
-              alt={trackData.name || 'Artist'}
+              src={trackData.album?.cover_art || trackData.avatar || '/default-avatar.png'}
+              alt={trackData.track.title || 'Track'}
               width={200}
               height={200}
               className="rounded-full shadow-lg"
@@ -129,7 +135,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       title: `${track.title} - Track Page`,
       description: `Listen to ${track.title} on Soniic`,
       icons: {
-        icon: 'soniic.ico',
+        icon: track.album?.cover_art || 'soniic.ico',
       },
     }
   }
