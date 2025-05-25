@@ -11,7 +11,7 @@ export async function getDomain() {
     if (fullDomain.includes('.localhost')) {
         return fullDomain.split('.localhost')[0];
     }
-    // For production domains like "troye-sivan.soniic.com" -> "troye-sivan"
+    // For production domains like "troye-sivan.soniic.link" -> "troye-sivan"
     else if (fullDomain.includes('.')) {
         return fullDomain.split('.')[0];
     }
@@ -176,9 +176,6 @@ export async function getTrackLinks(slug: string) {
 // Album-specific functions
 export async function getAlbumBySlug(slug: string) {
   console.log('Getting album by slug:', slug);
-  
-  // First try to get the artist for this domain
-  const domainArtist = await getArtist();
   
   // Find album by slug regardless of domain
   const album = await db.select().from(albums).where(

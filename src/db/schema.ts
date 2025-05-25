@@ -132,6 +132,7 @@ export const tracks = pgTable('tracks', {
 export const track_links = pgTable('track_links', {
     id: text().primaryKey().$defaultFn(() => crypto.randomUUID()),
     track_isrc: text().references(() => tracks.isrc),
+    name: text(),
     url: text(),
     icon: text(),
     color: text(),

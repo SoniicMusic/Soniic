@@ -72,6 +72,7 @@ export async function addTrack(trackData: LookupISRCResult, albumUPC: string) {
         const icon = getPlatformIcon(platform);
         await db.insert(track_links).values({
           track_isrc: newTrack.isrc,
+          name: platform,
           url,
           icon,
           color,
