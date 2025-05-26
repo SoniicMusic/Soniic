@@ -3,6 +3,25 @@ import { db } from '@/db/drizzle-db';
 import { artists, artist_links, domains, tracks, albums, track_links, album_links, track_artists } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 
+// Type definitions
+interface Track {
+  isrc: string;
+  title: string | null;
+  album_upc: string;
+  slug: string | null;
+}
+
+interface Album {
+  upc: string;
+  title: string | null;
+  cover_art: string | null;
+  slug: string | null;
+}
+
+interface TrackWithAlbum extends Track {
+  album: Album | null;
+}
+
 export async function getDomain() {
     const headersList = await headers()
     const fullDomain = headersList.get('host')?.split(':')[0] || ''
@@ -85,7 +104,7 @@ export async function getRelease() {
 }
 
 // Track-specific functions
-export async function getTrackBySlug(slug: string) {
+export async function getTrackBySlug(slug: string): Promise<TrackWithAlbum | null> {
   console.log('Getting track by slug:', slug);
   
   // First try to get the artist for this domain
@@ -118,8 +137,22 @@ export async function getTrackBySlug(slug: string) {
     }
   }
   
+  // Get the linked album
+  let album: Album | null = null;
+  if (track[0].album_upc) {
+    const albumResult = await db.select().from(albums).where(
+      eq(albums.upc, track[0].album_upc)
+    ).execute();
+    album = albumResult[0] || null;
+  }
+  
   console.log('Found track:', track[0]);
-  return track[0];
+  console.log('Found linked album:', album);
+  
+  return {
+    ...track[0],
+    album: album
+  };
 }
 
 export async function getTrackLinks(slug: string) {

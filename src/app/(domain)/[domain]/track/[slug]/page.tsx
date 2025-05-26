@@ -64,7 +64,7 @@ async function TrackCard(props: { trackData: TrackData }) {
               alt={trackData.track.title || 'Track'}
               width={200}
               height={200}
-              className=" shadow-lg"
+              className="shadow-lg"
             />
             <h1 className="text-3xl font-bold">{trackData.track.title}</h1>
             {trackData.bio && <p className="text-center text-lg px-3">{trackData.bio}</p>}
