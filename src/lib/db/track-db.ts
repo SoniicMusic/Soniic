@@ -93,11 +93,12 @@ export async function addTrack(trackData: LookupISRCResult, albumUPC: string) {
 export async function linkArtistToTrack(trackISRC: string, artistId: string) {
   try {
     // First check if this track-artist relationship already exists
-    const existingRelation = await db.query.track_artists.findFirst({
-      where: (track_artist) => 
-        eq(track_artist.track_isrc, trackISRC) && 
-        eq(track_artist.artist_id, artistId)
-    });
+    const existingRelations = await db.select().from(track_artists).where(
+      eq(track_artists.track_isrc, trackISRC)
+    ).execute();
+    
+    // Check if any existing relation has the same artist_id
+    const existingRelation = existingRelations.find(rel => rel.artist_id === artistId);
     
     if (existingRelation) {
       // Relationship already exists, no need to create it again

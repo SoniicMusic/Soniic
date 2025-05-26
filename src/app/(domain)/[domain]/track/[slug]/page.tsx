@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import Image from 'next/image';
-import { getTrackLinks, getTrackBySlug } from '@/lib/get-artist';
+import { getTrackLinks, getTrackBySlug, findCorrectDomainForTrack } from '@/lib/get-artist';
 import { Button } from '@/components/ui/button';
 import * as Icons from '@icons-pack/react-simple-icons';
 import { notFound } from 'next/navigation';
@@ -108,15 +108,47 @@ async function TrackCard(props: { trackData: TrackData }) {
   );
 }
 
-export default async function Page({ params }: { params: Promise<{ slug: string }> }) {
+export default async function Page({ params }: { params: Promise<{ domain: string; slug: string }> }) {
   try {
-    const { slug } = await params;
+    const { domain, slug } = await params;
     const trackData = await getTrackLinks(slug);
-    if (!trackData) return (
-      <div className="min-h-screen flex items-center justify-center bg-black text-white">
-        <p>Track not found</p>
-      </div>
-    );
+    
+    if (!trackData) {
+      // Try to find the correct domain for this track
+      const correctDomain = await findCorrectDomainForTrack(slug);
+      
+      if (correctDomain) {
+        // Track exists but belongs to a different artist/domain
+        return (
+          <div className="min-h-screen flex items-center justify-center bg-black text-white">
+            <div className="text-center max-w-md px-4">
+              <p className="text-xl mb-4">Track not available on this domain</p>
+              <p className="text-gray-400 mb-4">
+                "{correctDomain.trackTitle}" by {correctDomain.artistName} is available on a different domain.
+              </p>
+              <div className="mt-6">
+                <a 
+                  href={`/${correctDomain.subdomain}/track/${slug}`}
+                  className="inline-block bg-white text-black px-6 py-3 rounded-lg font-semibold hover:bg-gray-200 transition-colors"
+                >
+                  Visit {correctDomain.artistName}'s page
+                </a>
+              </div>
+            </div>
+          </div>
+        );
+      } else {
+        // Track doesn't exist at all
+        return (
+          <div className="min-h-screen flex items-center justify-center bg-black text-white">
+            <div className="text-center">
+              <p className="text-xl mb-2">Track not found</p>
+              <p className="text-gray-400">The track "{slug}" could not be found</p>
+            </div>
+          </div>
+        );
+      }
+    }
     return (
       <TrackCard trackData={trackData} />
     );
@@ -126,8 +158,8 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
   }
 }
 
-export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params;
+export async function generateMetadata({ params }: { params: Promise<{ domain: string; slug: string }> }) {
+  const { domain, slug } = await params;
   const track = await getTrackBySlug(slug);
 
   if (track) {

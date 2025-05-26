@@ -261,6 +261,80 @@ export async function getAlbumLinks(slug: string) {
   };
 }
 
+// Helper function to find the correct domain for a track
+export async function findCorrectDomainForTrack(slug: string): Promise<{ 
+  subdomain: string; 
+  artistName: string; 
+  trackTitle: string; 
+} | null> {
+  console.log('Finding correct domain for track:', slug);
+  
+  // Find track by slug regardless of domain
+  const track = await db.select().from(tracks).where(
+    eq(tracks.slug, slug)
+  ).execute();
+  
+  if (!track || track.length === 0) {
+    console.log('No track found in findCorrectDomainForTrack');
+    return null;
+  }
+  
+  console.log('Found track in findCorrectDomainForTrack:', track[0]);
+  
+  // Find the artist for this track
+  const trackArtistRelation = await db.select().from(track_artists).where(
+    eq(track_artists.track_isrc, track[0].isrc)
+  ).execute();
+  
+  console.log('Track artist relations:', trackArtistRelation);
+  
+  // Let's also check if there are ANY track artist relations at all
+  const allTrackArtistRelations = await db.select().from(track_artists).execute();
+  console.log('Total track artist relations in database:', allTrackArtistRelations.length);
+  
+  if (allTrackArtistRelations.length > 0) {
+    console.log('Sample track artist relations:', allTrackArtistRelations.slice(0, 3));
+  }
+  
+  if (trackArtistRelation.length === 0) {
+    console.log('No artist relation found for track');
+    return null;
+  }
+  
+  // Get the artist
+  const artist = await db.select().from(artists).where(
+    eq(artists.id, trackArtistRelation[0].artist_id!)
+  ).execute();
+  
+  console.log('Found artist for track:', artist[0]);
+  
+  if (!artist || artist.length === 0) {
+    console.log('No artist found');
+    return null;
+  }
+  
+  // Find the domain for this artist
+  const domainRecord = await db.select().from(domains).where(
+    eq(domains.artist_id, artist[0].id)
+  ).execute();
+  
+  console.log('Found domain record:', domainRecord[0]);
+  
+  if (!domainRecord || domainRecord.length === 0) {
+    console.log('No domain found for artist');
+    return null;
+  }
+  
+  const result = {
+    subdomain: domainRecord[0].subdomain,
+    artistName: artist[0].name || 'Unknown Artist',
+    trackTitle: track[0].title || 'Unknown Track'
+  };
+  
+  console.log('Returning correct domain result:', result);
+  return result;
+}
+
 // In the future, we can add track-specific and album-specific methods here
 // For example:
 // export async function getTrackInfo(slug: string) { ... }
