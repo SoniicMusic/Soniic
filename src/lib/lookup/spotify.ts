@@ -215,24 +215,36 @@ async function searchSpotify(query: string): Promise<SpotifySearchResult> {
         albums: { items: SpotifyAlbum[] }
     };
 
-  // Extract tracks
-  const tracks = data.tracks.items.map(track => ({
-    id: track.id,
-    title: track.name,
-    artists: track.artists.map(artist => artist.name),
-    coverUrl: track.album.images[1]?.url || track.album.images[0]?.url,
-    type: 'track' as const
-  }));
+  // Helper function to check if an artist should be filtered out
+  const shouldFilterArtist = (artistName: string) => {
+    const name = artistName.toLowerCase();
+    return name.includes('various artists') || 
+           name === 'various' || 
+           name.startsWith('unknown artist');
+  };
 
-  // Extract albums
-  const albums = data.albums.items.map(album => ({
-    id: album.id,
-    title: album.name,
-    artists: album.artists.map(artist => artist.name),
-    coverUrl: album.images[1]?.url || album.images[0]?.url,
-    type: 'album' as const,
-    releaseDate: album.release_date
-  }));
+  // Extract tracks - filter out various artists
+  const tracks = data.tracks.items
+    .filter(track => !track.artists.some(artist => shouldFilterArtist(artist.name)))
+    .map(track => ({
+      id: track.id,
+      title: track.name,
+      artists: track.artists.map(artist => artist.name),
+      coverUrl: track.album.images[1]?.url || track.album.images[0]?.url,
+      type: 'track' as const
+    }));
+
+  // Extract albums - filter out various artists
+  const albums = data.albums.items
+    .filter(album => !album.artists.some(artist => shouldFilterArtist(artist.name)))
+    .map(album => ({
+      id: album.id,
+      title: album.name,
+      artists: album.artists.map(artist => artist.name),
+      coverUrl: album.images[1]?.url || album.images[0]?.url,
+      type: 'album' as const,
+      releaseDate: album.release_date
+    }));
 
   return {
     tracks,

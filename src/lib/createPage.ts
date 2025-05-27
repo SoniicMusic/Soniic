@@ -208,9 +208,18 @@ export async function testLookup(identifier: string, type: "track" | "album") {
         console.log('No tracks found for existing album, looking up album data to get artists');
         const albumData = await lookupUPC(upc, 'CA');
         
-        if (albumData && albumData.ArtistIDs) {
+        if (albumData && albumData.ArtistIDs && Object.keys(albumData.ArtistIDs).length > 0) {
           // Process artists for the album to ensure they exist and have domains
+          let validArtistFound = false;
           for (const artistName in albumData.ArtistIDs) {
+            // Skip various artists entries as they're not useful for creating domains
+            if (artistName.toLowerCase().includes('various artists') || 
+                artistName.toLowerCase() === 'various' ||
+                artistName.startsWith('Unknown Artist')) {
+              console.log(`Skipping ${artistName} as it's not suitable for domain creation`);
+              continue;
+            }
+
             const platforms: Record<string, string> = {};
             
             // Convert artist IDs to URLs for each platform
@@ -225,15 +234,30 @@ export async function testLookup(identifier: string, type: "track" | "album") {
               platforms.Tidal = `https://tidal.com/browse/artist/${artistIds.Tidal}`;
             }
             
-            // Add artist to database (this will create a domain if needed)
-            await addArtistLink(artistName, platforms);
+            // Only try to add artist if we have at least one platform
+            if (Object.keys(platforms).length > 0) {
+              const artistRecord = await addArtistLink(artistName, platforms);
+              if (artistRecord) {
+                validArtistFound = true;
+              }
+            }
           }
           
           // Now try to find the primary artist for redirect
-          const firstArtistName = Object.keys(albumData.ArtistIDs)[0];
-          if (firstArtistName) {
+          // Skip various artists and look for the first valid artist
+          let firstValidArtistName = null;
+          for (const artistName of Object.keys(albumData.ArtistIDs)) {
+            if (!artistName.toLowerCase().includes('various artists') && 
+                artistName.toLowerCase() !== 'various' &&
+                !artistName.startsWith('Unknown Artist')) {
+              firstValidArtistName = artistName;
+              break;
+            }
+          }
+          
+          if (firstValidArtistName && validArtistFound) {
             const artistRecords = await db.select().from(artists).where(
-              eq(artists.name, firstArtistName)
+              eq(artists.name, firstValidArtistName)
             ).execute();
             
             if (artistRecords && artistRecords.length > 0) {
@@ -245,8 +269,8 @@ export async function testLookup(identifier: string, type: "track" | "album") {
               
               // If no domain exists, create one
               if (!domainRecords || domainRecords.length === 0) {
-                console.log('No domain found for existing album artist (no tracks), creating one:', firstArtistName);
-                const subdomain = await generateUniqueSubdomain(firstArtistName);
+                console.log('No domain found for existing album artist (no tracks), creating one:', firstValidArtistName);
+                const subdomain = await generateUniqueSubdomain(firstValidArtistName);
                 
                 await db.insert(domains).values({
                   artist_id: artistId,
@@ -295,8 +319,27 @@ export async function testLookup(identifier: string, type: "track" | "album") {
       // Add album to database
       const savedAlbum = await addAlbum(album);
       
-      // Process artists for the album
+      // Check if we have artist data and it's not empty
+      if (!album.ArtistIDs || Object.keys(album.ArtistIDs).length === 0) {
+        console.warn('No artist data found for album, cannot create redirect URL');
+        return {
+          success: true,
+          message: `Successfully added album: ${album.AlbumName}`,
+          album: savedAlbum
+        };
+      }
+
+      // Process artists for the album, skip "Various Artists" as it's not useful for domains
+      let validArtistFound = false;
       for (const artistName in album.ArtistIDs) {
+        // Skip various artists entries as they're not useful for creating domains
+        if (artistName.toLowerCase().includes('various artists') || 
+            artistName.toLowerCase() === 'various' ||
+            artistName.startsWith('Unknown Artist')) {
+          console.log(`Skipping ${artistName} as it's not suitable for domain creation`);
+          continue;
+        }
+
         const platforms: Record<string, string> = {};
         
         // Convert artist IDs to URLs for each platform
@@ -311,20 +354,30 @@ export async function testLookup(identifier: string, type: "track" | "album") {
           platforms.Tidal = `https://tidal.com/browse/artist/${artistIds.Tidal}`;
         }
         
-        // Add artist to database
-        const artistRecord = await addArtistLink(artistName, platforms);
-        
-        // If we were implementing album-artist relationships, we'd link them here
-        // Since your schema update doesn't include an album_artists table,
-        // we're assuming this relationship is implied through tracks
+        // Only try to add artist if we have at least one platform
+        if (Object.keys(platforms).length > 0) {
+          const artistRecord = await addArtistLink(artistName, platforms);
+          if (artistRecord) {
+            validArtistFound = true;
+          }
+        }
       }
       
       // Find the primary artist to determine which domain to redirect to
-      const firstArtistName = Object.keys(album.ArtistIDs)[0];
+      // Skip various artists and look for the first valid artist
+      let firstValidArtistName = null;
+      for (const artistName of Object.keys(album.ArtistIDs)) {
+        if (!artistName.toLowerCase().includes('various artists') && 
+            artistName.toLowerCase() !== 'various' &&
+            !artistName.startsWith('Unknown Artist')) {
+          firstValidArtistName = artistName;
+          break;
+        }
+      }
       
-      if (firstArtistName) {
+      if (firstValidArtistName && validArtistFound) {
         const artistRecords = await db.select().from(artists).where(
-          eq(artists.name, firstArtistName)
+          eq(artists.name, firstValidArtistName)
         ).execute();
         
         if (artistRecords && artistRecords.length > 0) {
@@ -336,8 +389,8 @@ export async function testLookup(identifier: string, type: "track" | "album") {
           
           // If no domain exists, create one
           if (!domainRecords || domainRecords.length === 0) {
-            console.log('No domain found for album artist, creating one:', firstArtistName);
-            const subdomain = await generateUniqueSubdomain(firstArtistName);
+            console.log('No domain found for album artist, creating one:', firstValidArtistName);
+            const subdomain = await generateUniqueSubdomain(firstValidArtistName);
             
             await db.insert(domains).values({
               artist_id: artistId,
