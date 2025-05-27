@@ -161,6 +161,10 @@ export async function getTrackLinks(slug: string) {
     return null;
   }
   
+  // Ensure track links exist, backfill if missing
+  const { ensureTrackLinks } = await import('./link-backfill');
+  await ensureTrackLinks(track.isrc);
+  
   // Get track links
   const links = await db.select().from(track_links).where(
     eq(track_links.track_isrc, track.isrc)
@@ -242,6 +246,10 @@ export async function getAlbumLinks(slug: string) {
   if (!album) {
     return null;
   }
+  
+  // Ensure album links exist, backfill if missing
+  const { ensureAlbumLinks } = await import('./link-backfill');
+  await ensureAlbumLinks(album.upc);
   
   // Get album links
   const links = await db.select().from(album_links).where(
