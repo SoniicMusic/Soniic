@@ -161,7 +161,7 @@ export const track_albums = pgTable('track_albums', {
 });
 export const domains = pgTable('domains', {
     artist_id: text().primaryKey().references(() => artists.id),
-    subdomain: text().notNull(),
+    subdomain: text().notNull().unique(), // Add unique constraint
     custom_domain: text(),
 });
 

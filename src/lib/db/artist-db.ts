@@ -7,6 +7,71 @@ import slugify from 'slugify';
 import { getPlatformColor, getPlatformOrder, getPlatformIcon, getPlatformDisplayName } from '../utils/platform-config';
 
 /**
+ * Generates a unique subdomain by checking existing ones and appending numbers if needed
+ */
+export async function generateUniqueSubdomain(baseName: string): Promise<string> {
+  let baseSlug = slugify(baseName, { lower: true, strict: true });
+  let subdomain = baseSlug;
+  let counter = 1;
+  
+  // Keep checking until we find a unique subdomain
+  while (true) {
+    const existingDomain = await db.select().from(domains).where(
+      eq(domains.subdomain, subdomain)
+    ).execute();
+    
+    if (existingDomain.length === 0) {
+      return subdomain;
+    }
+    
+    // If subdomain exists, try with a number suffix
+    subdomain = `${baseSlug}-${counter}`;
+    counter++;
+  }
+}
+
+/**
+ * Checks if an artist exists based on platform identifiers rather than just name
+ */
+async function findExistingArtistByPlatforms(artistName: string, platforms: Record<string, string>) {
+  // First try to find by exact name match
+  let artist = await db.query.artists.findFirst({
+    where: eq(artists.name, artistName)
+  });
+  
+  if (!artist) {
+    return null;
+  }
+  
+  // If we found an artist with the same name, check if they have different platform IDs
+  // This helps distinguish between artists with the same name
+  const existingLinks = await db.query.artist_links.findMany({
+    where: eq(artist_links.artist_id, artist.id)
+  });
+  
+  // Check if any of the platform URLs match
+  for (const [platform, newUrl] of Object.entries(platforms)) {
+    const platformDisplayName = getPlatformDisplayName(platform);
+    const existingLink = existingLinks.find(link => link.name === platformDisplayName);
+    
+    if (existingLink && existingLink.url === newUrl) {
+      // Found matching platform URL - this is the same artist
+      return artist;
+    }
+  }
+  
+  // If we found an artist with same name but different platform IDs, 
+  // they are different artists, so return null to create a new one
+  if (existingLinks.length > 0) {
+    console.log(`Found artist with same name "${artistName}" but different platform IDs - treating as different artist`);
+    return null;
+  }
+  
+  // If the existing artist has no platform links yet, we can use them
+  return artist;
+}
+
+/**
  * Adds or updates an artist in the database and creates platform links
  */
 export async function addArtistLink(artistName: string, platforms: Record<string, string>) {
@@ -18,9 +83,7 @@ export async function addArtistLink(artistName: string, platforms: Record<string
   }
   
   // Check if artist already exists
-  let artist = await db.query.artists.findFirst({
-    where: eq(artists.name, artistName)
-  });
+  let artist = await findExistingArtistByPlatforms(artistName, platforms);
   
   console.log(`Artist lookup result:`, artist);
   
@@ -44,9 +107,10 @@ export async function addArtistLink(artistName: string, platforms: Record<string
       }).returning();
       
       // Create a subdomain entry for the artist
+      const uniqueSubdomain = await generateUniqueSubdomain(artistName);
       await db.insert(domains).values({
         artist_id: newArtist.id,
-        subdomain: slugify(artistName, { lower: true, strict: true }),
+        subdomain: uniqueSubdomain,
       });
       
       artist = newArtist;

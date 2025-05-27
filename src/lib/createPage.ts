@@ -1,7 +1,7 @@
 'use server';
 import { getISRCSpotify, getSpotifyUPCAlbum, getSpotifyUPCTrack } from './lookup/spotify';
 import { lookupISRC, lookupUPC } from './magic-lookup';
-import { addArtistLink } from './db/artist-db';
+import { addArtistLink, generateUniqueSubdomain } from './db/artist-db';
 import { addTrack, linkArtistToTrack } from './db/track-db';
 import { addAlbum, getAlbumByUPC } from './db/album-db';
 import { buildRedirectUrl } from './redirect';
@@ -85,8 +85,7 @@ export async function testLookup(identifier: string, type: "track" | "album") {
           // If no domain exists, create one
           if (!domainRecord || domainRecord.length === 0) {
             console.log('No domain found for artist, creating one:', firstArtist);
-            const slugify = (await import('slugify')).default;
-            const subdomain = slugify(firstArtist, { lower: true, strict: true });
+            const subdomain = await generateUniqueSubdomain(firstArtist);
             
             await db.insert(domains).values({
               artist_id: artistId,
@@ -168,9 +167,8 @@ export async function testLookup(identifier: string, type: "track" | "album") {
               
               if (artistRecord && artistRecord.length > 0) {
                 console.log('No domain found for existing album artist, creating one:', artistRecord[0].name);
-                const slugify = (await import('slugify')).default;
                 const artistName = artistRecord[0].name || 'unknown-artist';
-                const subdomain = slugify(artistName, { lower: true, strict: true });
+                const subdomain = await generateUniqueSubdomain(artistName);
                 
                 await db.insert(domains).values({
                   artist_id: artistId,
@@ -248,8 +246,7 @@ export async function testLookup(identifier: string, type: "track" | "album") {
               // If no domain exists, create one
               if (!domainRecords || domainRecords.length === 0) {
                 console.log('No domain found for existing album artist (no tracks), creating one:', firstArtistName);
-                const slugify = (await import('slugify')).default;
-                const subdomain = slugify(firstArtistName, { lower: true, strict: true });
+                const subdomain = await generateUniqueSubdomain(firstArtistName);
                 
                 await db.insert(domains).values({
                   artist_id: artistId,
@@ -340,8 +337,7 @@ export async function testLookup(identifier: string, type: "track" | "album") {
           // If no domain exists, create one
           if (!domainRecords || domainRecords.length === 0) {
             console.log('No domain found for album artist, creating one:', firstArtistName);
-            const slugify = (await import('slugify')).default;
-            const subdomain = slugify(firstArtistName, { lower: true, strict: true });
+            const subdomain = await generateUniqueSubdomain(firstArtistName);
             
             await db.insert(domains).values({
               artist_id: artistId,
