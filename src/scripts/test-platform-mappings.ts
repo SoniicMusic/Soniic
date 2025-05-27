@@ -3,7 +3,7 @@
  * Test script to verify platform icon mappings work correctly
  */
 
-import { getPlatformIcon, getPlatformColor } from '../lib/utils/platform-config';
+import { getPlatformIcon, getPlatformColor, getPlatformDisplayName } from '../lib/utils/platform-config';
 
 const testPlatforms = [
   'AppleMusic',
@@ -26,7 +26,8 @@ console.log('Testing platform icon mappings...\n');
 testPlatforms.forEach(platform => {
   const icon = getPlatformIcon(platform);
   const color = getPlatformColor(platform);
-  console.log(`Platform: ${platform.padEnd(15)} | Icon: ${icon.padEnd(15)} | Color: ${color}`);
+  const displayName = getPlatformDisplayName(platform);
+  console.log(`Platform: ${platform.padEnd(15)} | Display: ${displayName.padEnd(15)} | Icon: ${icon.padEnd(15)} | Color: ${color}`);
 });
 
 console.log('\n✅ All platform mappings tested!');

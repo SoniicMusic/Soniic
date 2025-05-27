@@ -41,6 +41,29 @@ export function getPlatformOrder(platform: string): number {
 }
 
 /**
+ * Maps platform internal keys to display names
+ */
+export function getPlatformDisplayName(platform: string): string {
+  const displayNames: Record<string, string> = {
+    'AppleMusic': 'Apple Music',
+    'Spotify': 'Spotify',
+    'Tidal': 'Tidal',
+    'YouTube': 'YouTube',
+    'SoundCloud': 'SoundCloud',
+    'Amazon Music': 'Amazon Music',
+    'Deezer': 'Deezer',
+    'Pandora': 'Pandora',
+    'Instagram': 'Instagram',
+    'Twitter': 'Twitter',
+    'Facebook': 'Facebook',
+    'TikTok': 'TikTok',
+    // Add more platforms as needed
+  };
+  
+  return displayNames[platform] || platform;
+}
+
+/**
  * Maps platform names to Simple Icons naming scheme (SiPlatformName)
  */
 export function getPlatformIcon(platform: string): string {

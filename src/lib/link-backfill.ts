@@ -3,7 +3,7 @@ import { db } from '../db/drizzle-db';
 import { track_links, album_links, tracks, albums } from '../db/schema';
 import { eq } from 'drizzle-orm';
 import { lookupISRC, lookupUPC } from './magic-lookup';
-import { getPlatformColor, getPlatformIcon } from './utils/platform-config';
+import { getPlatformColor, getPlatformIcon, getPlatformDisplayName } from './utils/platform-config';
 
 /**
  * Checks if track links exist and backfills missing ones
@@ -35,7 +35,7 @@ export async function ensureTrackLinks(trackISRC: string): Promise<void> {
             
             await db.insert(track_links).values({
               track_isrc: trackISRC,
-              name: platform,
+              name: getPlatformDisplayName(platform),
               url: url,
               icon: getPlatformIcon(platform),
               color: getPlatformColor(platform),
@@ -51,7 +51,9 @@ export async function ensureTrackLinks(trackISRC: string): Promise<void> {
       // Check if we're missing any of the major platforms
       const existingPlatforms = new Set(existingLinks.map(link => link.name));
       const majorPlatforms = ['AppleMusic', 'Spotify', 'Tidal'];
-      const missingPlatforms = majorPlatforms.filter(platform => !existingPlatforms.has(platform));
+      const missingPlatforms = majorPlatforms.filter(platform => 
+        !existingPlatforms.has(getPlatformDisplayName(platform))
+      );
       
       if (missingPlatforms.length > 0) {
         console.log(`Missing platforms: ${missingPlatforms.join(', ')}, performing lookup...`);
@@ -67,7 +69,7 @@ export async function ensureTrackLinks(trackISRC: string): Promise<void> {
               
               await db.insert(track_links).values({
                 track_isrc: trackISRC,
-                name: platform,
+                name: getPlatformDisplayName(platform),
                 url: url,
                 icon: getPlatformIcon(platform),
                 color: getPlatformColor(platform),
@@ -114,7 +116,7 @@ export async function ensureAlbumLinks(albumUPC: string): Promise<void> {
             
             await db.insert(album_links).values({
               album_upc: albumUPC,
-              name: platform,
+              name: getPlatformDisplayName(platform),
               url: url,
               icon: getPlatformIcon(platform),
               color: getPlatformColor(platform),
@@ -130,7 +132,9 @@ export async function ensureAlbumLinks(albumUPC: string): Promise<void> {
       // Check if we're missing any of the major platforms
       const existingPlatforms = new Set(existingLinks.map(link => link.name));
       const majorPlatforms = ['AppleMusic', 'Spotify', 'Tidal'];
-      const missingPlatforms = majorPlatforms.filter(platform => !existingPlatforms.has(platform));
+      const missingPlatforms = majorPlatforms.filter(platform => 
+        !existingPlatforms.has(getPlatformDisplayName(platform))
+      );
       
       if (missingPlatforms.length > 0) {
         console.log(`Missing platforms: ${missingPlatforms.join(', ')}, performing lookup...`);
@@ -146,7 +150,7 @@ export async function ensureAlbumLinks(albumUPC: string): Promise<void> {
               
               await db.insert(album_links).values({
                 album_upc: albumUPC,
-                name: platform,
+                name: getPlatformDisplayName(platform),
                 url: url,
                 icon: getPlatformIcon(platform),
                 color: getPlatformColor(platform),

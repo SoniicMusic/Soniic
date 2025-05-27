@@ -97,7 +97,9 @@ export const artist_links = pgTable('artist_links', {
     icon: text(),
     color: text(),
     order: integer(),
-});
+}, (artist_link) => ({
+    uniqueArtistPlatform: unique().on(artist_link.artist_id, artist_link.name)
+}));
 
 // Albums Table
 export const albums = pgTable('albums', {
@@ -117,7 +119,9 @@ export const album_links = pgTable('album_links', {
     url: text(),
     icon: text(),
     color: text(),
-});
+}, (album_link) => ({
+    uniqueAlbumPlatform: unique().on(album_link.album_upc, album_link.name)
+}));
 
 // Tracks Table (Modified)
 export const tracks = pgTable('tracks', {
@@ -136,7 +140,9 @@ export const track_links = pgTable('track_links', {
     url: text(),
     icon: text(),
     color: text(),
-});
+}, (track_link) => ({
+    uniqueTrackPlatform: unique().on(track_link.track_isrc, track_link.name)
+}));
 
 // Track Artists Table
 export const track_artists = pgTable('track_artists', {

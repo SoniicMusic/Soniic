@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Music, Share2, Globe, Palette } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import * as Icons from '@icons-pack/react-simple-icons';
+import { getPlatformDisplayName } from '@/lib/utils/platform-config';
 
 interface ArtistShowcaseProps {
   title: string;
@@ -91,7 +92,7 @@ export default function ArtistShowcase({
                           ) : (
                             <Music size={20} />
                           )}
-                          <span>{link.name}</span>
+                          <span>{getPlatformDisplayName(link.name)}</span>
                         </Button>
                       );
                     })}

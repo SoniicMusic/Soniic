@@ -95,7 +95,7 @@ async function TrackCard(props: { trackData: TrackData }) {
                       ) : (
                         <div className="mr-3 w-6 h-6 bg-white/20 rounded" />
                       )}
-                      <span className="text-lg font-semibold">{link.name || link.url}</span>
+                      <span className="text-lg font-semibold">{link.name || link.url || ''}</span>
                     </div>
                   </a>
                 </Button>

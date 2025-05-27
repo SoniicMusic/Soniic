@@ -4,7 +4,7 @@ import { albums, album_links } from '../../db/schema';
 import { eq } from 'drizzle-orm';
 import slugify from 'slugify';
 import { LookupUPCResult } from '../magic-lookup';
-import { getPlatformColor } from '../utils/platform-config';
+import { getPlatformColor, getPlatformIcon, getPlatformDisplayName } from '../utils/platform-config';
 
 /**
  * Retrieves an album by its UPC
@@ -47,9 +47,9 @@ export async function addAlbum(albumData: LookupUPCResult) {
         if (url) {
           await db.insert(album_links).values({
             album_upc: newAlbum.upc,
-            name: platform,
+            name: getPlatformDisplayName(platform),
             url: url,
-            icon: platform.toLowerCase(),
+            icon: getPlatformIcon(platform),
             color: getPlatformColor(platform),
           }).onConflictDoNothing();
         }

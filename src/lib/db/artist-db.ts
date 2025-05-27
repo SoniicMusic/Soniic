@@ -4,7 +4,7 @@ import { artists, artist_links, domains } from '../../db/schema';
 import { eq } from 'drizzle-orm';
 import { lookupArtistProfileImage } from '../lookup/applemusic';
 import slugify from 'slugify';
-import { getPlatformColor, getPlatformOrder, getPlatformIcon } from '../utils/platform-config';
+import { getPlatformColor, getPlatformOrder, getPlatformIcon, getPlatformDisplayName } from '../utils/platform-config';
 
 /**
  * Adds or updates an artist in the database and creates platform links
@@ -55,12 +55,12 @@ export async function addArtistLink(artistName: string, platforms: Record<string
       for (const [platform, url] of Object.entries(platforms)) {
         await db.insert(artist_links).values({
           artist_id: artist.id,
-          name: platform,
+          name: getPlatformDisplayName(platform),
           url: url,
           icon: getPlatformIcon(platform),
           color: getPlatformColor(platform),
           order: getPlatformOrder(platform),
-        });
+        }).onConflictDoNothing();
       }
     } catch (error) {
       console.error('Error adding artist:', error);
@@ -103,16 +103,17 @@ export async function addArtistLink(artistName: string, platforms: Record<string
       
       // Add any new platform links
       for (const [platform, url] of Object.entries(platforms)) {
-        if (!existingPlatforms.has(platform)) {
+        const displayName = getPlatformDisplayName(platform);
+        if (!existingPlatforms.has(displayName)) {
           console.log(`Adding new platform ${platform} for artist ${artistName}`);
           await db.insert(artist_links).values({
             artist_id: artist.id,
-            name: platform,
+            name: displayName,
             url: url,
             icon: getPlatformIcon(platform),
             color: getPlatformColor(platform),
             order: getPlatformOrder(platform),
-          });
+          }).onConflictDoNothing();
         }
       }
     } catch (error) {
