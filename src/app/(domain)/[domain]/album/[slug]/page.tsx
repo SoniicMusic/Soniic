@@ -45,7 +45,7 @@ async function AlbumCard(props: { albumData: AlbumData }) {
     <div
       className="min-h-screen flex items-center justify-center relative animate-in fade-in-0 duration-3000"
       style={{
-        backgroundImage: albumData.album.cover_art ? `url(${albumData.background_image})` : undefined,
+        backgroundImage: albumData.album.cover_art ? `url(${albumData.album.cover_art})` : undefined,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
       }}

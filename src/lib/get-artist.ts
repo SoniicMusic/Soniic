@@ -162,15 +162,20 @@ export async function getTrackLinks(slug: string) {
   }
   
   // Ensure track links exist, backfill if missing
-  const { ensureTrackLinks } = await import('./link-backfill');
+  const { ensureTrackLinks, ensureAlbumLinks } = await import('./link-backfill');
   await ensureTrackLinks(track.isrc);
+  
+  // Also ensure album metadata and links are backfilled if this track has an album
+  if (track.album_upc) {
+    await ensureAlbumLinks(track.album_upc);
+  }
   
   // Get track links
   const links = await db.select().from(track_links).where(
     eq(track_links.track_isrc, track.isrc)
   ).execute();
   
-  // Get the album for this track to get cover art
+  // Get the album for this track to get cover art (get fresh data after backfill)
   let album = null;
   if (track.album_upc) {
     const albumResult = await db.select().from(albums).where(

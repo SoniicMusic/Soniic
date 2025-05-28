@@ -88,23 +88,63 @@ export async function ensureTrackLinks(trackISRC: string): Promise<void> {
 
 /**
  * Checks if album links exist and backfills missing ones
+ * Also updates album metadata if it's incomplete
  */
 export async function ensureAlbumLinks(albumUPC: string): Promise<void> {
   try {
     console.log(`Checking album links for UPC: ${albumUPC}`);
     
-    // Get existing album links
+    // Get existing album and its links
+    const existingAlbum = await db.select().from(albums).where(
+      eq(albums.upc, albumUPC)
+    ).execute();
+    
     const existingLinks = await db.select().from(album_links).where(
       eq(album_links.album_upc, albumUPC)
     ).execute();
     
     console.log(`Found ${existingLinks.length} existing album links`);
     
-    // If we have no links at all, perform a lookup to get them
-    if (existingLinks.length === 0) {
-      console.log('No album links found, performing lookup...');
+    // Check if album has incomplete data
+    const albumNeedsUpdate = existingAlbum.length > 0 && (
+      existingAlbum[0].title === 'Unknown Album' || 
+      !existingAlbum[0].cover_art || 
+      existingAlbum[0].cover_art === ''
+    );
+    
+    // If we have no links at all or album needs updating, perform a lookup
+    if (existingLinks.length === 0 || albumNeedsUpdate) {
+      console.log(`Performing lookup... (no links: ${existingLinks.length === 0}, needs update: ${albumNeedsUpdate})`);
       
       const albumData = await lookupUPC(albumUPC, 'US');
+      
+      // Update album metadata if we have better data
+      if (albumNeedsUpdate && albumData && existingAlbum.length > 0) {
+        const updateData: any = {};
+        
+        if (albumData.AlbumName && albumData.AlbumName !== 'Unknown Album') {
+          updateData.title = albumData.AlbumName;
+        }
+        
+        if (albumData.BackgroundImage) {
+          updateData.cover_art = albumData.BackgroundImage.replace('{w}x{h}', '600x600');
+        }
+        
+        if (albumData.genreNames && albumData.genreNames.length > 0) {
+          updateData.genre = albumData.genreNames[0];
+        }
+        
+        if (albumData.ReleaseDate) {
+          updateData.release_date = albumData.ReleaseDate;
+        }
+        
+        if (Object.keys(updateData).length > 0) {
+          console.log('Updating album metadata:', updateData);
+          await db.update(albums)
+            .set(updateData)
+            .where(eq(albums.upc, albumUPC));
+        }
+      }
       
       if (albumData?.Links) {
         console.log('Found album links from lookup:', Object.keys(albumData.Links));
