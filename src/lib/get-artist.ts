@@ -110,49 +110,84 @@ export async function getTrackBySlug(slug: string): Promise<TrackWithAlbum | nul
   // First try to get the artist for this domain
   const domainArtist = await getArtist();
   
-  // Find track by slug regardless of domain
-  const track = await db.select().from(tracks).where(
-    eq(tracks.slug, slug)
-  ).execute();
-  
-  if (!track || track.length === 0) {
-    console.log('No track found with slug:', slug);
-    return null;
-  }
-  
-  // If we have a domain artist, verify this track belongs to them
+  // If we have a domain artist, find the specific track that belongs to this artist
   if (domainArtist) {
-    const trackArtistRelation = await db.select().from(track_artists).where(
-      eq(track_artists.track_isrc, track[0].isrc)
+    console.log('Looking for track belonging to domain artist:', domainArtist.name);
+    
+    // Find all tracks with this slug
+    const allTracks = await db.select().from(tracks).where(
+      eq(tracks.slug, slug)
     ).execute();
     
-    // Check if this track belongs to the current domain's artist
-    const belongsToCurrentArtist = trackArtistRelation.some(
-      relation => relation.artist_id === domainArtist.id
-    );
-    
-    if (!belongsToCurrentArtist) {
-      console.log('Track found but does not belong to current domain artist');
+    if (!allTracks || allTracks.length === 0) {
+      console.log('No tracks found with slug:', slug);
       return null;
     }
-  }
-  
-  // Get the linked album
-  let album: Album | null = null;
-  if (track[0].album_upc) {
-    const albumResult = await db.select().from(albums).where(
-      eq(albums.upc, track[0].album_upc)
+    
+    // For each track, check if it belongs to the current domain's artist
+    for (const track of allTracks) {
+      const trackArtistRelation = await db.select().from(track_artists).where(
+        eq(track_artists.track_isrc, track.isrc)
+      ).execute();
+      
+      // Check if this track belongs to the current domain's artist
+      const belongsToCurrentArtist = trackArtistRelation.some(
+        relation => relation.artist_id === domainArtist.id
+      );
+      
+      if (belongsToCurrentArtist) {
+        // Found the correct track for this domain
+        console.log('Found track belonging to current domain artist:', track);
+        
+        // Get the linked album
+        let album: Album | null = null;
+        if (track.album_upc) {
+          const albumResult = await db.select().from(albums).where(
+            eq(albums.upc, track.album_upc)
+          ).execute();
+          album = albumResult[0] || null;
+        }
+        
+        console.log('Found linked album:', album);
+        
+        return {
+          ...track,
+          album: album
+        };
+      }
+    }
+    
+    // No track found that belongs to the current domain's artist
+    console.log('No track found belonging to current domain artist');
+    return null;
+  } else {
+    // No domain artist, find track by slug regardless of domain (use first match)
+    const track = await db.select().from(tracks).where(
+      eq(tracks.slug, slug)
     ).execute();
-    album = albumResult[0] || null;
+    
+    if (!track || track.length === 0) {
+      console.log('No track found with slug:', slug);
+      return null;
+    }
+    
+    // Get the linked album
+    let album: Album | null = null;
+    if (track[0].album_upc) {
+      const albumResult = await db.select().from(albums).where(
+        eq(albums.upc, track[0].album_upc)
+      ).execute();
+      album = albumResult[0] || null;
+    }
+    
+    console.log('Found track:', track[0]);
+    console.log('Found linked album:', album);
+    
+    return {
+      ...track[0],
+      album: album
+    };
   }
-  
-  console.log('Found track:', track[0]);
-  console.log('Found linked album:', album);
-  
-  return {
-    ...track[0],
-    album: album
-  };
 }
 
 export async function getTrackLinks(slug: string) {
