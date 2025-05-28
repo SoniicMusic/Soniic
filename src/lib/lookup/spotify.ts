@@ -13,6 +13,25 @@ interface SpotifyArtist {
     name: string;
 }
 
+// Add detailed Spotify artist interface for artist profile lookups
+interface SpotifyArtistProfile {
+    id: string;
+    name: string;
+    images: SpotifyImage[];
+    external_urls: {
+        spotify: string;
+    };
+}
+
+interface SpotifyArtistProfileResponse {
+    id: string;
+    name: string;
+    images: SpotifyImage[];
+    external_urls: {
+        spotify: string;
+    };
+}
+
 interface SpotifyTrack {
     id: string;
     name: string;
@@ -294,6 +313,37 @@ async function getSpotifyISRC(id: string): Promise<string> {
 	return data.external_ids.isrc;
 }
 
+async function lookupSpotifyArtistProfileImage(artistID: string): Promise<string> {
+	const token = await getToken();
+	const url = `https://api.spotify.com/v1/artists/${artistID}`;
+	const headers = {
+		Authorization: 'Bearer ' + token,
+	};
+	
+	try {
+		const response = await fetch(url, { headers });
+		if (!response.ok) {
+			console.warn(`Spotify API error! status: ${response.status}`);
+			return ''; // Return empty string instead of throwing error
+		}
+		
+		const data = await response.json() as SpotifyArtistProfileResponse;
+		
+		// Check if data exists and has images
+		if (!data.images || data.images.length === 0) {
+			console.warn(`No artist images found for Spotify ID: ${artistID}`);
+			return '';
+		}
+		
+		// Get the highest quality image (usually the first one or the largest)
+		const bestImage = data.images.find(img => img.height >= 300) || data.images[0];
+		return bestImage.url;
+	} catch (error) {
+		console.error(`Error looking up Spotify artist image: ${error}`);
+		return '';
+	}
+}
+
 export {
 	SpotifylookupISRC,
 	SpotifylookupUPC,
@@ -304,4 +354,5 @@ export {
 	getSpotifyUPCAlbum,
     getSpotifyUPCTrack,
 	getSpotifyISRC,
+	lookupSpotifyArtistProfileImage,
 };

@@ -3,6 +3,7 @@ import { db } from '../../db/drizzle-db';
 import { artists, artist_links, domains } from '../../db/schema';
 import { eq } from 'drizzle-orm';
 import { lookupArtistProfileImage } from '../lookup/applemusic';
+import { lookupSpotifyArtistProfileImage } from '../lookup/spotify';
 import slugify from 'slugify';
 import { getPlatformColor, getPlatformOrder, getPlatformIcon, getPlatformDisplayName } from '../utils/platform-config';
 
@@ -94,9 +95,18 @@ export async function addArtistLink(artistName: string, platforms: Record<string
     console.log(`Creating new artist from Apple Music ID: ${appleMusicId}`);
     
     try {
-      // Get artist profile image and name from Apple Music
-      const artistProfileImage = await lookupArtistProfileImage(appleMusicId);
-      console.log(`Got profile image: ${artistProfileImage ? 'Yes' : 'No'}`);
+      // Get artist profile image from Apple Music first, then try Spotify as fallback
+      let artistProfileImage = await lookupArtistProfileImage(appleMusicId);
+      console.log(`Got Apple Music profile image: ${artistProfileImage ? 'Yes' : 'No'}`);
+      
+      // If no Apple Music image and we have Spotify, try Spotify as fallback
+      if (!artistProfileImage && platforms.Spotify) {
+        const spotifyId = platforms.Spotify.split('/').pop() as string;
+        console.log(`Trying Spotify fallback for artist ID: ${spotifyId}`);
+        artistProfileImage = await lookupSpotifyArtistProfileImage(spotifyId);
+        console.log(`Got Spotify profile image: ${artistProfileImage ? 'Yes' : 'No'}`);
+      }
+      
       // Use the same image as both avatar and background for now
       
       // Create artist record
@@ -129,6 +139,46 @@ export async function addArtistLink(artistName: string, platforms: Record<string
     } catch (error) {
       console.error('Error adding artist:', error);
     }
+  } else if (!artist && platforms.Spotify) {
+    // If artist doesn't exist and no Apple Music but has Spotify, create with Spotify
+    const spotifyId = platforms.Spotify.split('/').pop() as string;
+    console.log(`Creating new artist from Spotify ID: ${spotifyId}`);
+    
+    try {
+      // Get artist profile image from Spotify
+      const artistProfileImage = await lookupSpotifyArtistProfileImage(spotifyId);
+      console.log(`Got Spotify profile image: ${artistProfileImage ? 'Yes' : 'No'}`);
+      
+      // Create artist record
+      const [newArtist] = await db.insert(artists).values({
+        name: artistName,
+        avatar: artistProfileImage || '',
+        background_image: artistProfileImage || '',
+      }).returning();
+      
+      // Create a subdomain entry for the artist
+      const uniqueSubdomain = await generateUniqueSubdomain(artistName);
+      await db.insert(domains).values({
+        artist_id: newArtist.id,
+        subdomain: uniqueSubdomain,
+      });
+      
+      artist = newArtist;
+      
+      // Add all platform links for this artist
+      for (const [platform, url] of Object.entries(platforms)) {
+        await db.insert(artist_links).values({
+          artist_id: artist.id,
+          name: getPlatformDisplayName(platform),
+          url: url,
+          icon: getPlatformIcon(platform),
+          color: getPlatformColor(platform),
+          order: getPlatformOrder(platform),
+        }).onConflictDoNothing();
+      }
+    } catch (error) {
+      console.error('Error adding artist with Spotify:', error);
+    }
   } else if (artist) {
     // Artist exists, check for new platforms to add
     try {
@@ -140,11 +190,33 @@ export async function addArtistLink(artistName: string, platforms: Record<string
       // Create a set of existing platforms for quick lookup
       const existingPlatforms = new Set(existingLinks.map(link => link.name));
       
-      // Check if we need to update the artist profile with Apple Music data
-      if (platforms.AppleMusic && !artist.avatar && !artist.background_image) {
-        const appleMusicId = platforms.AppleMusic.split('/').pop() as string;
-        try {
-          const artistProfileImage = await lookupArtistProfileImage(appleMusicId);
+      // Check if we need to update the artist profile with Apple Music data or Spotify fallback
+      if (!artist.avatar && !artist.background_image) {
+        let artistProfileImage = '';
+        
+        // Try Apple Music first
+        if (platforms.AppleMusic) {
+          const appleMusicId = platforms.AppleMusic.split('/').pop() as string;
+          try {
+            artistProfileImage = await lookupArtistProfileImage(appleMusicId);
+            console.log(`Got Apple Music profile image for existing artist: ${artistProfileImage ? 'Yes' : 'No'}`);
+          } catch (error) {
+            console.error('Error getting Apple Music profile image:', error);
+          }
+        }
+        
+        // If no Apple Music image and we have Spotify, try Spotify as fallback
+        if (!artistProfileImage && platforms.Spotify) {
+          const spotifyId = platforms.Spotify.split('/').pop() as string;
+          try {
+            artistProfileImage = await lookupSpotifyArtistProfileImage(spotifyId);
+            console.log(`Got Spotify profile image for existing artist: ${artistProfileImage ? 'Yes' : 'No'}`);
+          } catch (error) {
+            console.error('Error getting Spotify profile image:', error);
+          }
+        }
+        
+        if (artistProfileImage) {
           // Update the artist record with images
           await db.update(artists)
             .set({
@@ -160,8 +232,6 @@ export async function addArtistLink(artistName: string, platforms: Record<string
             avatar: artistProfileImage,
             background_image: artistProfileImage
           };
-        } catch (error) {
-          console.error('Error updating artist with Apple Music data:', error);
         }
       }
       

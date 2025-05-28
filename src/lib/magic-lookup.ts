@@ -112,6 +112,13 @@ async function lookupISRC(ISRC: string, CountryCode: string): Promise<LookupISRC
             }
         }
     }
+    // Get background image with Spotify fallback
+    let backgroundImage = AM?.attributes?.artwork?.url || null;
+    if (!backgroundImage && Spotify?.album?.images && Spotify.album.images.length > 0) {
+        // Use Spotify album cover as fallback
+        backgroundImage = Spotify.album.images[1]?.url || Spotify.album.images[0]?.url || null;
+    }
+
     // Return the results
     return {
         TrackName: AM?.attributes?.name || null,
@@ -121,7 +128,7 @@ async function lookupISRC(ISRC: string, CountryCode: string): Promise<LookupISRC
         genreNames: AM?.attributes?.genreNames || null,
         ReleaseDate: AM?.attributes?.releaseDate || null,
         PreviewAudio: AM?.attributes?.previews?.[0]?.url || null,
-        BackgroundImage: AM?.attributes?.artwork?.url || null,
+        BackgroundImage: backgroundImage,
         Colors: colors,
         ArtistLinks: artistIDs,
         TrackLinks: {
@@ -208,6 +215,13 @@ async function lookupUPC(UPC: string, CountryCode: string): Promise<LookupUPCRes
         }
     }
     
+    // Get background image with Spotify fallback
+    let backgroundImage = AM?.attributes?.artwork?.url || null;
+    if (!backgroundImage && Spotify?.images && Spotify.images.length > 0) {
+        // Use Spotify album cover as fallback
+        backgroundImage = Spotify.images[1]?.url || Spotify.images[0]?.url || null;
+    }
+    
     // Return the results
     return {
         UPC: UPC,  // Add the UPC to the result
@@ -215,7 +229,7 @@ async function lookupUPC(UPC: string, CountryCode: string): Promise<LookupUPCRes
         genreNames: AM?.attributes?.genreNames || null,
         ReleaseDate: AM?.attributes?.releaseDate || null,
         PreviewAudio: AM?.relationships?.tracks?.data?.[0]?.attributes?.previews?.[0]?.url || null,
-        BackgroundImage: AM?.attributes?.artwork?.url || null,
+        BackgroundImage: backgroundImage,
         Colors: colors,
         ArtistIDs: artistIDs,
         Links: {
