@@ -85,23 +85,23 @@ export default function Home() {
     secondaryButtonHref: "#features"
   };
   
-  const artistShowcaseConfig = {
-    title: "Custom Artist Pages That Work Everywhere",
-    description: "Artists get beautiful, customizable pages with their own branding and direct links to their music across all streaming platforms. Powered by the same technology that makes our cross-platform search work seamlessly.",
-    backgroundImage: "https://images.unsplash.com/photo-1614149162883-504ce46d75a4?q=80",
-    artistImage: "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?q=80",
-    artistName: "Artist Name",
-    artistBio: "Electronic music producer and DJ based in Los Angeles. New album \"Neon Dreams\" out now on all platforms.",
-    artistDomain: "artist.soniic.com",
-    artistLinks: [
-      { name: "Spotify", url: "#", icon: "SiSpotify", color: "#1DB954" },
-      { name: "Apple Music", url: "#", icon: "SiApplemusic", color: "#FA324A" },
-      { name: "Latest Album", url: "#", icon: "SiYoutube", color: "#FF0000" },
-      { name: "Instagram", url: "#", icon: "SiInstagram", color: "#E1306C" }
-    ],
-    ctaText: "Create Your Artist Page",
-    ctaHref: "/search"
-  };
+  // const artistShowcaseConfig = {
+  //   title: "Custom Artist Pages That Work Everywhere",
+  //   description: "Artists get beautiful, customizable pages with their own branding and direct links to their music across all streaming platforms. Powered by the same technology that makes our cross-platform search work seamlessly.",
+  //   backgroundImage: "https://images.unsplash.com/photo-1614149162883-504ce46d75a4?q=80",
+  //   artistImage: "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?q=80",
+  //   artistName: "Artist Name",
+  //   artistBio: "Electronic music producer and DJ based in Los Angeles. New album \"Neon Dreams\" out now on all platforms.",
+  //   artistDomain: "artist.soniic.com",
+  //   artistLinks: [
+  //     { name: "Spotify", url: "#", icon: "SiSpotify", color: "#1DB954" },
+  //     { name: "Apple Music", url: "#", icon: "SiApplemusic", color: "#FA324A" },
+  //     { name: "Latest Album", url: "#", icon: "SiYoutube", color: "#FF0000" },
+  //     { name: "Instagram", url: "#", icon: "SiInstagram", color: "#E1306C" }
+  //   ],
+  //   ctaText: "Create Your Artist Page",
+  //   ctaHref: "/search"
+  // };
   
   // Footer has been moved to root layout
 
@@ -109,8 +109,8 @@ export default function Home() {
     <>
       <LandingLayout>
         <HeroSection {...heroConfig} />
-        <FeaturesSection />
-        <ArtistShowcase {...artistShowcaseConfig} />
+        {/* <FeaturesSection />
+        <ArtistShowcase {...artistShowcaseConfig} /> */}
       </LandingLayout>
     </>
   );
