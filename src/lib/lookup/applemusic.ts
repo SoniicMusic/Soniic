@@ -189,9 +189,9 @@ async function AppleMusicGetArtwork(ISRC: string, CountryCode: string): Promise<
 	return artwork;
 }
 
-async function lookupArtistName(artistID: string): Promise<string> {
+async function lookupArtistName(artistID: string, countryCode: string = 'ca'): Promise<string> {
 	const appleMusicKey = await getJWT();
-	const url = `https://api.music.apple.com/v1/catalog/ca/artists/${artistID}`;
+	const url = `https://api.music.apple.com/v1/catalog/${countryCode}/artists/${artistID}`;
 	const headers = {
 		Authorization: `Bearer ${appleMusicKey}`,
 	};
@@ -214,9 +214,9 @@ async function lookupArtistName(artistID: string): Promise<string> {
 	}
 }
 
-async function lookupArtistProfileImage(artistID: string): Promise<string> {
+async function lookupArtistProfileImage(artistID: string, countryCode: string = 'ca'): Promise<string> {
 	const appleMusicKey = await getJWT();
-	const url = `https://api.music.apple.com/v1/catalog/ca/artists/${artistID}`;
+	const url = `https://api.music.apple.com/v1/catalog/${countryCode}/artists/${artistID}`;
 	const headers = {
 		Authorization: `Bearer ${appleMusicKey}`,
 	};
