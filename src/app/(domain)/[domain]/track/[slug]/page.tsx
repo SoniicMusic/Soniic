@@ -56,7 +56,7 @@ async function TrackCard(props: { trackData: TrackData }) {
 
       className="min-h-screen flex items-center justify-center relative"
       style={{
-        backgroundImage: trackData.background_image ? `url(${trackData.background_image})` : undefined,
+        backgroundImage: trackData.album?.cover_art ? `url(${trackData.album?.cover_art})` : undefined,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
       }}
