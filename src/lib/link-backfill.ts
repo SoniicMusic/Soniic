@@ -127,7 +127,7 @@ export async function ensureAlbumLinks(albumUPC: string): Promise<void> {
         }
         
         if (albumData.BackgroundImage) {
-          updateData.cover_art = albumData.BackgroundImage.replace('{w}x{h}', '600x600');
+          updateData.cover_art = albumData.BackgroundImage.replace('{w}x{h}', '3000x3000');
         }
         
         if (albumData.genreNames && albumData.genreNames.length > 0) {
