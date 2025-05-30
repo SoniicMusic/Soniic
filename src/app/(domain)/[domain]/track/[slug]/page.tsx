@@ -1,11 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import Image from 'next/image';
 import { getTrackLinks, getTrackBySlug, findCorrectDomainForTrack } from '@/lib/get-artist';
-import { Button } from '@/components/ui/button';
-import * as Icons from '@icons-pack/react-simple-icons';
-import { notFound } from 'next/navigation';
-
+import * as motion from '@/lib/motion';
+import Links from '@/components/links';
 // Type definitions for track data
 interface TrackInfo {
   id?: string;
@@ -43,119 +42,121 @@ interface TrackData {
 
 async function TrackCard(props: { trackData: TrackData }) {
   const trackData = props.trackData.info
-  const artistLinks = props.trackData.links
+  const trackLinks = props.trackData.links
   return (
-    <div
-      className="min-h-screen flex items-center justify-center relative animate-in fade-in-0 duration-3000"
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{
+        opacity: 1,
+        transition: {
+          duration: 1.5,
+          delay: 0.5
+        }
+      }}
+
+      className="min-h-screen flex items-center justify-center relative"
       style={{
-        backgroundImage: trackData.album?.cover_art ? `url(${trackData.album?.cover_art})` : undefined,
+        backgroundImage: trackData.background_image ? `url(${trackData.background_image})` : undefined,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
       }}
     >
       {/* Overlay for better text readability */}
       <div className="absolute inset-0 bg-black/50" />
-
       <Card className="w-screen min-h-screen bg-black/10 backdrop-blur-3xl border-none text-white relative z-10">
-        <CardContent className="container mx-auto max-w-lg px-2 py-8 flex flex-col items-center">
-          <div className="flex flex-col items-center space-y-6 w-full">
-            <Image
-              src={trackData.album?.cover_art || trackData.avatar || '/default-avatar.png'}
-              alt={trackData.track.title || 'Track'}
-              width={200}
-              height={200}
-              className="shadow-lg"
-            />
-            <h1 className="text-3xl font-bold">{trackData.track.title}</h1>
-            {trackData.bio && <p className="text-center text-lg px-3">{trackData.bio}</p>}
-          </div>
-          <section className="w-full mt-8 space-y-4 px-2">
-            {artistLinks.map((link: TrackLink, index: number) => {
-              const IconComponent = link.icon && link.icon in Icons 
-                ? (Icons as any)[link.icon]
-                : null;
-              
-              // Debug logging and fallback for missing icons
-              if (!IconComponent && link.icon) {
-                console.warn(`Icon "${link.icon}" not found for track link`);
+        <CardContent className="container mx-auto max-w-lg px-2 py-8 flex flex-col items-center"> {/* Changed max-w-2xl to max-w-lg and px-4 to px-2 */}
+          <motion.div className="flex flex-col items-center space-y-6 w-full"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{
+              opacity: 1,
+              y: 0,
+              transition: {
+                duration: 1.5,
+                delay: 0.5
               }
-              
-              return (
-                <Button
-                  key={`${link.id || link.url}-${index}`}
-                  variant="outline"
-                  className="w-full bg-white/10 hover:bg-white/20 text-white border-white/30"
-                  asChild
-                >
-                  <a href={link.url || '#'} target="_blank" rel="noopener noreferrer"
-                    className="flex items-center w-full h-full px-3 py-3">
-                    <div className="flex items-center">
-                      {IconComponent ? (
-                        <IconComponent className="mr-3 w-6 h-6" />
-                      ) : (
-                        <div className="mr-3 w-6 h-6 bg-white/20 rounded" />
-                      )}
-                      <span className="text-lg font-semibold">{link.name || link.url || ''}</span>
-                    </div>
-                  </a>
-                </Button>
-              );
-            })}
-          </section>
+            }}
+          >
+            <motion.div
+              initial={{
+                opacity: 0, y: 10,
+                filter: 'blur(5px)'
+              }}
+              animate={{
+                opacity: 1,
+                y: 0,
+                filter: 'blur(0px)',
+                transition: {
+                  duration: 1.5,
+                  delay: 0.5
+                }
+              }}
+            >
+              <Image
+                src={trackData.album?.cover_art || '/default-avatar.png'}
+                alt={trackData.track.title || 'Track'}
+                width={200}
+                height={200}
+                className="rounded-md shadow-lg"
+              />
+            </motion.div>
+
+            <motion.h1
+              initial={{
+                opacity: 0, y: 10,
+                filter: 'blur(5px)'
+              }}
+              animate={{
+                opacity: 1,
+                y: 0,
+                filter: 'blur(0px)',
+                transition: {
+                  duration: 1.5,
+                  delay: 0.5
+                }
+              }}
+
+              className="text-3xl font-bold">
+              {trackData.track.title}
+            </motion.h1>
+
+            {
+              trackData.album?.title &&
+              <motion.p
+                className="text-center text-lg px-3"
+                initial={{ opacity: 0, y: 10, filter: 'blur(5px)' }}
+                animate={{
+                  opacity: 1,
+                  y: 0,
+                  filter: 'blur(0px)',
+                  transition: {
+                    duration: 1.5,
+                    delay: 0.5
+                  }
+                }}
+              >
+                {trackData.bio}
+              </motion.p>
+            }
+          </motion.div>
+
+          <Links links={trackLinks} />
         </CardContent>
       </Card>
-    </div>
+    </motion.div>
   );
 }
 
 export default async function Page({ params }: { params: Promise<{ domain: string; slug: string }> }) {
-  try {
-    const { domain, slug } = await params;
-    const trackData = await getTrackLinks(slug);
-    
-    if (!trackData) {
-      // Try to find the correct domain for this track
-      const correctDomain = await findCorrectDomainForTrack(slug);
-      
-      if (correctDomain) {
-        // Track exists but belongs to a different artist/domain
-        return (
-          <div className="min-h-screen flex items-center justify-center bg-black text-white">
-            <div className="text-center max-w-md px-4">
-              <p className="text-xl mb-4">Track not available on this domain</p>
-              <p className="text-gray-400 mb-4">
-                "{correctDomain.trackTitle}" by {correctDomain.artistName} is available on a different domain.
-              </p>
-              <div className="mt-6">
-                <a 
-                  href={`/${correctDomain.subdomain}/track/${slug}`}
-                  className="inline-block bg-white text-black px-6 py-3 rounded-lg font-semibold hover:bg-gray-200 transition-colors"
-                >
-                  Visit {correctDomain.artistName}'s page
-                </a>
-              </div>
-            </div>
-          </div>
-        );
-      } else {
-        // Track doesn't exist at all
-        return (
-          <div className="min-h-screen flex items-center justify-center bg-black text-white">
-            <div className="text-center">
-              <p className="text-xl mb-2">Track not found</p>
-              <p className="text-gray-400">The track "{slug}" could not be found</p>
-            </div>
-          </div>
-        );
-      }
-    }
-    return (
-      <TrackCard trackData={trackData} />
-    );
-  } catch (error) {
-    console.error('Error loading track:', error);
-    notFound();
-  }
+  const { domain, slug } = await params;
+  const trackData = await getTrackLinks(slug);
+  if (!trackData) return (
+    <div className="min-h-screen flex items-center justify-center bg-black text-white">
+      <p>Track not found</p>
+    </div>
+  );
+  return (
+    <TrackCard trackData={trackData} />
+  );
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ domain: string; slug: string }> }) {
