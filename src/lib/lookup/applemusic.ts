@@ -46,6 +46,12 @@ interface AppleMusicArtistResponse {
   data: AppleMusicArtist[];
 }
 
+// Utility function to replace 'ac' endings with 'bb' in artwork URLs
+function replaceArtworkSuffix(url: string): string {
+	if (!url) return url;
+	return url.replace(/ac$/, 'bb');
+}
+
 async function AppleMusiclookupISRC(ISRC: string, CountryCode: string): Promise<AppleMusicTrack> {
 	console.log('Apple Music lookup');
 	const appleMusicKey = await getJWT();
@@ -186,7 +192,7 @@ async function AppleMusicGetArtwork(ISRC: string, CountryCode: string): Promise<
 		console.warn(`No artwork found in Apple Music response for ISRC: ${ISRC}`);
 		return '';
 	}
-	return artwork;
+	return replaceArtworkSuffix(artwork);
 }
 
 async function lookupArtistName(artistID: string, countryCode: string = 'ca'): Promise<string> {
@@ -238,7 +244,7 @@ async function lookupArtistProfileImage(artistID: string, countryCode: string = 
 		// Get the highest quality artwork URL
 		const artwork = data.data[0].attributes.artwork;
 		const profileImage = artwork.url.replace('{w}x{h}', '3000x3000');
-		return profileImage;
+		return replaceArtworkSuffix(profileImage);
 	} catch (error) {
 		console.error(`Error looking up artist image: ${error}`);
 		return '';
