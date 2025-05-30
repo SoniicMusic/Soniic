@@ -3,6 +3,7 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import Image from 'next/image';
 import { getTrackLinks, getTrackBySlug, getAlbumLinks, getAlbumBySlug } from '@/lib/get-artist';
+import { getTrackArtistsWithDomains, getAlbumArtistsWithDomains, ArtistWithDomain } from '@/lib/artist-helpers';
 import * as motion from '@/lib/motion';
 import Links from '@/components/links';
 
@@ -64,11 +65,13 @@ interface AlbumLink extends BaseLink {
 interface TrackData {
   info: TrackInfo;
   links: TrackLink[];
+  artists?: ArtistWithDomain[];
 }
 
 interface AlbumData {
   info: AlbumInfo;
   links: AlbumLink[];
+  artists?: ArtistWithDomain[];
 }
 
 // Union type for data
@@ -106,8 +109,8 @@ function getSubtitle(data: ContentData): string | null {
   if (isTrackData(data)) {
     return data.info.album?.title || null;
   } else {
-    // For albums, we could show release date, genre, or artist name
-    return data.info.name || null;
+    // For albums, we'll fetch artist names separately in the component
+    return null;
   }
 }
 
@@ -116,6 +119,19 @@ async function UnifiedContentCard(props: { data: ContentData; contentType: Conte
   const title = getMainTitle(data);
   const coverArt = getCoverArt(data);
   const subtitle = getSubtitle(data);
+
+  // Fetch artists for subtitle
+  let artists: ArtistWithDomain[] = [];
+  if (isTrackData(data)) {
+    artists = await getTrackArtistsWithDomains(data.info.track.isrc);
+  } else if (isAlbumData(data)) {
+    artists = await getAlbumArtistsWithDomains(data.info.album.upc);
+  }
+
+  // Create artist subtitle with comma-separated names
+  const artistSubtitle = artists.length > 0 
+    ? artists.map(artist => artist.name).filter(Boolean).join(', ')
+    : null;
 
   return (
     <motion.div
@@ -195,6 +211,29 @@ async function UnifiedContentCard(props: { data: ContentData; contentType: Conte
               {title}
             </motion.h1>
 
+            {artistSubtitle && (
+              <motion.p
+                className="text-center text-lg px-3 text-gray-400 underline"
+                initial={{ 
+                  opacity: 0, 
+                  y: 10, 
+                  filter: 'blur(5px)' 
+                }}
+                animate={{
+                  opacity: 1,
+                  y: 0,
+                  filter: 'blur(0px)',
+                  transition: {
+                    duration: 1.5,
+                    delay: 0.5
+                  }
+                }}
+              >
+                {artistSubtitle}
+              </motion.p>
+            )}
+
+            {/* Show original subtitle for tracks (album name) */}
             {subtitle && (
               <motion.p
                 className="text-center text-lg px-3"
