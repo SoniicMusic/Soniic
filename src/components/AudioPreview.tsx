@@ -17,6 +17,7 @@ export default function AudioPreview({ src, title = "Track Preview", className =
   const [duration, setDuration] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
+  const fadeIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Debug logging for prop changes
   useEffect(() => {
@@ -50,7 +51,14 @@ export default function AudioPreview({ src, title = "Track Preview", className =
         setDuration(audio.duration);
       }
     };
-    const handleEnded = () => setIsPlaying(false);
+    const handleEnded = async () => {
+      // Fade out when ending
+      const audio = audioRef.current;
+      if (audio && audio.volume > 0) {
+        await fadeOut(audio);
+      }
+      setIsPlaying(false);
+    };
 
     audio.addEventListener('timeupdate', updateTime);
     audio.addEventListener('loadedmetadata', updateDuration);
@@ -73,6 +81,12 @@ export default function AudioPreview({ src, title = "Track Preview", className =
       audio.removeEventListener('canplay', handleCanPlay);
       audio.removeEventListener('canplaythrough', handleCanPlay);
       audio.removeEventListener('ended', handleEnded);
+      
+      // Clear any ongoing fade
+      if (fadeIntervalRef.current) {
+        clearInterval(fadeIntervalRef.current);
+        fadeIntervalRef.current = null;
+      }
     };
   }, [src]); // Add src as dependency to re-setup listeners when src changes
 
@@ -84,12 +98,66 @@ export default function AudioPreview({ src, title = "Track Preview", className =
     setIsPlaying(false);
     setIsLoading(false);
     
+    // Clear any ongoing fade
+    if (fadeIntervalRef.current) {
+      clearInterval(fadeIntervalRef.current);
+      fadeIntervalRef.current = null;
+    }
+    
     // Force the audio element to reload the new source
     const audio = audioRef.current;
     if (audio) {
+      audio.volume = 1; // Reset volume to full
       audio.load(); // This forces the audio element to reload
     }
   }, [src]);
+
+  // Cleanup fade intervals on unmount
+  useEffect(() => {
+    return () => {
+      if (fadeIntervalRef.current) {
+        clearInterval(fadeIntervalRef.current);
+        fadeIntervalRef.current = null;
+      }
+    };
+  }, []);
+
+  // Audio fade utilities
+  const fadeAudio = (audio: HTMLAudioElement, fromVolume: number, toVolume: number, duration: number = 300) => {
+    return new Promise<void>((resolve) => {
+      // Clear any existing fade
+      if (fadeIntervalRef.current) {
+        clearInterval(fadeIntervalRef.current);
+        fadeIntervalRef.current = null;
+      }
+
+      const steps = 20;
+      const stepDuration = duration / steps;
+      const volumeStep = (toVolume - fromVolume) / steps;
+      let currentStep = 0;
+
+      audio.volume = fromVolume;
+
+      fadeIntervalRef.current = setInterval(() => {
+        currentStep++;
+        const newVolume = fromVolume + (volumeStep * currentStep);
+        
+        if (currentStep >= steps) {
+          audio.volume = toVolume;
+          if (fadeIntervalRef.current) {
+            clearInterval(fadeIntervalRef.current);
+            fadeIntervalRef.current = null;
+          }
+          resolve();
+        } else {
+          audio.volume = Math.max(0, Math.min(1, newVolume));
+        }
+      }, stepDuration);
+    });
+  };
+
+  const fadeIn = (audio: HTMLAudioElement) => fadeAudio(audio, 0, 1, 300);
+  const fadeOut = (audio: HTMLAudioElement) => fadeAudio(audio, 1, 0, 300);
 
   const togglePlay = async () => {
     const audio = audioRef.current;
@@ -97,11 +165,16 @@ export default function AudioPreview({ src, title = "Track Preview", className =
 
     try {
       if (isPlaying) {
+        // Fade out then pause
+        await fadeOut(audio);
         audio.pause();
         setIsPlaying(false);
       } else {
+        // Start playing with fade in
+        audio.volume = 0; // Start at 0 volume
         await audio.play();
         setIsPlaying(true);
+        await fadeIn(audio);
       }
     } catch (error) {
       console.error('Error playing audio:', error);
@@ -225,7 +298,14 @@ export default function AudioPreview({ src, title = "Track Preview", className =
           <div className="flex items-center justify-between text-white/90 text-sm">
             <div className="flex items-center space-x-2">
                               <Button
-                onClick={togglePlay}
+                onClick={async () => {
+                  const audio = audioRef.current;
+                  if (audio && isPlaying) {
+                    await fadeOut(audio);
+                    audio.pause();
+                    setIsPlaying(false);
+                  }
+                }}
                 variant="ghost"
                 size="sm"
                 className="h-6 w-6 p-0 rounded-full bg-white/10 hover:bg-white/20 border-none pointer-events-auto"
