@@ -147,67 +147,126 @@ export default function AudioPreview({ src, title = "Track Preview", className =
 
   if (variant === 'circular-overlay') {
     return (
-      <motion.div 
-        className={`absolute inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm opacity-0 hover:opacity-100 transition-opacity duration-300 rounded-md ${className}`}
-        initial={{ opacity: 0 }}
-        whileHover={{ opacity: 1 }}
-      >
-        <audio ref={audioRef} src={src} preload="metadata" crossOrigin="anonymous" />
-        
-        <div className="relative">
-          {/* Play/Pause button with external progress ring */}
-          <div className="relative">
-            {/* Circular progress ring positioned outside the button */}
-            <svg className="absolute -inset-2 w-16 h-16 transform -rotate-90" viewBox="0 0 64 64">
-              {/* Background circle */}
-              <circle
-                cx="32"
-                cy="32"
-                r="28"
-                stroke="white"
-                strokeOpacity="0.2"
-                strokeWidth="2"
-                fill="none"
-              />
-              {/* Progress circle */}
-              <circle
-                cx="32"
-                cy="32"
-                r="28"
-                stroke="white"
-                strokeOpacity="0.9"
-                strokeWidth="2"
-                fill="none"
-                strokeDasharray={175.9}
-                strokeDashoffset={175.9 * (1 - progressPercent / 100)}
-                strokeLinecap="round"
-                className="transition-all duration-150"
-              />
-            </svg>
-            
-            <Button
-              onClick={togglePlay}
-              disabled={isLoading}
-              variant="outline"
-              size="icon"
-              className="h-12 w-12 rounded-full bg-white/20 border-white/30 hover:bg-white/30 backdrop-blur-sm relative z-10"
-            >
-              {isLoading ? (
-                <div className="animate-spin h-5 w-5 border-2 border-white/50 border-t-white rounded-full" />
-              ) : isPlaying ? (
-                <Pause className="h-5 w-5 text-white" />
-              ) : (
-                <Play className="h-5 w-5 text-white ml-0.5" />
-              )}
-            </Button>
-          </div>
+      <>
+        <motion.div 
+          className={`absolute inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm opacity-0 hover:opacity-100 transition-opacity duration-300 rounded-md ${className}`}
+          initial={{ opacity: 0 }}
+          whileHover={{ opacity: 1 }}
+        >
+          <audio ref={audioRef} src={src} preload="metadata" crossOrigin="anonymous" />
           
-          {/* Time display */}
-          <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 text-xs text-white/80 whitespace-nowrap">
-            {formatTime(currentTime)} / {formatTime(duration)}
+          <div className="relative">
+            {/* Play/Pause button with external progress ring */}
+            <div className="relative">
+              {/* Circular progress ring positioned outside the button */}
+              <svg className="absolute -inset-2 w-16 h-16 transform -rotate-90" viewBox="0 0 64 64">
+                {/* Background circle */}
+                <circle
+                  cx="32"
+                  cy="32"
+                  r="28"
+                  stroke="white"
+                  strokeOpacity="0.2"
+                  strokeWidth="2"
+                  fill="none"
+                />
+                {/* Progress circle */}
+                <circle
+                  cx="32"
+                  cy="32"
+                  r="28"
+                  stroke="white"
+                  strokeOpacity="0.9"
+                  strokeWidth="2"
+                  fill="none"
+                  strokeDasharray={175.9}
+                  strokeDashoffset={175.9 * (1 - progressPercent / 100)}
+                  strokeLinecap="round"
+                  className="transition-all duration-150"
+                />
+              </svg>
+              
+              <Button
+                onClick={togglePlay}
+                disabled={isLoading}
+                variant="outline"
+                size="icon"
+                className="h-12 w-12 rounded-full bg-white/20 border-white/30 hover:bg-white/30 backdrop-blur-sm relative z-10"
+              >
+                {isLoading ? (
+                  <div className="animate-spin h-5 w-5 border-2 border-white/50 border-t-white rounded-full" />
+                ) : isPlaying ? (
+                  <Pause className="h-5 w-5 text-white" />
+                ) : (
+                  <Play className="h-5 w-5 text-white ml-0.5" />
+                )}
+              </Button>
+            </div>
+            
+            {/* Time display */}
+            <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 text-xs text-white/80 whitespace-nowrap">
+              {formatTime(currentTime)} / {formatTime(duration)}
+            </div>
           </div>
-        </div>
-      </motion.div>
+        </motion.div>
+
+        {/* Playing indicator at bottom - visible when playing and not hovered */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ 
+            opacity: isPlaying ? 1 : 0, 
+            y: isPlaying ? 0 : 10 
+          }}
+          className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-gray-600/80 to-transparent rounded-b-md p-3 group-hover:opacity-0 transition-opacity duration-300 pointer-events-none"
+          style={{ 
+            visibility: isPlaying ? 'visible' : 'hidden'
+          }}
+        >
+          <div className="flex items-center justify-between text-white/90 text-sm">
+            <div className="flex items-center space-x-2">
+                              <Button
+                onClick={togglePlay}
+                variant="ghost"
+                size="sm"
+                className="h-6 w-6 p-0 rounded-full bg-white/10 hover:bg-white/20 border-none pointer-events-auto"
+              >
+                <Pause className="h-3 w-3 text-white" />
+              </Button>
+              <div className="flex space-x-1">
+                {/* Animated sound bars */}
+                {[1, 2, 3].map((i) => (
+                  <div
+                    key={i}
+                    className="w-1 bg-white/80 rounded-full animate-pulse"
+                    style={{
+                      height: '12px',
+                      animationDelay: `${i * 0.2}s`,
+                      animationDuration: '1s'
+                    }}
+                  />
+                ))}
+              </div>
+              {/* Pause button */}
+
+            </div>
+            
+            {/* Progress bar */}
+            <div className="flex-1 mx-3">
+              <div className="h-1 bg-white/20 rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-white/70 rounded-full transition-all duration-150"
+                  style={{ width: `${progressPercent}%` }}
+                />
+              </div>
+            </div>
+            
+            {/* Time */}
+            <span className="text-xs text-white/70 font-mono">
+              {formatTime(currentTime)} / {formatTime(duration)}
+            </span>
+          </div>
+        </motion.div>
+      </>
     );
   }
 

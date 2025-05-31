@@ -175,7 +175,7 @@ async function UnifiedContentCard(props: { data: ContentData; contentType: Conte
                   delay: 0.5
                 }
               }}
-              className="relative"
+              className="relative group"
             >
               <Image
                 src={coverArt || '/default-avatar.png'}

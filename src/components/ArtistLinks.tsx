@@ -65,7 +65,7 @@ export default function ArtistLinks({ artists, className = '' }: ArtistLinksProp
         }
       }}
     >
-      <div className="flex flex-wrap justify-center gap-3">
+      <div className="flex flex-wrap justify-center gap-1">
         {artistsWithDomains.map((artist, index) => (
           <motion.div
             key={artist.id}
@@ -82,6 +82,7 @@ export default function ArtistLinks({ artists, className = '' }: ArtistLinksProp
                 delay: 0.6 + (index * 0.1)
               }
             }}
+            className="flex items-center"
           >
             <Link
               href={getArtistUrl(artist.subdomain!)}
@@ -91,6 +92,9 @@ export default function ArtistLinks({ artists, className = '' }: ArtistLinksProp
                 {artist.name}
               </span>
             </Link>
+            {index < artistsWithDomains.length - 1 && (
+              <span className="text-gray-400 text-lg">,</span>
+            )}
           </motion.div>
         ))}
       </div>
