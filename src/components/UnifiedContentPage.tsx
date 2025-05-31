@@ -188,6 +188,7 @@ async function UnifiedContentCard(props: { data: ContentData; contentType: Conte
               {/* Audio Preview for tracks */}
               {contentType === 'track' && isTrackData(data) && data.info.track.preview_url && (
                 <AudioPreview 
+                  key={`audio-${data.info.track.isrc}-${data.info.track.preview_url}`}
                   src={data.info.track.preview_url} 
                   title={title}
                   variant="circular-overlay"

@@ -18,6 +18,19 @@ export default function AudioPreview({ src, title = "Track Preview", className =
   const [isLoading, setIsLoading] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
 
+  // Debug logging for prop changes
+  useEffect(() => {
+    console.log('AudioPreview: Component mounted/src changed:', { src, title });
+    
+    // Force immediate state update when src is valid
+    if (src && src.trim() !== '') {
+      setIsLoading(true);
+      setCurrentTime(0);
+      setDuration(0);
+      setIsPlaying(false);
+    }
+  }, [src, title]);
+
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
@@ -61,14 +74,21 @@ export default function AudioPreview({ src, title = "Track Preview", className =
       audio.removeEventListener('canplaythrough', handleCanPlay);
       audio.removeEventListener('ended', handleEnded);
     };
-  }, []);
+  }, [src]); // Add src as dependency to re-setup listeners when src changes
 
   // Reset states when src changes
   useEffect(() => {
+    console.log('AudioPreview: Resetting state for new src:', src);
     setCurrentTime(0);
     setDuration(0);
     setIsPlaying(false);
     setIsLoading(false);
+    
+    // Force the audio element to reload the new source
+    const audio = audioRef.current;
+    if (audio) {
+      audio.load(); // This forces the audio element to reload
+    }
   }, [src]);
 
   const togglePlay = async () => {
@@ -110,11 +130,20 @@ export default function AudioPreview({ src, title = "Track Preview", className =
 
   const progressPercent = duration > 0 ? (currentTime / duration) * 100 : 0;
   console.log('AudioPreview Debug:', {
+    src,
     currentTime,
     duration,
     progressPercent,
-    isPlaying
+    isPlaying,
+    isLoading,
+    hasAudioRef: !!audioRef.current
   });
+
+  // Don't render if src is invalid
+  if (!src || src.trim() === '') {
+    console.log('AudioPreview: Invalid src, not rendering:', src);
+    return null;
+  }
 
   if (variant === 'circular-overlay') {
     return (
