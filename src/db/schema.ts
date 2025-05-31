@@ -129,6 +129,7 @@ export const tracks = pgTable('tracks', {
   title: text(),
   album_upc: text().references(() => albums.upc).notNull(), // Required reference to album
   slug: text(),
+  preview_url: text(), // Audio preview URL
   // Removed track_number and cover_art - we'll use the album's cover_art
 });
 

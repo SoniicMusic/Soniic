@@ -7,10 +7,24 @@ import { getPlatformColor, getPlatformIcon, getPlatformDisplayName } from './uti
 
 /**
  * Checks if track links exist and backfills missing ones
+ * Also updates preview URL if missing
  */
 export async function ensureTrackLinks(trackISRC: string): Promise<void> {
   try {
     console.log(`Checking track links for ISRC: ${trackISRC}`);
+    
+    // Get the track to check if preview_url is missing
+    const track = await db.select().from(tracks).where(
+      eq(tracks.isrc, trackISRC)
+    ).execute();
+    
+    if (!track || track.length === 0) {
+      console.log(`Track not found for ISRC: ${trackISRC}`);
+      return;
+    }
+    
+    const trackRecord = track[0];
+    const needsPreviewUrl = !trackRecord.preview_url;
     
     // Get existing track links
     const existingLinks = await db.select().from(track_links).where(
@@ -19,33 +33,50 @@ export async function ensureTrackLinks(trackISRC: string): Promise<void> {
     
     console.log(`Found ${existingLinks.length} existing track links`);
     
-    // If we have no links at all, perform a lookup to get them
-    if (existingLinks.length === 0) {
-      console.log('No track links found, performing lookup...');
+    // Check if we need to perform a lookup (no links OR missing preview URL)
+    const needsLookup = existingLinks.length === 0 || needsPreviewUrl;
+    
+    if (needsLookup) {
+      if (existingLinks.length === 0) {
+        console.log('No track links found, performing lookup...');
+      }
+      if (needsPreviewUrl) {
+        console.log('Preview URL missing, performing lookup to get it...');
+      }
       
       const trackData = await lookupISRC(trackISRC, 'US');
       
-      if (trackData?.TrackLinks) {
-        console.log('Found track links from lookup:', Object.keys(trackData.TrackLinks));
-        
-        // Add the missing track links
-        for (const [platform, url] of Object.entries(trackData.TrackLinks)) {
-          if (url) {
-            console.log(`Adding track link for ${platform}: ${url}`);
-            
-            await db.insert(track_links).values({
-              track_isrc: trackISRC,
-              name: getPlatformDisplayName(platform),
-              url: url,
-              icon: getPlatformIcon(platform),
-              color: getPlatformColor(platform),
-            }).onConflictDoNothing();
-          }
+      if (trackData) {
+        // Update preview URL if it was missing and we got one from lookup
+        if (needsPreviewUrl && trackData.PreviewAudio) {
+          console.log(`Updating preview URL for track ${trackISRC}: ${trackData.PreviewAudio}`);
+          await db.update(tracks)
+            .set({ preview_url: trackData.PreviewAudio })
+            .where(eq(tracks.isrc, trackISRC));
         }
         
-        console.log('Track links backfilled successfully');
+        // Add track links if they were missing
+        if (existingLinks.length === 0 && trackData.TrackLinks) {
+          console.log('Found track links from lookup:', Object.keys(trackData.TrackLinks));
+          
+          for (const [platform, url] of Object.entries(trackData.TrackLinks)) {
+            if (url) {
+              console.log(`Adding track link for ${platform}: ${url}`);
+              
+              await db.insert(track_links).values({
+                track_isrc: trackISRC,
+                name: getPlatformDisplayName(platform),
+                url: url,
+                icon: getPlatformIcon(platform),
+                color: getPlatformColor(platform),
+              }).onConflictDoNothing();
+            }
+          }
+          
+          console.log('Track links backfilled successfully');
+        }
       } else {
-        console.log('No track links found in lookup result');
+        console.log('No track data found in lookup result');
       }
     } else {
       // Check if we're missing any of the major platforms
@@ -60,24 +91,34 @@ export async function ensureTrackLinks(trackISRC: string): Promise<void> {
         
         const trackData = await lookupISRC(trackISRC, 'US');
         
-        if (trackData?.TrackLinks) {
-          // Add only the missing platform links
-          for (const platform of missingPlatforms) {
-            const url = trackData.TrackLinks[platform as keyof typeof trackData.TrackLinks];
-            if (url) {
-              console.log(`Adding missing track link for ${platform}: ${url}`);
-              
-              await db.insert(track_links).values({
-                track_isrc: trackISRC,
-                name: getPlatformDisplayName(platform),
-                url: url,
-                icon: getPlatformIcon(platform),
-                color: getPlatformColor(platform),
-              }).onConflictDoNothing();
-            }
+        if (trackData) {
+          // Update preview URL if it was missing and we got one from lookup
+          if (needsPreviewUrl && trackData.PreviewAudio) {
+            console.log(`Updating preview URL for track ${trackISRC}: ${trackData.PreviewAudio}`);
+            await db.update(tracks)
+              .set({ preview_url: trackData.PreviewAudio })
+              .where(eq(tracks.isrc, trackISRC));
           }
           
-          console.log('Missing track links backfilled successfully');
+          // Add only the missing platform links
+          if (trackData.TrackLinks) {
+            for (const platform of missingPlatforms) {
+              const url = trackData.TrackLinks[platform as keyof typeof trackData.TrackLinks];
+              if (url) {
+                console.log(`Adding missing track link for ${platform}: ${url}`);
+                
+                await db.insert(track_links).values({
+                  track_isrc: trackISRC,
+                  name: getPlatformDisplayName(platform),
+                  url: url,
+                  icon: getPlatformIcon(platform),
+                  color: getPlatformColor(platform),
+                }).onConflictDoNothing();
+              }
+            }
+            
+            console.log('Missing track links backfilled successfully');
+          }
         }
       }
     }

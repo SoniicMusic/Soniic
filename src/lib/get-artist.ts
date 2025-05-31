@@ -9,6 +9,7 @@ interface Track {
   title: string | null;
   album_upc: string;
   slug: string | null;
+  preview_url: string | null;
 }
 
 interface Album {

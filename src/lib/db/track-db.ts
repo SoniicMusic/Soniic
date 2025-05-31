@@ -42,6 +42,7 @@ export async function addTrack(trackData: LookupISRCResult, albumUPC: string) {
       isrc: trackData.ISRC as string,
       title: trackData.TrackName || 'Unknown Track',
       album_upc: albumUPC,
+      preview_url: trackData.PreviewAudio,
       slug: slugify(trackData.TrackName || 'Unknown Track', { lower: true, strict: true }),
     }).onConflictDoNothing();
     // Fetch the newly created track to get its ID
