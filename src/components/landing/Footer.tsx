@@ -30,7 +30,7 @@ export default function Footer({
             alt="Logo" 
             width={40} 
             height={40}
-            className="mr-2" 
+            className="mr-2 rounded-md shadow-lg" 
           />
           <span className="font-bold text-xl">Soniic</span>
         </div>

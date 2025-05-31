@@ -1,7 +1,7 @@
 'use client';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Search, ArrowRight } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface HeroSectionProps {
@@ -37,7 +37,7 @@ export default function HeroSection({
             alt="Logo" 
             width={100} 
             height={100} 
-            className="animate-pulse" 
+            className="animate-pulse rounded-md shadow-lg" 
           />
         </div>
         <h1 className="text-6xl sm:text-7xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-600 mb-4">
@@ -58,7 +58,7 @@ export default function HeroSection({
               {primaryButtonText}
             </Link>
           </Button>
-          <Button 
+          {/* <Button 
             asChild 
             size="lg" 
             variant="outline" 
@@ -68,14 +68,14 @@ export default function HeroSection({
               {secondaryButtonText}
               <ArrowRight className="ml-2 h-5 w-5" />
             </a>
-          </Button>
+          </Button> */}
         </div>
       </div>
       
-      {/* Scroll indicator */}
+      {/* Scroll indicator
       <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
         <ArrowRight className="rotate-90 h-6 w-6 text-white/50" />
-      </div>
+      </div> */}
     </section>
   );
 }
