@@ -61,7 +61,7 @@ export default function ArtistLinks({ artists, className = '' }: ArtistLinksProp
         filter: 'blur(0px)',
         transition: {
           duration: 1.5,
-          delay: 0.5
+          delay: 0.6
         }
       }}
     >
@@ -79,7 +79,7 @@ export default function ArtistLinks({ artists, className = '' }: ArtistLinksProp
               filter: 'blur(0px)',
               transition: {
                 duration: 1.5,
-                delay: 0.5 + (index * 0.1)
+                delay: 0.6 + (index * 0.1)
               }
             }}
           >
