@@ -19,10 +19,8 @@ export default function AudioPreview({ src, title = "Track Preview", className =
   const audioRef = useRef<HTMLAudioElement>(null);
   const fadeIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Debug logging for prop changes
+  // Reset states when src changes
   useEffect(() => {
-    console.log('AudioPreview: Component mounted/src changed:', { src, title });
-    
     // Force immediate state update when src is valid
     if (src && src.trim() !== '') {
       setIsLoading(true);
@@ -38,7 +36,6 @@ export default function AudioPreview({ src, title = "Track Preview", className =
 
     const updateTime = () => setCurrentTime(audio.currentTime);
     const updateDuration = () => {
-      console.log('Duration update:', audio.duration);
       if (audio.duration && !isNaN(audio.duration) && isFinite(audio.duration)) {
         setDuration(audio.duration);
       }
@@ -92,7 +89,6 @@ export default function AudioPreview({ src, title = "Track Preview", className =
 
   // Reset states when src changes
   useEffect(() => {
-    console.log('AudioPreview: Resetting state for new src:', src);
     setCurrentTime(0);
     setDuration(0);
     setIsPlaying(false);
@@ -177,7 +173,7 @@ export default function AudioPreview({ src, title = "Track Preview", className =
         await fadeIn(audio);
       }
     } catch (error) {
-      console.error('Error playing audio:', error);
+      // Silent error handling for audio playback
     }
   };
 
@@ -202,19 +198,9 @@ export default function AudioPreview({ src, title = "Track Preview", className =
   };
 
   const progressPercent = duration > 0 ? (currentTime / duration) * 100 : 0;
-  console.log('AudioPreview Debug:', {
-    src,
-    currentTime,
-    duration,
-    progressPercent,
-    isPlaying,
-    isLoading,
-    hasAudioRef: !!audioRef.current
-  });
 
   // Don't render if src is invalid
   if (!src || src.trim() === '') {
-    console.log('AudioPreview: Invalid src, not rendering:', src);
     return null;
   }
 

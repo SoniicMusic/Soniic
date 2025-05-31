@@ -38,11 +38,6 @@ async function ArtistCard(props: { trackData: any }) {
             {artistLinks.map((link: any, index: number) => {
               const Icon = (Icons as any)[link.icon];
               
-              // Debug logging and fallback for missing icons
-              if (!Icon) {
-                console.warn(`Icon "${link.icon}" not found for link "${link.name}"`);
-              }
-              
               return (
                 <Button
                   key={`${link.id || link.name}-${index}`}
@@ -75,8 +70,6 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
   // Redirect from old URL pattern to new URL pattern
   const { slug } = await params;
   const domain = await getDomain();
-  
-  console.log('Redirecting from old format:', slug, 'on domain:', domain);
   
   // For backward compatibility, we'll redirect to the /track/ version
   // In the future, we could check if this is a track or album and redirect accordingly

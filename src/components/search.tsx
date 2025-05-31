@@ -42,7 +42,6 @@ export default function SearchComponent() {
         const searchResults = await searchSpotify(searchQuery)
         setResults(searchResults || { tracks: [], albums: [] })
       } catch (error) {
-        console.error('Error searching Spotify:', error)
         setResults({ tracks: [], albums: [] })
       }
     })

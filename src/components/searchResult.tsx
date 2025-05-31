@@ -20,25 +20,20 @@ export default function SearchResult({ id, title, artists, coverUrl, type, onLoo
         try {
             setIsLoading(true);
             onLookupStart?.(); // Start the full screen loader
-            console.log('Starting lookup for:', { id, type });
             
             // Call testLookup and handle the response
             const result = await testLookup(id, type);
-            console.log('Lookup result:', result);
             
             // If successful and we have a redirectUrl, navigate to it
             if (result.success && result.redirectUrl) {
-                console.log('Redirecting to:', result.redirectUrl);
                 window.location.href = result.redirectUrl;
                 // Note: onLookupEnd will be called when the page unloads/navigates
             } else {
                 // Show message if there's no redirect URL
-                console.log('Lookup successful but no redirect URL available. Result:', result);
                 setIsLoading(false);
                 onLookupEnd?.(); // End the full screen loader
             }
         } catch (error) {
-            console.error('Error during lookup:', error);
             setIsLoading(false);
             onLookupEnd?.(); // End the full screen loader on error
         }

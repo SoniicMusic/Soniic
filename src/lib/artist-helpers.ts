@@ -58,7 +58,6 @@ export async function getTrackArtistsWithDomains(isrc: string): Promise<ArtistWi
     
     return artistsWithDomains;
   } catch (error) {
-    console.error('Error getting track artists:', error);
     return [];
   }
 }

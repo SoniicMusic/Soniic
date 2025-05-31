@@ -64,7 +64,6 @@ export default function SearchResultsComponent(props: {
       }
 
       {results.tracks.map((track) => {
-        console.log(track)
         return (
           <motion.ul
             key={track.id}

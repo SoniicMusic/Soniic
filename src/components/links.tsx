@@ -91,11 +91,6 @@ export default function Links(props: LinksProps) {
         // Create a unique key that works for all link types
         const linkKey = link.id || `${link.name}-${link.url}-${index}`;
         
-        // Debug logging for missing icons
-        if (!Icon) {
-          console.warn(`Icon "${link.icon}" not found for link "${link.name}"`);
-        }
-        
         return (
           <motion.ul
             key={linkKey}
