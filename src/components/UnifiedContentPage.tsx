@@ -149,7 +149,7 @@ async function UnifiedContentCard(props: { data: ContentData; contentType: Conte
       <Card className="w-screen min-h-screen bg-black/10 backdrop-blur-3xl border-none text-white relative z-10">
         <CardContent className="container mx-auto max-w-lg px-2 py-8 flex flex-col items-center">
           <motion.div 
-            className="flex flex-col items-center space-y-8 w-full"
+            className="flex flex-col items-center space-y-4 w-full"
             initial={{ opacity: 0, y: 10 }}
             animate={{
               opacity: 1,
@@ -180,20 +180,18 @@ async function UnifiedContentCard(props: { data: ContentData; contentType: Conte
               <Image
                 src={coverArt || '/default-avatar.png'}
                 alt={title}
-                width={200}
-                height={200}
+                width={300}
+                height={300}
                 className={`shadow-lg ${contentType === 'album' ? 'rounded-md' : 'rounded-md'}`}
               />
               
               {/* Audio Preview for tracks */}
               {contentType === 'track' && isTrackData(data) && data.info.track.preview_url && (
-                <div className="absolute inset-x-0 -bottom-4">
-                  <AudioPreview 
-                    src={data.info.track.preview_url} 
-                    title={title}
-                    className="mx-2"
-                  />
-                </div>
+                <AudioPreview 
+                  src={data.info.track.preview_url} 
+                  title={title}
+                  variant="circular-overlay"
+                />
               )}
             </motion.div>
 

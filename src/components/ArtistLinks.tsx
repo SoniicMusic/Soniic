@@ -50,13 +50,18 @@ export default function ArtistLinks({ artists, className = '' }: ArtistLinksProp
   return (
     <motion.div
       className={`flex flex-col items-center space-y-3 ${className}`}
-      initial={{ opacity: 0, y: 10 }}
+      initial={{ 
+        opacity: 0, 
+        y: 10,
+        filter: 'blur(5px)'
+      }}
       animate={{
         opacity: 1,
         y: 0,
+        filter: 'blur(0px)',
         transition: {
           duration: 1.5,
-          delay: 0.7
+          delay: 0.5
         }
       }}
     >
@@ -64,13 +69,17 @@ export default function ArtistLinks({ artists, className = '' }: ArtistLinksProp
         {artistsWithDomains.map((artist, index) => (
           <motion.div
             key={artist.id}
-            initial={{ opacity: 0, scale: 0.9 }}
+            initial={{ 
+              opacity: 0, 
+              filter: 'blur(5px)'
+            }}
             animate={{
               opacity: 1,
               scale: 1,
+              filter: 'blur(0px)',
               transition: {
-                duration: 0.5,
-                delay: 0.8 + (index * 0.1)
+                duration: 1.5,
+                delay: 0.5 + (index * 0.1)
               }
             }}
           >

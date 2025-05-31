@@ -8,9 +8,10 @@ interface AudioPreviewProps {
   src: string;
   title?: string;
   className?: string;
+  variant?: 'default' | 'circular-overlay';
 }
 
-export default function AudioPreview({ src, title = "Track Preview", className = "" }: AudioPreviewProps) {
+export default function AudioPreview({ src, title = "Track Preview", className = "", variant = 'default' }: AudioPreviewProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -22,25 +23,53 @@ export default function AudioPreview({ src, title = "Track Preview", className =
     if (!audio) return;
 
     const updateTime = () => setCurrentTime(audio.currentTime);
-    const updateDuration = () => setDuration(audio.duration);
+    const updateDuration = () => {
+      console.log('Duration update:', audio.duration);
+      if (audio.duration && !isNaN(audio.duration) && isFinite(audio.duration)) {
+        setDuration(audio.duration);
+      }
+    };
     const handleLoadStart = () => setIsLoading(true);
-    const handleCanPlay = () => setIsLoading(false);
+    const handleCanPlay = () => {
+      setIsLoading(false);
+      // Also try to get duration when audio can play
+      if (audio.duration && !isNaN(audio.duration) && isFinite(audio.duration)) {
+        setDuration(audio.duration);
+      }
+    };
     const handleEnded = () => setIsPlaying(false);
 
     audio.addEventListener('timeupdate', updateTime);
     audio.addEventListener('loadedmetadata', updateDuration);
+    audio.addEventListener('durationchange', updateDuration);
     audio.addEventListener('loadstart', handleLoadStart);
     audio.addEventListener('canplay', handleCanPlay);
+    audio.addEventListener('canplaythrough', handleCanPlay);
     audio.addEventListener('ended', handleEnded);
+
+    // Try to get duration immediately if already loaded
+    if (audio.duration && !isNaN(audio.duration) && isFinite(audio.duration)) {
+      setDuration(audio.duration);
+    }
 
     return () => {
       audio.removeEventListener('timeupdate', updateTime);
       audio.removeEventListener('loadedmetadata', updateDuration);
+      audio.removeEventListener('durationchange', updateDuration);
       audio.removeEventListener('loadstart', handleLoadStart);
       audio.removeEventListener('canplay', handleCanPlay);
+      audio.removeEventListener('canplaythrough', handleCanPlay);
       audio.removeEventListener('ended', handleEnded);
     };
   }, []);
+
+  // Reset states when src changes
+  useEffect(() => {
+    setCurrentTime(0);
+    setDuration(0);
+    setIsPlaying(false);
+    setIsLoading(false);
+  }, [src]);
 
   const togglePlay = async () => {
     const audio = audioRef.current;
@@ -80,7 +109,80 @@ export default function AudioPreview({ src, title = "Track Preview", className =
   };
 
   const progressPercent = duration > 0 ? (currentTime / duration) * 100 : 0;
+  console.log('AudioPreview Debug:', {
+    currentTime,
+    duration,
+    progressPercent,
+    isPlaying
+  });
 
+  if (variant === 'circular-overlay') {
+    return (
+      <motion.div 
+        className={`absolute inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm opacity-0 hover:opacity-100 transition-opacity duration-300 rounded-md ${className}`}
+        initial={{ opacity: 0 }}
+        whileHover={{ opacity: 1 }}
+      >
+        <audio ref={audioRef} src={src} preload="metadata" crossOrigin="anonymous" />
+        
+        <div className="relative">
+          {/* Play/Pause button with external progress ring */}
+          <div className="relative">
+            {/* Circular progress ring positioned outside the button */}
+            <svg className="absolute -inset-2 w-16 h-16 transform -rotate-90" viewBox="0 0 64 64">
+              {/* Background circle */}
+              <circle
+                cx="32"
+                cy="32"
+                r="28"
+                stroke="white"
+                strokeOpacity="0.2"
+                strokeWidth="2"
+                fill="none"
+              />
+              {/* Progress circle */}
+              <circle
+                cx="32"
+                cy="32"
+                r="28"
+                stroke="white"
+                strokeOpacity="0.9"
+                strokeWidth="2"
+                fill="none"
+                strokeDasharray={175.9}
+                strokeDashoffset={175.9 * (1 - progressPercent / 100)}
+                strokeLinecap="round"
+                className="transition-all duration-150"
+              />
+            </svg>
+            
+            <Button
+              onClick={togglePlay}
+              disabled={isLoading}
+              variant="outline"
+              size="icon"
+              className="h-12 w-12 rounded-full bg-white/20 border-white/30 hover:bg-white/30 backdrop-blur-sm relative z-10"
+            >
+              {isLoading ? (
+                <div className="animate-spin h-5 w-5 border-2 border-white/50 border-t-white rounded-full" />
+              ) : isPlaying ? (
+                <Pause className="h-5 w-5 text-white" />
+              ) : (
+                <Play className="h-5 w-5 text-white ml-0.5" />
+              )}
+            </Button>
+          </div>
+          
+          {/* Time display */}
+          <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 text-xs text-white/80 whitespace-nowrap">
+            {formatTime(currentTime)} / {formatTime(duration)}
+          </div>
+        </div>
+      </motion.div>
+    );
+  }
+
+  // Default variant
   return (
     <motion.div 
       className={`bg-black/20 backdrop-blur-sm rounded-lg p-4 ${className}`}
@@ -94,7 +196,7 @@ export default function AudioPreview({ src, title = "Track Preview", className =
         }
       }}
     >
-      <audio ref={audioRef} src={src} preload="metadata" />
+      <audio ref={audioRef} src={src} preload="metadata" crossOrigin="anonymous" />
       
       <div className="flex items-center space-x-4">
         <Button
