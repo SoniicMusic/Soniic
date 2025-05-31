@@ -50,6 +50,13 @@ export default function SearchComponent() {
     return debounce(handleSearch, 500);
   }, []);
 
+  // Cleanup debounced function on unmount
+  useEffect(() => {
+    return () => {
+      debouncedSearch.cancel();
+    };
+  }, [debouncedSearch]);
+
   useEffect(() => {
     if (initialQuery) {
       handleSearch(initialQuery);
@@ -61,17 +68,21 @@ export default function SearchComponent() {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newQuery = e.target.value
     setQuery(newQuery)
-    if (newQuery) {
+    if (newQuery.trim()) {
       router.replace(`/search?q=${encodeURIComponent(newQuery)}`, { scroll: false })
-      debouncedSearch(newQuery)
+      // Cancel any pending debounced search before starting a new one
+      debouncedSearch.cancel()
+      debouncedSearch(newQuery.trim())
     } else {
       router.replace('/search', { scroll: false })
+      debouncedSearch.cancel()
       setResults({ tracks: [], albums: [] })
     }
   }
   const handleClearSearch = () => {
     setQuery('')
     router.replace('/search', { scroll: false })
+    debouncedSearch.cancel()
     setResults({ tracks: [], albums: [] })
   }
 
@@ -94,6 +105,11 @@ export default function SearchComponent() {
             onChange={handleInputChange}
           />
           <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-white/50" size={24} />
+          {isPending && (
+            <div className="absolute right-12 top-1/2 transform -translate-y-1/2">
+              <div className="animate-spin h-5 w-5 border-2 border-white/50 border-t-white rounded-full"></div>
+            </div>
+          )}
           {query && (
             <Button
               variant="ghost"
