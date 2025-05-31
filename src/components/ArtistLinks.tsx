@@ -26,7 +26,7 @@ function getArtistUrl(subdomain: string): string {
     }
   } else {
     // Server-side: default to localhost for development
-    return `https://${subdomain}.localhost:3000`;
+    return `http://${subdomain}.localhost:3000`;
   }
 }
 
