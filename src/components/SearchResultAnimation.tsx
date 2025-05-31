@@ -19,7 +19,7 @@ interface AlbumResult {
 }
 
 const listVarients = {
-  hidden: { opacity: 0, x: -10, filter: "blur(10px)" },
+  hidden: { opacity: 0, x: -10, filter: "blur(5px)" },
   visible: { opacity: 1, x: 0, filter: "blur(0px)" },
 }
 
