@@ -36,9 +36,15 @@ const containerVariants = {
 }
 
 
-export default function SearchResultsComponent(props: { results: { tracks: TrackResult[], albums: AlbumResult[] }, isPending: boolean }) {
+export default function SearchResultsComponent(props: { 
+  results: { tracks: TrackResult[], albums: AlbumResult[] }, 
+  isPending: boolean,
+  onLookupStart?: () => void,
+  onLookupEnd?: () => void
+}) {
   const results = props.results
   const isPending = props.isPending
+  const { onLookupStart, onLookupEnd } = props
   return (
     <motion.section className="max-w-6xl space-y-4"
       initial="hidden"
@@ -73,6 +79,8 @@ export default function SearchResultsComponent(props: { results: { tracks: Track
               artists={track.artists}
               coverUrl={track.coverUrl}
               type={track.type}
+              onLookupStart={onLookupStart}
+              onLookupEnd={onLookupEnd}
             />
           </motion.ul>
         )
@@ -97,6 +105,8 @@ export default function SearchResultsComponent(props: { results: { tracks: Track
             artists={album.artists}
             coverUrl={album.coverUrl}
             type={album.type}
+            onLookupStart={onLookupStart}
+            onLookupEnd={onLookupEnd}
           />
         </motion.ul>
       ))}

@@ -7,6 +7,7 @@ import { searchSpotify } from '@/lib/lookup/spotify'
 import { useEffect, useMemo, useState, useTransition } from "react"
 import debounce from 'lodash/debounce'
 import SearchResultsComponent from "./SearchResultAnimation"
+import FullScreenLoader from "./FullScreenLoader"
 import { useRouter, useSearchParams } from 'next/navigation'
 
 // Define interfaces for our track and album types to match with SearchResultAnimation
@@ -33,6 +34,7 @@ export default function SearchComponent() {
   const [query, setQuery] = useState(initialQuery)
   const [results, setResults] = useState<{ tracks: TrackResult[]; albums: AlbumResult[] }>({ tracks: [], albums: [] })
   const [isPending, startTransition] = useTransition()
+  const [isLookupLoading, setIsLookupLoading] = useState(false)
 
   const handleSearch = (searchQuery: string) => {
     startTransition(async () => {
@@ -88,6 +90,9 @@ export default function SearchComponent() {
 
   return (
     <div className="min-h-screen text-white overflow-hidden fixed inset-0 ">
+      {/* Full screen loader */}
+      <FullScreenLoader isVisible={isLookupLoading} message="Finding your music..." />
+      
       {/* Dark blue edge glows - with more center coverage */}
       {/* <div className="fixed bottom-0 left-0 w-full h-[15vh] bg-linear-to-t from-blue-900/40 to-transparent blur-[100px]" />
       <div className="fixed left-0 top-0 w-[60vw] h-full bg-linear-to-r from-blue-900/40 to-transparent blur-[100px]" />
@@ -128,7 +133,12 @@ export default function SearchComponent() {
       <div className="h-[calc(100vh-5rem)] overflow-hidden">
         <ScrollArea className="h-full w-full">
           <section className="max-w-6xl space-y-4 w-full mx-auto mb-5">
-            <SearchResultsComponent results={results} isPending={isPending} />
+            <SearchResultsComponent 
+              results={results} 
+              isPending={isPending} 
+              onLookupStart={() => setIsLookupLoading(true)}
+              onLookupEnd={() => setIsLookupLoading(false)}
+            />
           </section>
         </ScrollArea>
       </div>
