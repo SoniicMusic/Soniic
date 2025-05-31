@@ -19,14 +19,15 @@ interface AlbumResult {
 }
 
 const listVarients = {
-  hidden: { opacity: 0, x: -10 },
-  visible: { opacity: 1, x: 0 },
+  hidden: { opacity: 0, x: -10, filter: "blur(10px)" },
+  visible: { opacity: 1, x: 0, filter: "blur(0px)" },
 }
 
 const containerVariants = {
-  hidden: { opacity: 0 },
+  hidden: { opacity: 0, filter: "blur(5px)" },
   visible: {
     opacity: 1,
+    filter: "blur(0px)",
     transition: {
       delayChildren: 1,
       staggerChildren: 0.2,
