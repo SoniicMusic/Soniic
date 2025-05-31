@@ -2,7 +2,7 @@
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Search, X } from 'lucide-react'
+import { Search } from 'lucide-react'
 import { searchSpotify } from '@/lib/lookup/spotify'
 import { useEffect, useMemo, useState, useTransition } from "react"
 import debounce from 'lodash/debounce'
@@ -108,23 +108,13 @@ export default function SearchComponent() {
             className="w-full pl-12 pr-4 py-6 bg-white/10 text-white placeholder-white/50 text-xl"
             value={query}
             onChange={handleInputChange}
+            autoFocus
           />
           <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-white/50" size={24} />
           {isPending && (
-            <div className="absolute right-12 top-1/2 transform -translate-y-1/2">
+            <div className="absolute right-14 top-1/2 transform -translate-y-1/2">
               <div className="animate-spin h-5 w-5 border-2 border-white/50 border-t-white rounded-full"></div>
             </div>
-          )}
-          {query && (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="absolute right-2 top-1/2 transform -translate-y-1/2 text-white/50 hover:text-white"
-              onClick={handleClearSearch}
-            >
-              <X size={24} />
-              <span className="sr-only">Clear search</span>
-            </Button>
           )}
         </div>
       </div>
