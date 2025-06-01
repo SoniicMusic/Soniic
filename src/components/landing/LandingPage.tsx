@@ -77,7 +77,7 @@ export default function Home() {
   // Define all your content as configuration objects that can be easily modified
   const heroConfig = {
     title: "One Link. Any Platform.",
-    description: "Find music across Spotify, Apple Music, Tidal and more — all from a single search. Artists can create beautiful custom pages that work everywhere.",
+    description: "Find music across Spotify, Apple Music and Tidal — all from a single search. Create beautiful custom pages that work everywhere.",
     logoSrc: "/soniic.png",
     primaryButtonText: "Start Searching",
     primaryButtonHref: "/search",
