@@ -5,6 +5,7 @@ services:
       - ./.env
     volumes:
       - ./keys:/app/keys
+    st
   db:
     image: postgres:17.5
     env_file:
