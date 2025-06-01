@@ -5,7 +5,11 @@ services:
       - ./.env
     volumes:
       - ./keys:/app/keys
-    st
+    deploy:
+      update_config:
+        order: start-first
+    depends_on:
+      - db
   db:
     image: postgres:17.5
     env_file:
