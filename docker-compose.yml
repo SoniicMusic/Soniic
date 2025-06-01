@@ -1,0 +1,13 @@
+services:
+  soniic:
+    image: ghcr.io/soniicmusic/soniic:main
+    env_file:
+      - ./.env
+    volumes:
+      - ./keys:/app/keys
+  db:
+    image: postgres:17.5
+    env_file:
+      - ./.env
+    volumes:
+      - ./db:/var/lib/postgresql/data
