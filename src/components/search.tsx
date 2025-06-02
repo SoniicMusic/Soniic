@@ -17,6 +17,7 @@ interface TrackResult {
   artists: string[];
   coverUrl: string;
   type: 'track' | 'album';
+  explicit?: boolean;
 }
 
 interface AlbumResult {

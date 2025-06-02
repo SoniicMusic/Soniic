@@ -35,6 +35,7 @@ interface SpotifyArtistProfileResponse {
 interface SpotifyTrack {
     id: string;
     name: string;
+    explicit: boolean;
     external_urls: {
         spotify: string;
     };
@@ -81,6 +82,7 @@ interface SpotifySearchResult {
         artists: string[];
         coverUrl: string;
         type: 'track';
+        explicit: boolean;
     }[];
     albums: {
         id: string;
@@ -109,6 +111,21 @@ async function SpotifylookupISRC(ISRC: string): Promise<SpotifyTrack | null> {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json() as SpotifyTrackResponse;
+        
+        // If no tracks found, return null
+        if (!data.tracks.items || data.tracks.items.length === 0) {
+            return null;
+        }
+        
+        // Prioritize explicit versions over clean versions
+        const explicitTrack = data.tracks.items.find(track => track.explicit === true);
+        if (explicitTrack) {
+            console.log('Found explicit version, using that instead of clean version');
+            return explicitTrack;
+        }
+        
+        // If no explicit version found, return the first result (likely clean)
+        console.log('No explicit version found, using first result');
         return data.tracks.items[0];
     }
     catch (error) {
@@ -250,7 +267,8 @@ async function searchSpotify(query: string): Promise<SpotifySearchResult> {
       title: track.name,
       artists: track.artists.map(artist => artist.name),
       coverUrl: track.album.images[1]?.url || track.album.images[0]?.url,
-      type: 'track' as const
+      type: 'track' as const,
+      explicit: track.explicit
     }));
 
   // Extract albums - filter out various artists

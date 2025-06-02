@@ -12,6 +12,7 @@ interface AppleMusicTrack {
     albumName?: string;
     genreNames?: string[];
     releaseDate?: string;
+    contentRating?: string; // This field indicates explicit content in Apple Music
     previews?: { url: string }[];
     url?: string;
     artwork?: {
@@ -87,6 +88,16 @@ async function AppleMusiclookupISRC(ISRC: string, CountryCode: string): Promise<
 		} as AppleMusicTrack;
 	}
 	
+	// Prioritize explicit versions over clean versions
+	// In Apple Music, contentRating is either "explicit" for explicit content or undefined/null for clean
+	const explicitTrack = data.data.find(track => track.attributes?.contentRating === 'explicit');
+	if (explicitTrack) {
+		console.log('Found explicit version in Apple Music, using that instead of clean version');
+		return explicitTrack;
+	}
+	
+	// If no explicit version found, return the first result (likely clean)
+	console.log('No explicit version found in Apple Music, using first result');
 	return data.data[0];
 }
 

@@ -9,10 +9,11 @@ interface SearchResultProps {
     coverUrl: string;
     id: string;
     type: 'track' | 'album';
+    explicit?: boolean;
     onLookupStart?: () => void;
     onLookupEnd?: () => void;
 }
-export default function SearchResult({ id, title, artists, coverUrl, type, onLookupStart, onLookupEnd }: SearchResultProps) {
+export default function SearchResult({ id, title, artists, coverUrl, type, explicit, onLookupStart, onLookupEnd }: SearchResultProps) {
     const artistNames = artists.join(', ');
     const [isLoading, setIsLoading] = useState(false);
     
@@ -49,7 +50,12 @@ export default function SearchResult({ id, title, artists, coverUrl, type, onLoo
             <div className="flex items-center space-x-4">
                 <Image src={coverUrl} alt={title} width={64} height={64} className="rounded-md" />
                 <div>
-                    <h3 className="text-lg font-semibold">{title}</h3>
+                    <div className="flex items-center gap-2">
+                        <h3 className="text-lg font-semibold">{title}</h3>
+                        {type === 'track' && explicit && (
+                            <span className="text-xs bg-gray-600 text-white px-1.5 py-0.5 rounded">E</span>
+                        )}
+                    </div>
                     <p className="text-sm text-gray-400">{artistNames}</p>
                     {isLoading && <p className="text-xs text-blue-400">Loading...</p>}
                 </div>

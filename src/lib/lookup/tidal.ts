@@ -24,6 +24,7 @@ interface TidalTrack {
         isrc?: string;
         title?: string;
         artistName?: string;
+        explicit?: boolean; // Tidal's explicit content indicator
     };
     resource?: {
         tidalUrl: string;
@@ -102,6 +103,42 @@ async function TidalLookupISRC(ISRC: string, CountryCode: string): Promise<Tidal
         } as TidalTrack;
     }
     
+    // Prioritize explicit versions over clean versions
+    const explicitTrack = data.data.find(track => track.attributes?.explicit === true);
+    if (explicitTrack) {
+        console.log('Found explicit version in Tidal, using that instead of clean version');
+        // Set the track to the explicit version for further processing
+        const track = explicitTrack;
+        
+        // enrich track with artist info from the included array if available
+        if (data.included && track && track.relationships?.artists?.data?.length) {
+            // Get all artist IDs from the relationships
+            const artistIds = track.relationships.artists.data.map(artist => artist.id);
+            
+            // Find all matching artists in the included array
+            const artistDetails = artistIds.map(artistId => 
+                data.included?.find(item => item.type === 'artists' && item.id === artistId)
+            ).filter(Boolean); // Remove any undefined values
+            
+            if (artistDetails.length > 0) {
+                // Map artist details to our TidalArtist interface
+                track.artists = artistDetails.map(artistDetail => ({
+                    id: artistDetail.id,
+                    name: artistDetail.attributes.name,
+                    type: artistDetail.type,
+                    attributes: {
+                        name: artistDetail.attributes.name,
+                        profilePicture: artistDetail.attributes.profilePicture?.uri
+                    }
+                }));
+            }
+        }
+        
+        return track;
+    }
+    
+    // If no explicit version found, use the first result (likely clean)
+    console.log('No explicit version found in Tidal, using first result');
     const track = data.data[0];
 
     // enrich track with artist info from the included array if available

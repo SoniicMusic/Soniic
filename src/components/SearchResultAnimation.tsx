@@ -8,6 +8,7 @@ interface TrackResult {
   artists: string[];
   coverUrl: string;
   type: 'track' | 'album';  // Updated to match exact type union
+  explicit?: boolean;
 }
 
 interface AlbumResult {
@@ -79,6 +80,7 @@ export default function SearchResultsComponent(props: {
               artists={track.artists}
               coverUrl={track.coverUrl}
               type={track.type}
+              explicit={track.explicit}
               onLookupStart={onLookupStart}
               onLookupEnd={onLookupEnd}
             />
