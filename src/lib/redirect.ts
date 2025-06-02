@@ -11,7 +11,10 @@ export function buildRedirectUrl(url: string): string {
   console.log('buildRedirectUrl called with:', { url, NODE_ENV });
   
   if (NODE_ENV === 'production') {
-    const result = `https://${url}`;
+    // Extract subdomain and path from the url
+    const domain = url.split('/')[0];
+    const path = url.split('/').slice(1).join('/');
+    const result = `https://${domain}.soniic.link/${path}`;
     console.log('Production redirect URL:', result);
     return result;
   } else if (NODE_ENV === 'development') {
