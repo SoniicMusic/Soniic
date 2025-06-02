@@ -88,16 +88,10 @@ export default function SearchComponent() {
   }
 
   return (
-    <div className="min-h-screen text-white overflow-hidden fixed inset-0 ">
+    <div className="min-h-screen text-white overflow-hidden fixed inset-0 bg-black">
       {/* Full screen loader */}
       <FullScreenLoader isVisible={isLookupLoading} message="Finding your music..." />
       
-      {/* Dark blue edge glows - with more center coverage */}
-      {/* <div className="fixed bottom-0 left-0 w-full h-[15vh] bg-linear-to-t from-blue-900/40 to-transparent blur-[100px]" />
-      <div className="fixed left-0 top-0 w-[60vw] h-full bg-linear-to-r from-blue-900/40 to-transparent blur-[100px]" />
-      <div className="fixed right-0 top-0 w-[60vw] h-full bg-linear-to-l from-blue-900/40 to-transparent blur-[100px]" /> */}
-      {/* Dark blue edge glows - with less center coverage */}
-
       {/* Search header - fixed position */}
       <div className="bg-black backdrop-blur-md p-4 sticky top-0 z-10">
         <div className="relative max-w-6xl mx-auto">
