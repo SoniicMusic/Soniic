@@ -315,7 +315,7 @@ export async function generateUnifiedMetadata({
     if (track) {
       return {
         title: `${track.title} - Track Page`,
-        description: `Listen to ${track.title} on Soniic`,
+        description: `Find links to the platforms you can stream ${track.title} on Soniic`,
         icons: {
           icon: track.album?.cover_art || 'soniic.ico',
         },
@@ -326,7 +326,7 @@ export async function generateUnifiedMetadata({
     if (album) {
       return {
         title: `${album.title} - Album Page`,
-        description: `Listen to ${album.title} on Soniic`,
+        description: `Find links to the platforms you can stream ${album.title} on Soniic`,
         icons: {
           icon: album.cover_art || 'soniic.ico',
         },
