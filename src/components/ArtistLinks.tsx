@@ -12,21 +12,23 @@ interface ArtistLinksProps {
 
 // Helper function to generate artist URL
 function getArtistUrl(subdomain: string): string {
-  if (typeof window !== 'undefined') {
-    // Client-side: use current hostname
-    const hostname = window.location.hostname;
-    const port = window.location.port;
-    const protocol = window.location.protocol;
-    
-    if (hostname.includes('localhost')) {
+  const NODE_ENV = process.env.NODE_ENV;
+  
+  if (NODE_ENV === 'production') {
+    return `https://${subdomain}.soniic.link`;
+  } else {
+    // Development environment
+    if (typeof window !== 'undefined') {
+      // Client-side: use current hostname
+      const hostname = window.location.hostname;
+      const port = window.location.port;
+      const protocol = window.location.protocol;
+      
       return `${protocol}//${subdomain}.localhost${port ? `:${port}` : ''}`;
     } else {
-      // For production, assume .soniic.link domain structure
-      return `${protocol}//${subdomain}.soniic.link`;
+      // Server-side development default
+      return `http://${subdomain}.localhost:3000`;
     }
-  } else {
-    // Server-side: default to localhost for development
-    return `http://${subdomain}.localhost:3000`;
   }
 }
 
