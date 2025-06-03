@@ -375,12 +375,7 @@ export default function AudioPreview({ src, title = "Track Preview", className =
               
               <Button
                 onClick={togglePlay}
-                onTouchStart={() => {
-                  // For Safari mobile, ensure we capture touch events
-                  if (isSafariMobile && !userInteracted) {
-                    setUserInteracted(true);
-                  }
-                }}
+                onTouchStart={handleTouchStart}
                 disabled={isLoading || (!canPlay && !isSafariMobile)}
                 variant="outline"
                 size="icon"
