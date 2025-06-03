@@ -17,7 +17,7 @@ const isSafari = () => {
   const userAgent = window.navigator.userAgent.toLowerCase();
   // More accurate Safari detection
   return (userAgent.includes('safari') && !userAgent.includes('chrome')) || 
-         userAgent.includes('webkit') && userAgent.includes('version');
+         (userAgent.includes('webkit') && userAgent.includes('version'));
 };
 
 const isMobile = () => {
