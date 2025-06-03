@@ -11,41 +11,13 @@ interface AudioPreviewProps {
   variant?: 'default' | 'circular-overlay';
 }
 
-// Safari detection utility
-const isSafari = () => {
-  if (typeof window === 'undefined') return false;
-  const userAgent = window.navigator.userAgent.toLowerCase();
-  // More accurate Safari detection
-  return (userAgent.includes('safari') && !userAgent.includes('chrome')) || 
-         (userAgent.includes('webkit') && userAgent.includes('version'));
-};
-
-const isMobile = () => {
-  if (typeof window === 'undefined') return false;
-  return /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(
-    window.navigator.userAgent.toLowerCase()
-  ) || (window.navigator.maxTouchPoints && window.navigator.maxTouchPoints > 2);
-};
-
-const isIOS = () => {
-  if (typeof window === 'undefined') return false;
-  return /iphone|ipad|ipod/i.test(window.navigator.userAgent.toLowerCase()) ||
-         (window.navigator.platform === 'MacIntel' && window.navigator.maxTouchPoints > 1);
-};
-
 export default function AudioPreview({ src, title = "Track Preview", className = "", variant = 'default' }: AudioPreviewProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
-  const [userInteracted, setUserInteracted] = useState(false);
-  const [canPlay, setCanPlay] = useState(false);
-  const [audioContextUnlocked, setAudioContextUnlocked] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
   const fadeIntervalRef = useRef<NodeJS.Timeout | null>(null);
-
-  // Detect Safari mobile for special handling
-  const isSafariMobile = (isSafari() && isMobile()) || isIOS();
 
   // Reset states when src changes
   useEffect(() => {
@@ -55,8 +27,6 @@ export default function AudioPreview({ src, title = "Track Preview", className =
       setCurrentTime(0);
       setDuration(0);
       setIsPlaying(false);
-      setCanPlay(false);
-      setUserInteracted(false);
     }
   }, [src, title]);
 
@@ -73,28 +43,10 @@ export default function AudioPreview({ src, title = "Track Preview", className =
     const handleLoadStart = () => setIsLoading(true);
     const handleCanPlay = () => {
       setIsLoading(false);
-      setCanPlay(true);
       // Also try to get duration when audio can play
       if (audio.duration && !isNaN(audio.duration) && isFinite(audio.duration)) {
         setDuration(audio.duration);
       }
-    };
-    
-    const handleLoadedData = () => {
-      // Additional handler for Safari
-      if (isSafariMobile) {
-        setCanPlay(true);
-        setIsLoading(false);
-        if (audio.duration && !isNaN(audio.duration) && isFinite(audio.duration)) {
-          setDuration(audio.duration);
-        }
-      }
-    };
-    
-    const handleError = (error: Event) => {
-      console.warn('Audio loading error:', error);
-      setIsLoading(false);
-      setCanPlay(false);
     };
     const handleEnded = async () => {
       // Fade out when ending
@@ -111,8 +63,6 @@ export default function AudioPreview({ src, title = "Track Preview", className =
     audio.addEventListener('loadstart', handleLoadStart);
     audio.addEventListener('canplay', handleCanPlay);
     audio.addEventListener('canplaythrough', handleCanPlay);
-    audio.addEventListener('loadeddata', handleLoadedData);
-    audio.addEventListener('error', handleError);
     audio.addEventListener('ended', handleEnded);
 
     // Try to get duration immediately if already loaded
@@ -127,8 +77,6 @@ export default function AudioPreview({ src, title = "Track Preview", className =
       audio.removeEventListener('loadstart', handleLoadStart);
       audio.removeEventListener('canplay', handleCanPlay);
       audio.removeEventListener('canplaythrough', handleCanPlay);
-      audio.removeEventListener('loadeddata', handleLoadedData);
-      audio.removeEventListener('error', handleError);
       audio.removeEventListener('ended', handleEnded);
       
       // Clear any ongoing fade
@@ -145,9 +93,6 @@ export default function AudioPreview({ src, title = "Track Preview", className =
     setDuration(0);
     setIsPlaying(false);
     setIsLoading(false);
-    setCanPlay(false);
-    setUserInteracted(false);
-    setAudioContextUnlocked(false);
     
     // Clear any ongoing fade
     if (fadeIntervalRef.current) {
@@ -159,20 +104,7 @@ export default function AudioPreview({ src, title = "Track Preview", className =
     const audio = audioRef.current;
     if (audio) {
       audio.volume = 1; // Reset volume to full
-      // Add muted attribute to help with iOS autoplay restrictions
-      audio.muted = false;
       audio.load(); // This forces the audio element to reload
-      
-      // For Safari mobile, try to prepare the audio element
-      if (isSafariMobile) {
-        // Set a longer timeout for Safari to load metadata
-        setTimeout(() => {
-          if (audio.readyState >= 2) { // HAVE_CURRENT_DATA
-            setCanPlay(true);
-            setIsLoading(false);
-          }
-        }, 1000);
-      }
     }
   }, [src]);
 
@@ -225,12 +157,7 @@ export default function AudioPreview({ src, title = "Track Preview", className =
 
   const togglePlay = async () => {
     const audio = audioRef.current;
-    if (!audio || (!canPlay && !isSafariMobile)) return;
-
-    // Mark that user has interacted with the audio
-    if (!userInteracted) {
-      setUserInteracted(true);
-    }
+    if (!audio) return;
 
     try {
       if (isPlaying) {
@@ -239,61 +166,14 @@ export default function AudioPreview({ src, title = "Track Preview", className =
         audio.pause();
         setIsPlaying(false);
       } else {
-        // For Safari iOS, we need special handling
-        if (isSafariMobile && !audioContextUnlocked) {
-          // Try to unlock audio context by playing a silent audio first
-          try {
-            audio.muted = true;
-            const playPromise = audio.play();
-            if (playPromise !== undefined) {
-              await playPromise;
-            }
-            audio.pause();
-            audio.currentTime = 0;
-            audio.muted = false;
-            setAudioContextUnlocked(true);
-          } catch (unlockError) {
-            console.warn('Failed to unlock audio context:', unlockError);
-          }
-        }
-        
         // Start playing with fade in
         audio.volume = 0; // Start at 0 volume
-        
-        // Use a promise to handle play() properly
-        const playPromise = audio.play();
-        if (playPromise !== undefined) {
-          await playPromise;
-          setIsPlaying(true);
-          await fadeIn(audio);
-        }
+        await audio.play();
+        setIsPlaying(true);
+        await fadeIn(audio);
       }
     } catch (error) {
-      console.warn('Audio playback failed:', error);
-      // Reset states on error
-      setIsPlaying(false);
-      
-      // For Safari, try alternative approach
-      if (isSafariMobile) {
-        try {
-          // Force reload and try again
-          audio.load();
-          setTimeout(async () => {
-            try {
-              audio.volume = 0.5; // Use moderate volume for fallback
-              const retryPromise = audio.play();
-              if (retryPromise !== undefined) {
-                await retryPromise;
-                setIsPlaying(true);
-              }
-            } catch (retryError) {
-              console.warn('Retry audio playback failed:', retryError);
-            }
-          }, 500);
-        } catch (reloadError) {
-          console.warn('Audio reload failed:', reloadError);
-        }
-      }
+      // Silent error handling for audio playback
     }
   };
 
@@ -332,15 +212,7 @@ export default function AudioPreview({ src, title = "Track Preview", className =
           initial={{ opacity: 0 }}
           whileHover={{ opacity: 1 }}
         >
-          <audio 
-            ref={audioRef} 
-            src={src} 
-            preload={isSafariMobile ? "none" : "metadata"}
-            crossOrigin="anonymous"
-            playsInline
-            webkit-playsinline="true"
-            controls={false}
-          />
+          <audio ref={audioRef} src={src} preload="metadata" crossOrigin="anonymous" />
           
           <div className="relative">
             {/* Play/Pause button with external progress ring */}
@@ -375,13 +247,12 @@ export default function AudioPreview({ src, title = "Track Preview", className =
               
               <Button
                 onClick={togglePlay}
-                onTouchStart={handleTouchStart}
-                disabled={isLoading || (!canPlay && !isSafariMobile)}
+                disabled={isLoading}
                 variant="outline"
                 size="icon"
                 className="h-12 w-12 rounded-full bg-white/20 border-white/30 hover:bg-white/30 backdrop-blur-sm relative z-10"
               >
-                {isLoading || (!canPlay && !isSafariMobile) ? (
+                {isLoading ? (
                   <div className="animate-spin h-5 w-5 border-2 border-white/50 border-t-white rounded-full" />
                 ) : isPlaying ? (
                   <Pause className="h-5 w-5 text-white" />
@@ -479,31 +350,17 @@ export default function AudioPreview({ src, title = "Track Preview", className =
         }
       }}
     >
-      <audio 
-        ref={audioRef} 
-        src={src} 
-        preload={isSafariMobile ? "none" : "metadata"}
-        crossOrigin="anonymous"
-        playsInline
-        webkit-playsinline="true"
-        controls={false}
-      />
+      <audio ref={audioRef} src={src} preload="metadata" crossOrigin="anonymous" />
       
       <div className="flex items-center space-x-4">
         <Button
           onClick={togglePlay}
-          onTouchStart={() => {
-            // For Safari mobile, ensure we capture touch events
-            if (isSafariMobile && !userInteracted) {
-              setUserInteracted(true);
-            }
-          }}
-          disabled={isLoading || (!canPlay && !isSafariMobile)}
+          disabled={isLoading}
           variant="outline"
           size="icon"
           className="h-10 w-10 rounded-full bg-white/10 border-white/20 hover:bg-white/20"
         >
-          {isLoading || (!canPlay && !isSafariMobile) ? (
+          {isLoading ? (
             <div className="animate-spin h-4 w-4 border-2 border-white/50 border-t-white rounded-full" />
           ) : isPlaying ? (
             <Pause className="h-4 w-4 text-white" />
