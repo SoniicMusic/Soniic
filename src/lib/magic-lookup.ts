@@ -134,7 +134,7 @@ async function lookupISRC(ISRC: string, CountryCode: string): Promise<LookupISRC
         TrackLinks: {
             AppleMusic: AM ? 'https://music.apple.com/song/' + AM.id : undefined,
             Spotify: Spotify ? 'https://open.spotify.com/track/' + Spotify.id : undefined,
-            Tidal: Tidal ? 'https://tidal.com/browse/track/' + Tidal.id : undefined,
+            Tidal: (Tidal && Tidal.id) ? 'https://tidal.com/browse/track/' + Tidal.id : undefined,
         },
     };
 }
@@ -235,7 +235,7 @@ async function lookupUPC(UPC: string, CountryCode: string): Promise<LookupUPCRes
         Links: {
             AppleMusic: AM ? 'https://music.apple.com/album/' + AM.id : undefined,
             Spotify: Spotify ? 'https://open.spotify.com/album/' + Spotify.id : undefined,
-            Tidal: Tidal ? 'https://tidal.com/browse/album/' + Tidal.id : undefined,
+            Tidal: (Tidal && Tidal.id) ? 'https://tidal.com/browse/album/' + Tidal.id : undefined,
         },
     };
 }
