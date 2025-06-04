@@ -11,13 +11,27 @@ interface AudioPreviewProps {
   variant?: 'default' | 'circular-overlay';
 }
 
+// Mobile detection utility
+const isMobile = (): boolean => {
+  if (typeof window === 'undefined') return false;
+  return /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(
+    window.navigator.userAgent.toLowerCase()
+  ) || !!(window.navigator.maxTouchPoints && window.navigator.maxTouchPoints > 2);
+};
+
 export default function AudioPreview({ src, title = "Track Preview", className = "", variant = 'default' }: AudioPreviewProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+  const [isMobileDevice, setIsMobileDevice] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
   const fadeIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Check if mobile on client side
+  useEffect(() => {
+    setIsMobileDevice(isMobile());
+  }, []);
 
   // Reset states when src changes
   useEffect(() => {
@@ -166,14 +180,36 @@ export default function AudioPreview({ src, title = "Track Preview", className =
         audio.pause();
         setIsPlaying(false);
       } else {
-        // Start playing with fade in
-        audio.volume = 0; // Start at 0 volume
-        await audio.play();
-        setIsPlaying(true);
-        await fadeIn(audio);
+        // For mobile devices, especially iOS Safari, we need special handling
+        if (isMobileDevice) {
+          // On mobile, try to play directly without fade initially
+          try {
+            const playPromise = audio.play();
+            if (playPromise !== undefined) {
+              await playPromise;
+              setIsPlaying(true);
+              // Only fade in after successful play start
+              await fadeIn(audio);
+            }
+          } catch (mobileError) {
+            console.warn('Mobile audio playback failed, trying fallback:', mobileError);
+            // Fallback: try again with volume set
+            audio.volume = 0.5;
+            await audio.play();
+            setIsPlaying(true);
+          }
+        } else {
+          // Desktop behavior with fade
+          audio.volume = 0;
+          await audio.play();
+          setIsPlaying(true);
+          await fadeIn(audio);
+        }
       }
     } catch (error) {
-      // Silent error handling for audio playback
+      console.warn('Audio playback failed:', error);
+      // Reset state on error
+      setIsPlaying(false);
     }
   };
 
@@ -208,11 +244,23 @@ export default function AudioPreview({ src, title = "Track Preview", className =
     return (
       <>
         <motion.div 
-          className={`absolute inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm opacity-0 hover:opacity-100 transition-opacity duration-300 rounded-md ${className}`}
-          initial={{ opacity: 0 }}
-          whileHover={{ opacity: 1 }}
+          className={`absolute inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm transition-opacity duration-300 rounded-md ${className} ${
+            isMobileDevice 
+              ? 'opacity-100' 
+              : 'opacity-0 hover:opacity-100'
+          }`}
+          initial={{ opacity: isMobileDevice ? 1 : 0 }}
+          whileHover={isMobileDevice ? {} : { opacity: 1 }}
+          animate={{ opacity: isMobileDevice ? 1 : 0 }}
         >
-          <audio ref={audioRef} src={src} preload="metadata" crossOrigin="anonymous" />
+          <audio 
+            ref={audioRef} 
+            src={src} 
+            preload="metadata" 
+            crossOrigin="anonymous"
+            playsInline
+            webkit-playsinline="true"
+          />
           
           <div className="relative">
             {/* Play/Pause button with external progress ring */}
@@ -247,10 +295,14 @@ export default function AudioPreview({ src, title = "Track Preview", className =
               
               <Button
                 onClick={togglePlay}
+                onTouchStart={(e) => {
+                  // Prevent double tap zoom on iOS
+                  e.preventDefault();
+                }}
                 disabled={isLoading}
                 variant="outline"
                 size="icon"
-                className="h-12 w-12 rounded-full bg-white/20 border-white/30 hover:bg-white/30 backdrop-blur-sm relative z-10"
+                className="h-12 w-12 rounded-full bg-white/20 border-white/30 hover:bg-white/30 backdrop-blur-sm relative z-10 touch-manipulation"
               >
                 {isLoading ? (
                   <div className="animate-spin h-5 w-5 border-2 border-white/50 border-t-white rounded-full" />
@@ -269,14 +321,16 @@ export default function AudioPreview({ src, title = "Track Preview", className =
           </div>
         </motion.div>
 
-        {/* Playing indicator at bottom - visible when playing and not hovered */}
+        {/* Playing indicator at bottom - visible when playing */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ 
             opacity: isPlaying ? 1 : 0, 
             y: isPlaying ? 0 : 10 
           }}
-          className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-gray-600/80 to-transparent rounded-b-md p-3 group-hover:opacity-0 transition-opacity duration-300 pointer-events-none"
+          className={`absolute bottom-0 left-0 right-0 bg-gradient-to-t from-gray-600/80 to-transparent rounded-b-md p-3 transition-opacity duration-300 pointer-events-none ${
+            isMobileDevice ? '' : 'group-hover:opacity-0'
+          }`}
           style={{ 
             visibility: isPlaying ? 'visible' : 'hidden'
           }}
@@ -292,9 +346,13 @@ export default function AudioPreview({ src, title = "Track Preview", className =
                     setIsPlaying(false);
                   }
                 }}
+                onTouchStart={(e) => {
+                  // Prevent double tap zoom on iOS
+                  e.preventDefault();
+                }}
                 variant="ghost"
                 size="sm"
-                className="h-6 w-6 p-0 rounded-full bg-white/10 hover:bg-white/20 border-none pointer-events-auto"
+                className="h-6 w-6 p-0 rounded-full bg-white/10 hover:bg-white/20 border-none pointer-events-auto touch-manipulation"
               >
                 <Pause className="h-3 w-3 text-white" />
               </Button>
@@ -350,15 +408,26 @@ export default function AudioPreview({ src, title = "Track Preview", className =
         }
       }}
     >
-      <audio ref={audioRef} src={src} preload="metadata" crossOrigin="anonymous" />
+      <audio 
+        ref={audioRef} 
+        src={src} 
+        preload="metadata" 
+        crossOrigin="anonymous"
+        playsInline
+        webkit-playsinline="true"
+      />
       
       <div className="flex items-center space-x-4">
         <Button
           onClick={togglePlay}
+          onTouchStart={(e) => {
+            // Prevent double tap zoom on iOS
+            e.preventDefault();
+          }}
           disabled={isLoading}
           variant="outline"
           size="icon"
-          className="h-10 w-10 rounded-full bg-white/10 border-white/20 hover:bg-white/20"
+          className="h-10 w-10 rounded-full bg-white/10 border-white/20 hover:bg-white/20 touch-manipulation"
         >
           {isLoading ? (
             <div className="animate-spin h-4 w-4 border-2 border-white/50 border-t-white rounded-full" />
@@ -378,8 +447,16 @@ export default function AudioPreview({ src, title = "Track Preview", className =
           <div className="space-y-1">
             {/* Progress bar */}
             <div 
-              className="h-2 bg-white/20 rounded-full cursor-pointer relative overflow-hidden"
+              className={`h-2 bg-white/20 rounded-full cursor-pointer relative overflow-hidden ${
+                isMobileDevice ? 'touch-manipulation' : ''
+              }`}
               onClick={handleSeek}
+              onTouchStart={(e) => {
+                // Improve touch responsiveness
+                if (isMobileDevice) {
+                  e.preventDefault();
+                }
+              }}
             >
               <div 
                 className="h-full bg-white/60 rounded-full transition-all duration-150"
