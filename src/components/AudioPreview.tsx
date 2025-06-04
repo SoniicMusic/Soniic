@@ -25,12 +25,30 @@ export default function AudioPreview({ src, title = "Track Preview", className =
   const [duration, setDuration] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [isMobileDevice, setIsMobileDevice] = useState(false);
+  const [showControls, setShowControls] = useState(false);
+  const [showHint, setShowHint] = useState(true);
   const audioRef = useRef<HTMLAudioElement>(null);
   const fadeIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const hintTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Check if mobile on client side
   useEffect(() => {
     setIsMobileDevice(isMobile());
+    
+    // Show hint for a few seconds, then hide it
+    if (hintTimeoutRef.current) {
+      clearTimeout(hintTimeoutRef.current);
+    }
+    
+    hintTimeoutRef.current = setTimeout(() => {
+      setShowHint(false);
+    }, 3000);
+    
+    return () => {
+      if (hintTimeoutRef.current) {
+        clearTimeout(hintTimeoutRef.current);
+      }
+    };
   }, []);
 
   // Reset states when src changes
@@ -41,6 +59,8 @@ export default function AudioPreview({ src, title = "Track Preview", className =
       setCurrentTime(0);
       setDuration(0);
       setIsPlaying(false);
+      setShowControls(false); // Hide controls when src changes
+      setShowHint(true); // Show hint again for new content
     }
   }, [src, title]);
 
@@ -107,6 +127,8 @@ export default function AudioPreview({ src, title = "Track Preview", className =
     setDuration(0);
     setIsPlaying(false);
     setIsLoading(false);
+    setShowControls(false); // Hide controls when src changes
+    setShowHint(true); // Show hint again for new content
     
     // Clear any ongoing fade
     if (fadeIntervalRef.current) {
@@ -128,6 +150,10 @@ export default function AudioPreview({ src, title = "Track Preview", className =
       if (fadeIntervalRef.current) {
         clearInterval(fadeIntervalRef.current);
         fadeIntervalRef.current = null;
+      }
+      if (hintTimeoutRef.current) {
+        clearTimeout(hintTimeoutRef.current);
+        hintTimeoutRef.current = null;
       }
     };
   }, []);
@@ -245,13 +271,34 @@ export default function AudioPreview({ src, title = "Track Preview", className =
       <>
         <motion.div 
           className={`absolute inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm transition-opacity duration-300 rounded-md ${className} ${
-            isMobileDevice 
+            showControls 
               ? 'opacity-100' 
-              : 'opacity-0 hover:opacity-100'
+              : 'opacity-0'
           }`}
-          initial={{ opacity: isMobileDevice ? 1 : 0 }}
-          whileHover={isMobileDevice ? {} : { opacity: 1 }}
-          animate={{ opacity: isMobileDevice ? 1 : 0 }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: showControls ? 1 : 0 }}
+          onMouseEnter={() => {
+            if (!isMobileDevice) {
+              setShowControls(true);
+              setShowHint(false);
+            }
+          }}
+          onMouseLeave={() => !isMobileDevice && setShowControls(false)}
+          onTouchStart={(e) => {
+            // For mobile devices, toggle controls on tap
+            if (isMobileDevice) {
+              e.preventDefault();
+              setShowControls(!showControls);
+              setShowHint(false); // Hide hint once user interacts
+            }
+          }}
+          onClick={() => {
+            // For desktop, also allow click to toggle
+            if (!isMobileDevice) {
+              setShowControls(!showControls);
+              setShowHint(false);
+            }
+          }}
         >
           <audio 
             ref={audioRef} 
@@ -261,6 +308,20 @@ export default function AudioPreview({ src, title = "Track Preview", className =
             playsInline
             webkit-playsinline="true"
           />
+
+          {/* Subtle hint that fades out */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ 
+              opacity: showHint && !showControls ? 0.8 : 0,
+            }}
+            transition={{ duration: 0.5 }}
+            className="absolute inset-0 flex items-center justify-center pointer-events-none"
+          >
+            <div className="bg-black/40 backdrop-blur-sm rounded-full px-3 py-1 text-white/90 text-xs">
+              {isMobileDevice ? "Tap to play" : "Hover to play"}
+            </div>
+          </motion.div>
           
           <div className="relative">
             {/* Play/Pause button with external progress ring */}
@@ -296,8 +357,9 @@ export default function AudioPreview({ src, title = "Track Preview", className =
               <Button
                 onClick={togglePlay}
                 onTouchStart={(e) => {
-                  // Prevent double tap zoom on iOS
+                  // Prevent double tap zoom on iOS and event bubbling
                   e.preventDefault();
+                  e.stopPropagation();
                 }}
                 disabled={isLoading}
                 variant="outline"
@@ -329,7 +391,7 @@ export default function AudioPreview({ src, title = "Track Preview", className =
             y: isPlaying ? 0 : 10 
           }}
           className={`absolute bottom-0 left-0 right-0 bg-gradient-to-t from-gray-600/80 to-transparent rounded-b-md p-3 transition-opacity duration-300 pointer-events-none ${
-            isMobileDevice ? '' : 'group-hover:opacity-0'
+            showControls ? '' : 'group-hover:opacity-0'
           }`}
           style={{ 
             visibility: isPlaying ? 'visible' : 'hidden'
@@ -347,8 +409,9 @@ export default function AudioPreview({ src, title = "Track Preview", className =
                   }
                 }}
                 onTouchStart={(e) => {
-                  // Prevent double tap zoom on iOS
+                  // Prevent double tap zoom on iOS and event bubbling
                   e.preventDefault();
+                  e.stopPropagation();
                 }}
                 variant="ghost"
                 size="sm"
@@ -397,14 +460,36 @@ export default function AudioPreview({ src, title = "Track Preview", className =
   // Default variant
   return (
     <motion.div 
-      className={`bg-black/20 backdrop-blur-sm rounded-lg p-4 ${className}`}
+      className={`bg-black/20 backdrop-blur-sm rounded-lg p-4 ${className} ${
+        showControls || !showHint ? 'opacity-100' : 'opacity-60'
+      }`}
       initial={{ opacity: 0, y: 10 }}
       animate={{ 
-        opacity: 1, 
+        opacity: showControls || !showHint ? 1 : 0.6, 
         y: 0,
         transition: {
           duration: 1.5,
           delay: 0.8
+        }
+      }}
+      onMouseEnter={() => {
+        if (!isMobileDevice) {
+          setShowControls(true);
+          setShowHint(false);
+        }
+      }}
+      onMouseLeave={() => !isMobileDevice && setShowControls(false)}
+      onTouchStart={(e) => {
+        if (isMobileDevice) {
+          e.preventDefault();
+          setShowControls(!showControls);
+          setShowHint(false);
+        }
+      }}
+      onClick={() => {
+        if (!isMobileDevice) {
+          setShowControls(!showControls);
+          setShowHint(false);
         }
       }}
     >
