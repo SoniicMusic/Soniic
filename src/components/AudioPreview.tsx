@@ -298,27 +298,26 @@ export default function AudioPreview({ src, title = "Track Preview", className =
                 backgroundColor: 'rgba(0, 0, 0, 0.6)'
               }}
               exit={{ 
-                opacity: 0, 
-                y: 10,
+                opacity: 0,
                 backgroundColor: 'rgba(0, 0, 0, 0)'
               }}
               transition={{ 
-                duration: 0.3, 
-                ease: "easeInOut",
-                backgroundColor: { duration: 0.3, ease: "easeInOut" }
+                duration: 0.5, 
+                ease: "easeOut",
+                backgroundColor: { duration: 0.5, ease: "easeOut" }
               }}
               className={`absolute inset-0 flex items-center justify-center rounded-md pointer-events-none ${className}`}
               style={{ 
                 backdropFilter: 'blur(4px)',
                 WebkitBackdropFilter: 'blur(4px)',
-                transition: 'backdrop-filter 0.3s ease-in-out, -webkit-backdrop-filter 0.3s ease-in-out',
+                transition: 'backdrop-filter 0.5s ease-out, -webkit-backdrop-filter 0.5s ease-out',
               }}
             >
               <motion.div 
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 10 }}
-                transition={{ duration: 0.3, ease: "easeInOut" }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.5, ease: "easeOut" }}
                 className="bg-white/20 backdrop-blur-sm rounded-full px-4 py-2 text-white/90 text-sm font-medium border border-white/30"
               >
                 {isMobileDevice ? "Tap to play" : "Hover to play"}
