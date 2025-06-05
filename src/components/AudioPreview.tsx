@@ -274,12 +274,22 @@ export default function AudioPreview({ src, title = "Track Preview", className =
   if (variant === 'circular-overlay') {
     return (
       <>
-        {/* Invisible interaction layer - always present to prevent flickering */}
-        <div 
-          className="absolute inset-0"
+        <motion.div 
+          className={`absolute inset-0 flex items-center justify-center rounded-md ${className}`}
+          initial={{ opacity: 0 }}
+          animate={{ 
+            opacity: 1,
+            backgroundColor: showControls ? 'rgba(0, 0, 0, 0.6)' : 'rgba(0, 0, 0, 0)',
+          }}
+          transition={{ 
+            opacity: { duration: 0.2, ease: "easeInOut" },
+            backgroundColor: { duration: 0.3, ease: "easeInOut" }
+          }}
           style={{ 
-            zIndex: showControls ? 5 : 20,
-            pointerEvents: showControls ? 'none' : 'auto'
+            backdropFilter: showControls ? 'blur(4px)' : 'blur(0px)',
+            WebkitBackdropFilter: showControls ? 'blur(4px)' : 'blur(0px)', // Safari support
+            transition: 'backdrop-filter 0.3s ease-in-out, -webkit-backdrop-filter 0.3s ease-in-out',
+            pointerEvents: 'auto'
           }}
           onMouseEnter={() => {
             if (!isMobileDevice) {
@@ -301,23 +311,13 @@ export default function AudioPreview({ src, title = "Track Preview", className =
               setHasInteracted(true);
             }
           }}
-          onClick={() => {
-            if (!isMobileDevice && !showControls) {
+          onClick={(e) => {
+            // Only toggle if clicking the background (not on buttons)
+            if (e.target === e.currentTarget && !isMobileDevice) {
               setShowControls(!showControls);
               setShowHint(false);
               setHasInteracted(true);
             }
-          }}
-        />
-
-        {/* Controls overlay */}
-        <motion.div 
-          className={`absolute inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm rounded-md ${className}`}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: showControls ? 1 : 0 }}
-          transition={{ duration: 0.2, ease: "easeInOut" }}
-          style={{ 
-            pointerEvents: showControls ? 'auto' : 'none'
           }}
         >
           <audio 
@@ -329,78 +329,87 @@ export default function AudioPreview({ src, title = "Track Preview", className =
             webkit-playsinline="true"
           />
 
-          {/* Subtle hint that fades out - separate layer */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ 
-              opacity: showHint && !showControls && !hasInteracted ? 0.9 : 0,
-            }}
-            transition={{ duration: 0.3, ease: "easeInOut" }}
-            className="absolute inset-0 flex items-center justify-center pointer-events-none z-10"
-          >
-            <div className="bg-black/50 backdrop-blur-sm rounded-full px-4 py-2 text-white/90 text-sm font-medium">
-              {isMobileDevice ? "Tap to play" : "Hover to play"}
-            </div>
-          </motion.div>
+          {/* Hint overlay */}
+          {showHint && !showControls && !hasInteracted && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.9 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              className="absolute inset-0 flex items-center justify-center pointer-events-none bg-black/40 backdrop-blur-sm"
+            >
+              <div className="bg-black/50 backdrop-blur-sm rounded-full px-4 py-2 text-white/90 text-sm font-medium">
+                {isMobileDevice ? "Tap to play" : "Hover to play"}
+              </div>
+            </motion.div>
+          )}
           
-          <div className="relative">
-            {/* Play/Pause button with external progress ring */}
-            <div className="relative">
-              {/* Circular progress ring positioned outside the button */}
-              <svg className="absolute -inset-2 w-16 h-16 transform -rotate-90" viewBox="0 0 64 64">
-                {/* Background circle */}
-                <circle
-                  cx="32"
-                  cy="32"
-                  r="28"
-                  stroke="white"
-                  strokeOpacity="0.2"
-                  strokeWidth="2"
-                  fill="none"
-                />
-                {/* Progress circle */}
-                <circle
-                  cx="32"
-                  cy="32"
-                  r="28"
-                  stroke="white"
-                  strokeOpacity="0.9"
-                  strokeWidth="2"
-                  fill="none"
-                  strokeDasharray={175.9}
-                  strokeDashoffset={175.9 * (1 - progressPercent / 100)}
-                  strokeLinecap="round"
-                  className="transition-all duration-150"
-                />
-              </svg>
+          {/* Play controls */}
+          {showControls && (
+            <motion.div
+              className="relative"
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.8 }}
+              transition={{ duration: 0.2 }}
+            >
+              {/* Play/Pause button with external progress ring */}
+              <div className="relative">
+                {/* Circular progress ring positioned outside the button */}
+                <svg className="absolute -inset-2 w-16 h-16 transform -rotate-90" viewBox="0 0 64 64">
+                  {/* Background circle */}
+                  <circle
+                    cx="32"
+                    cy="32"
+                    r="28"
+                    stroke="white"
+                    strokeOpacity="0.2"
+                    strokeWidth="2"
+                    fill="none"
+                  />
+                  {/* Progress circle */}
+                  <circle
+                    cx="32"
+                    cy="32"
+                    r="28"
+                    stroke="white"
+                    strokeOpacity="0.9"
+                    strokeWidth="2"
+                    fill="none"
+                    strokeDasharray={175.9}
+                    strokeDashoffset={175.9 * (1 - progressPercent / 100)}
+                    strokeLinecap="round"
+                    className="transition-all duration-150"
+                  />
+                </svg>
+                
+                <Button
+                  onClick={togglePlay}
+                  onTouchStart={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                  }}
+                  disabled={isLoading}
+                  variant="outline"
+                  size="icon"
+                  className="h-12 w-12 rounded-full bg-white/20 border-white/30 hover:bg-white/30 backdrop-blur-sm relative z-10 touch-manipulation"
+                >
+                  {isLoading ? (
+                    <div className="animate-spin h-5 w-5 border-2 border-white/50 border-t-white rounded-full" />
+                  ) : isPlaying ? (
+                    <Pause className="h-5 w-5 text-white" />
+                  ) : (
+                    <Play className="h-5 w-5 text-white ml-0.5" />
+                  )}
+                </Button>
+              </div>
               
-              <Button
-                onClick={togglePlay}
-                onTouchStart={(e) => {
-                  // Prevent double tap zoom on iOS and event bubbling
-                  e.preventDefault();
-                  e.stopPropagation();
-                }}
-                disabled={isLoading}
-                variant="outline"
-                size="icon"
-                className="h-12 w-12 rounded-full bg-white/20 border-white/30 hover:bg-white/30 backdrop-blur-sm relative z-30 touch-manipulation"
-              >
-                {isLoading ? (
-                  <div className="animate-spin h-5 w-5 border-2 border-white/50 border-t-white rounded-full" />
-                ) : isPlaying ? (
-                  <Pause className="h-5 w-5 text-white" />
-                ) : (
-                  <Play className="h-5 w-5 text-white ml-0.5" />
-                )}
-              </Button>
-            </div>
-            
-            {/* Time display */}
-            <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 text-xs text-white/80 whitespace-nowrap">
-              {formatTime(currentTime)} / {formatTime(duration)}
-            </div>
-          </div>
+              {/* Time display */}
+              <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 text-xs text-white/80 whitespace-nowrap">
+                {formatTime(currentTime)} / {formatTime(duration)}
+              </div>
+            </motion.div>
+          )}
         </motion.div>
 
         {/* Playing indicator at bottom - visible when playing */}
