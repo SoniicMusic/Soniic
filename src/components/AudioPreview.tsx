@@ -3,6 +3,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Play, Pause, Volume2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import * as motion from '@/lib/motion';
+const { AnimatePresence } = motion;
 
 interface AudioPreviewProps {
   src: string;
@@ -28,6 +29,7 @@ export default function AudioPreview({ src, title = "Track Preview", className =
   const [showControls, setShowControls] = useState(false);
   const [showHint, setShowHint] = useState(true);
   const [hasInteracted, setHasInteracted] = useState(false);
+  const [hintIsVisible, setHintIsVisible] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
   const fadeIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const hintTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -40,6 +42,9 @@ export default function AudioPreview({ src, title = "Track Preview", className =
     if (hintTimeoutRef.current) {
       clearTimeout(hintTimeoutRef.current);
     }
+    
+    // Set hint as visible when it should show
+    setHintIsVisible(showHint && !hasInteracted);
     
     hintTimeoutRef.current = setTimeout(() => {
       if (!hasInteracted) {
@@ -65,6 +70,7 @@ export default function AudioPreview({ src, title = "Track Preview", className =
       setShowControls(false); // Hide controls when src changes
       setShowHint(true); // Show hint again for new content
       setHasInteracted(false); // Reset interaction state
+      setHintIsVisible(false); // Reset hint visibility state
     }
   }, [src, title]);
 
@@ -134,6 +140,7 @@ export default function AudioPreview({ src, title = "Track Preview", className =
     setShowControls(false); // Hide controls when src changes
     setShowHint(true); // Show hint again for new content
     setHasInteracted(false); // Reset interaction state
+    setHintIsVisible(false); // Reset hint visibility state
     
     // Clear any ongoing fade
     if (fadeIntervalRef.current) {
@@ -274,6 +281,53 @@ export default function AudioPreview({ src, title = "Track Preview", className =
   if (variant === 'circular-overlay') {
     return (
       <>
+        {/* Hint overlay - separate from controls */}
+        <AnimatePresence
+          onExitComplete={() => setHintIsVisible(false)}
+        >
+          {showHint && !showControls && !hasInteracted && (
+            <motion.div
+              initial={{ 
+                opacity: 0, 
+                y: -10,
+                backgroundColor: 'rgba(0, 0, 0, 0)'
+              }}
+              animate={{ 
+                opacity: 1, 
+                y: 0,
+                backgroundColor: 'rgba(0, 0, 0, 0.6)'
+              }}
+              exit={{ 
+                opacity: 0, 
+                y: 10,
+                backgroundColor: 'rgba(0, 0, 0, 0)'
+              }}
+              transition={{ 
+                duration: 0.3, 
+                ease: "easeInOut",
+                backgroundColor: { duration: 0.3, ease: "easeInOut" }
+              }}
+              className={`absolute inset-0 flex items-center justify-center rounded-md pointer-events-none ${className}`}
+              style={{ 
+                backdropFilter: 'blur(4px)',
+                WebkitBackdropFilter: 'blur(4px)',
+                transition: 'backdrop-filter 0.3s ease-in-out, -webkit-backdrop-filter 0.3s ease-in-out',
+              }}
+            >
+              <motion.div 
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 10 }}
+                transition={{ duration: 0.3, ease: "easeInOut" }}
+                className="bg-white/20 backdrop-blur-sm rounded-full px-4 py-2 text-white/90 text-sm font-medium border border-white/30"
+              >
+                {isMobileDevice ? "Tap to play" : "Hover to play"}
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Main controls container */}
         <motion.div 
           className={`absolute inset-0 flex items-center justify-center rounded-md ${className}`}
           initial={{ opacity: 0 }}
@@ -329,21 +383,6 @@ export default function AudioPreview({ src, title = "Track Preview", className =
             webkit-playsinline="true"
           />
 
-          {/* Hint overlay */}
-          {showHint && !showControls && !hasInteracted && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 0.9 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.3 }}
-              className="absolute inset-0 flex items-center justify-center pointer-events-none bg-black/40 backdrop-blur-sm"
-            >
-              <div className="bg-black/50 backdrop-blur-sm rounded-full px-4 py-2 text-white/90 text-sm font-medium">
-                {isMobileDevice ? "Tap to play" : "Hover to play"}
-              </div>
-            </motion.div>
-          )}
-          
           {/* Play controls */}
           {showControls && (
             <motion.div
