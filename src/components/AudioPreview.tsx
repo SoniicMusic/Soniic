@@ -276,7 +276,11 @@ export default function AudioPreview({ src, title = "Track Preview", className =
       <>
         {/* Invisible interaction layer - always present to prevent flickering */}
         <div 
-          className="absolute inset-0 z-20"
+          className="absolute inset-0"
+          style={{ 
+            zIndex: showControls ? 5 : 20,
+            pointerEvents: showControls ? 'none' : 'auto'
+          }}
           onMouseEnter={() => {
             if (!isMobileDevice) {
               setShowControls(true);
@@ -298,7 +302,7 @@ export default function AudioPreview({ src, title = "Track Preview", className =
             }
           }}
           onClick={() => {
-            if (!isMobileDevice) {
+            if (!isMobileDevice && !showControls) {
               setShowControls(!showControls);
               setShowHint(false);
               setHasInteracted(true);
@@ -380,7 +384,7 @@ export default function AudioPreview({ src, title = "Track Preview", className =
                 disabled={isLoading}
                 variant="outline"
                 size="icon"
-                className="h-12 w-12 rounded-full bg-white/20 border-white/30 hover:bg-white/30 backdrop-blur-sm relative z-10 touch-manipulation"
+                className="h-12 w-12 rounded-full bg-white/20 border-white/30 hover:bg-white/30 backdrop-blur-sm relative z-30 touch-manipulation"
               >
                 {isLoading ? (
                   <div className="animate-spin h-5 w-5 border-2 border-white/50 border-t-white rounded-full" />
