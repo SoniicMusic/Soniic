@@ -156,6 +156,23 @@ async function lookupUPC(UPC: string, CountryCode: string): Promise<LookupUPCRes
     if (results[0].status === 'rejected') console.warn('Apple Music lookup failed:', results[0].reason);
     if (results[1].status === 'rejected') console.warn('Spotify lookup failed:', results[1].reason);
     if (results[2].status === 'rejected') console.warn('Tidal lookup failed:', results[2].reason);
+
+    // Attempt to get album name from multiple sources
+    let albumNameToUse = AM?.attributes?.name || null;
+    if (!albumNameToUse && Spotify?.name) {
+      console.warn('Album name missing from Apple Music, using Spotify name for UPC:', UPC);
+      albumNameToUse = Spotify.name;
+    }
+    if (!albumNameToUse && Tidal?.attributes?.title) {
+      console.warn('Album name missing from Apple Music and Spotify, using Tidal name for UPC:', UPC);
+      albumNameToUse = Tidal.attributes.title;
+    }
+    if (!albumNameToUse) {
+      // If no album name is found from any source, throw an error
+      console.error('Critical: Album name missing from all sources for UPC:', UPC);
+      throw new Error(`Failed to find album name for UPC: ${UPC} from any source.`);
+    }
+
     const artistIDs: { [key: string]: { [key: string]: string } } = {};
 
     // Extracting Apple Music artist IDs
@@ -225,7 +242,7 @@ async function lookupUPC(UPC: string, CountryCode: string): Promise<LookupUPCRes
     // Return the results
     return {
         UPC: UPC,  // Add the UPC to the result
-        AlbumName: AM?.attributes?.name || null,
+        AlbumName: albumNameToUse, // Use the determined album name
         genreNames: AM?.attributes?.genreNames || null,
         ReleaseDate: AM?.attributes?.releaseDate || null,
         PreviewAudio: AM?.relationships?.tracks?.data?.[0]?.attributes?.previews?.[0]?.url || null,

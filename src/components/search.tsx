@@ -2,13 +2,14 @@
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Search } from 'lucide-react'
+import { Search, X } from 'lucide-react'
 import { searchSpotify } from '@/lib/lookup/spotify'
 import { useEffect, useMemo, useState, useTransition } from "react"
 import debounce from 'lodash/debounce'
 import SearchResultsComponent from "./SearchResultAnimation"
 import FullScreenLoader from "./FullScreenLoader"
 import { useRouter, useSearchParams } from 'next/navigation'
+import * as motion from  "@/lib/motion"
 
 // Define interfaces for our track and album types to match with SearchResultAnimation
 interface TrackResult {
@@ -136,16 +137,24 @@ export default function SearchComponent() {
       <div className="bg-black backdrop-blur-md p-4 sticky top-0 z-10">
         <div className="relative max-w-6xl mx-auto">
           <Input
-            type="search"
             placeholder="Search..."
             className="w-full pl-12 pr-4 py-6 bg-white/10 text-white placeholder-white/50 text-xl"
             value={query}
             onChange={handleInputChange}
             autoFocus
           />
+          <motion.button 
+            className="absolute right-4 top-1/2 transform -translate-y-1/2 p-1 hover:bg-white/10 rounded disabled:opacity-50 disabled:cursor-not-allowed" 
+            onClick={handleClearSearch}
+            disabled={!query.trim()}
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+          >
+            <X className="text-white/50" size={20} />
+          </motion.button>
           <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-white/50" size={24} />
           {isPending && (
-            <div className="absolute right-14 top-1/2 transform -translate-y-1/2">
+            <div className="absolute right-16 top-1/2 transform -translate-y-1/2">
               <div className="animate-spin h-5 w-5 border-2 border-white/50 border-t-white rounded-full"></div>
             </div>
           )}

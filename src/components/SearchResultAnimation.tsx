@@ -60,7 +60,7 @@ export default function SearchResultsComponent(props: {
 
       {
         results.tracks.length > 0 &&
-        <h2 className="text-xl font-bold z-10 sticky top-0 p-2 pl-5 items-center backdrop-blur-3xl">
+        <h2 className="text-xl font-bold z-9999 sticky top-0 p-2 pl-5 items-center bg-black/50 backdrop-blur-md">
           Tracks
         </h2>
       }
@@ -91,7 +91,7 @@ export default function SearchResultsComponent(props: {
       }
       )}
       {
-        results.albums.length > 0 && <h2 className="text-xl font-bold z-10 sticky top-0 p-2 pl-5 items-center backdrop-blur-3xl">Albums</h2>
+        results.albums.length > 0 && <h2 className="text-xl font-bold z-9999 sticky top-0 p-2 pl-5 items-center bg-black/50 backdrop-blur-md">Albums</h2>
       }
       {results.albums.map((album) => (
         <motion.ul
