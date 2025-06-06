@@ -2,6 +2,7 @@
 import { testLookup } from '@/lib/createPage';
 import Image from 'next/image';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 interface SearchResultProps {
     title: string;
@@ -14,6 +15,7 @@ interface SearchResultProps {
     onLookupEnd?: () => void;
 }
 export default function SearchResult({ id, title, artists, coverUrl, type, explicit, onLookupStart, onLookupEnd }: SearchResultProps) {
+    const router = useRouter();
     const artistNames = artists.join(', ');
     const [isLoading, setIsLoading] = useState(false);
     
@@ -27,8 +29,9 @@ export default function SearchResult({ id, title, artists, coverUrl, type, expli
             
             // If successful and we have a redirectUrl, navigate to it
             if (result.success && result.redirectUrl) {
-                window.location.href = result.redirectUrl;
-                // Note: onLookupEnd will be called when the page unloads/navigates
+                // Use Next.js router for proper navigation instead of window.location.href
+                router.push(result.redirectUrl);
+                // Note: onLookupEnd will be called when the component unmounts
             } else {
                 // Show message if there's no redirect URL
                 setIsLoading(false);

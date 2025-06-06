@@ -37,6 +37,11 @@ export default function SearchComponent() {
   const [isPending, startTransition] = useTransition()
   const [isLookupLoading, setIsLookupLoading] = useState(false)
 
+  // Reset loading state when component mounts (handles browser back navigation)
+  useEffect(() => {
+    setIsLookupLoading(false);
+  }, []);
+
   const handleSearch = (searchQuery: string) => {
     startTransition(async () => {
       try {
@@ -50,6 +55,31 @@ export default function SearchComponent() {
 
   const debouncedSearch = useMemo(() => {
     return debounce(handleSearch, 500);
+  }, []);
+
+  // Handle browser back navigation - reset loading state when returning to search page
+  useEffect(() => {
+    const handleFocus = () => {
+      // Reset lookup loading state when the window regains focus (user navigates back)
+      setIsLookupLoading(false);
+    };
+
+    const handleVisibilityChange = () => {
+      // Reset lookup loading state when page becomes visible again
+      if (document.visibilityState === 'visible') {
+        setIsLookupLoading(false);
+      }
+    };
+
+    // Add event listeners for browser back navigation
+    window.addEventListener('focus', handleFocus);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    // Cleanup
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
   }, []);
 
   // Cleanup debounced function on unmount
