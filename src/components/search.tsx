@@ -36,10 +36,15 @@ export default function SearchComponent() {
   const [results, setResults] = useState<{ tracks: TrackResult[]; albums: AlbumResult[] }>({ tracks: [], albums: [] })
   const [isPending, startTransition] = useTransition()
   const [isLookupLoading, setIsLookupLoading] = useState(false)
+  const [resetItemLoading, setResetItemLoading] = useState(false)
 
   // Reset loading state when component mounts (handles browser back navigation)
   useEffect(() => {
     setIsLookupLoading(false);
+    setResetItemLoading(true);
+    // Reset the flag after a brief moment to allow child components to react
+    const timer = setTimeout(() => setResetItemLoading(false), 100);
+    return () => clearTimeout(timer);
   }, []);
 
   const handleSearch = (searchQuery: string) => {
@@ -62,12 +67,16 @@ export default function SearchComponent() {
     const handleFocus = () => {
       // Reset lookup loading state when the window regains focus (user navigates back)
       setIsLookupLoading(false);
+      setResetItemLoading(true);
+      setTimeout(() => setResetItemLoading(false), 100);
     };
 
     const handleVisibilityChange = () => {
       // Reset lookup loading state when page becomes visible again
       if (document.visibilityState === 'visible') {
         setIsLookupLoading(false);
+        setResetItemLoading(true);
+        setTimeout(() => setResetItemLoading(false), 100);
       }
     };
 
@@ -152,6 +161,7 @@ export default function SearchComponent() {
               isPending={isPending} 
               onLookupStart={() => setIsLookupLoading(true)}
               onLookupEnd={() => setIsLookupLoading(false)}
+              resetLoading={resetItemLoading}
             />
           </section>
         </ScrollArea>

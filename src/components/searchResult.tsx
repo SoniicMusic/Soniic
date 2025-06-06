@@ -1,7 +1,7 @@
 
 import { testLookup } from '@/lib/createPage';
 import Image from 'next/image';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
 interface SearchResultProps {
@@ -13,11 +13,19 @@ interface SearchResultProps {
     explicit?: boolean;
     onLookupStart?: () => void;
     onLookupEnd?: () => void;
+    resetLoading?: boolean; // New prop to reset loading state
 }
-export default function SearchResult({ id, title, artists, coverUrl, type, explicit, onLookupStart, onLookupEnd }: SearchResultProps) {
+export default function SearchResult({ id, title, artists, coverUrl, type, explicit, onLookupStart, onLookupEnd, resetLoading }: SearchResultProps) {
     const router = useRouter();
     const artistNames = artists.join(', ');
     const [isLoading, setIsLoading] = useState(false);
+    
+    // Reset loading state when resetLoading prop changes
+    useEffect(() => {
+        if (resetLoading) {
+            setIsLoading(false);
+        }
+    }, [resetLoading]);
     
     const handleClick = async () => {
         try {

@@ -42,11 +42,12 @@ export default function SearchResultsComponent(props: {
   results: { tracks: TrackResult[], albums: AlbumResult[] }, 
   isPending: boolean,
   onLookupStart?: () => void,
-  onLookupEnd?: () => void
+  onLookupEnd?: () => void,
+  resetLoading?: boolean
 }) {
   const results = props.results
   const isPending = props.isPending
-  const { onLookupStart, onLookupEnd } = props
+  const { onLookupStart, onLookupEnd, resetLoading } = props
   return (
     <motion.section className="max-w-6xl space-y-4"
       initial="hidden"
@@ -83,6 +84,7 @@ export default function SearchResultsComponent(props: {
               explicit={track.explicit}
               onLookupStart={onLookupStart}
               onLookupEnd={onLookupEnd}
+              resetLoading={resetLoading}
             />
           </motion.ul>
         )
@@ -109,6 +111,7 @@ export default function SearchResultsComponent(props: {
             type={album.type}
             onLookupStart={onLookupStart}
             onLookupEnd={onLookupEnd}
+            resetLoading={resetLoading}
           />
         </motion.ul>
       ))}
