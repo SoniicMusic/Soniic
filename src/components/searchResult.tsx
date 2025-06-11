@@ -34,7 +34,6 @@ export default function SearchResult({ id, title, artists, coverUrl, type, expli
             
             // Call testLookup and handle the response
             const result = await testLookup(id, type);
-            
             // If successful and we have a redirectUrl, navigate to it
             if (result.success && result.redirectUrl) {
                 // Use Next.js router for proper navigation instead of window.location.href
