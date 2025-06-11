@@ -1,4 +1,3 @@
-
 import { testLookup } from '@/lib/createPage';
 import Image from 'next/image';
 import { useState, useEffect } from 'react';
@@ -38,7 +37,10 @@ export default function SearchResult({ id, title, artists, coverUrl, type, expli
             // If successful and we have a redirectUrl, navigate to it
             if (result.success && result.redirectUrl) {
                 // Use Next.js router for proper navigation instead of window.location.href
-                router.push(result.redirectUrl);
+                // Defer the router.push call
+                setTimeout(() => {
+                    router.push(result.redirectUrl);
+                }, 0);
                 // Note: onLookupEnd will be called when the component unmounts
             } else {
                 // Show message if there's no redirect URL
