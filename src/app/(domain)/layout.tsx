@@ -12,6 +12,9 @@ const inter = Inter({
 
 export const viewport: Viewport = {
   themeColor: '#0000',
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
 }
 export default function DomainLayout({
   children,
