@@ -1,3 +1,4 @@
+
 import { testLookup } from '@/lib/createPage';
 import Image from 'next/image';
 import { useState, useEffect } from 'react';
@@ -37,10 +38,7 @@ export default function SearchResult({ id, title, artists, coverUrl, type, expli
             // If successful and we have a redirectUrl, navigate to it
             if (result.success && result.redirectUrl) {
                 // Use Next.js router for proper navigation instead of window.location.href
-                // Defer the router.push call
-                setTimeout(() => {
-                    router.push(result.redirectUrl);
-                }, 0);
+                router.push(result.redirectUrl);
                 // Note: onLookupEnd will be called when the component unmounts
             } else {
                 // Show message if there's no redirect URL
@@ -58,7 +56,7 @@ export default function SearchResult({ id, title, artists, coverUrl, type, expli
             className={`flex items-center space-x-4 p-3 rounded-md hover:bg-white/10 cursor-pointer transition-all duration-200 ${isLoading ? 'opacity-50' : ''}`}
             onMouseDown={handleClick}
             role="button" 
-            aria-label={`Play ${type}: ${title} by ${artistNames}`}
+            aria-label={`Lookup ${type}: ${title} by ${artistNames}`}
         >
             <div className="flex items-center space-x-4">
                 <Image src={coverUrl} alt={title} width={64} height={64} className="rounded-md" />
