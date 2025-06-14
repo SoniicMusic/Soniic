@@ -19,7 +19,7 @@
     "drizzle-orm": "^0.44.2",
     "jsonwebtoken": "^9.0.2",
     "lodash": "^4.17.21",
-    "lucide-react": "^0.514.0",
+    "lucide-react": "^0.515.0",
     "motion": "^12.17.3",
     "next": "^15.3.3",
     "next-auth": "^5.0.0-beta.28",
