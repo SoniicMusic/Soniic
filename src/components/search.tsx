@@ -137,15 +137,19 @@ export default function SearchComponent() {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newQuery = e.target.value
     setQuery(newQuery)
+    
     if (newQuery.trim()) {
       // Don't update URL immediately - let debounced search handle it
       // Cancel any pending debounced search before starting a new one
       debouncedSearch.cancel()
       debouncedSearch(newQuery.trim())
     } else {
+      // Clear everything when input becomes empty
       router.replace('/search', { scroll: false })
       debouncedSearch.cancel()
       setResults({ tracks: [], albums: [] })
+      setLastSearchedQuery('')
+      currentSearchRef.current = ''
     }
   }
   const handleClearSearch = () => {
@@ -153,6 +157,8 @@ export default function SearchComponent() {
     router.replace('/search', { scroll: false })
     debouncedSearch.cancel()
     setResults({ tracks: [], albums: [] })
+    setLastSearchedQuery('')
+    currentSearchRef.current = ''
   }
 
   return (
