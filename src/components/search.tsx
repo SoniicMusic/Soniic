@@ -51,6 +51,8 @@ export default function SearchComponent() {
   const handleSearch = (searchQuery: string) => {
     startTransition(async () => {
       try {
+        // Update URL only when search actually executes
+        router.replace(`/search?q=${encodeURIComponent(searchQuery)}`, { scroll: false })
         const searchResults = await searchSpotify(searchQuery)
         setResults(searchResults || { tracks: [], albums: [] })
       } catch (error) {
@@ -61,7 +63,7 @@ export default function SearchComponent() {
 
   const debouncedSearch = useMemo(() => {
     return debounce(handleSearch, 500);
-  }, []);
+  }, [router]);
 
   // Handle browser back navigation - reset loading state when returning to search page
   useEffect(() => {
@@ -111,7 +113,7 @@ export default function SearchComponent() {
     const newQuery = e.target.value
     setQuery(newQuery)
     if (newQuery.trim()) {
-      router.replace(`/search?q=${encodeURIComponent(newQuery)}`, { scroll: false })
+      // Don't update URL immediately - let debounced search handle it
       // Cancel any pending debounced search before starting a new one
       debouncedSearch.cancel()
       debouncedSearch(newQuery.trim())
