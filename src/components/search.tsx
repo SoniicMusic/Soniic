@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Search, X } from 'lucide-react'
 import { searchSpotify } from '@/lib/lookup/spotify'
-import { useEffect, useMemo, useState, useTransition } from "react"
+import { useEffect, useMemo, useState, useTransition, useCallback, useRef } from "react"
 import debounce from 'lodash/debounce'
 import SearchResultsComponent from "./SearchResultAnimation"
 import FullScreenLoader from "./FullScreenLoader"
@@ -48,22 +48,45 @@ export default function SearchComponent() {
     return () => clearTimeout(timer);
   }, []);
 
-  const handleSearch = (searchQuery: string) => {
-    startTransition(async () => {
-      try {
-        // Update URL only when search actually executes
-        router.replace(`/search?q=${encodeURIComponent(searchQuery)}`, { scroll: false })
-        const searchResults = await searchSpotify(searchQuery)
+  const [lastSearchedQuery, setLastSearchedQuery] = useState(initialQuery)
+  const currentSearchRef = useRef<string>('')
+
+  const performSearch = useCallback(async (searchQuery: string) => {
+    // Set the current search query
+    currentSearchRef.current = searchQuery
+    
+    try {
+      const searchResults = await searchSpotify(searchQuery)
+      
+      // Only update results if this is still the current search
+      if (currentSearchRef.current === searchQuery) {
         setResults(searchResults || { tracks: [], albums: [] })
-      } catch (error) {
+        setLastSearchedQuery(searchQuery)
+      }
+    } catch (error) {
+      // Only update results if this is still the current search
+      if (currentSearchRef.current === searchQuery) {
         setResults({ tracks: [], albums: [] })
       }
-    })
-  }
+    }
+  }, [])
+
+  const handleSearch = useCallback((searchQuery: string) => {
+    startTransition(() => performSearch(searchQuery))
+  }, [performSearch])
 
   const debouncedSearch = useMemo(() => {
-    return debounce(handleSearch, 500);
-  }, [router]);
+    return debounce((searchQuery: string) => {
+      handleSearch(searchQuery)
+    }, 500);
+  }, [handleSearch])
+
+  // Update URL only when the actual search completes successfully
+  useEffect(() => {
+    if (lastSearchedQuery && lastSearchedQuery !== initialQuery) {
+      router.replace(`/search?q=${encodeURIComponent(lastSearchedQuery)}`, { scroll: false })
+    }
+  }, [lastSearchedQuery, router, initialQuery])
 
   // Handle browser back navigation - reset loading state when returning to search page
   useEffect(() => {
@@ -103,7 +126,9 @@ export default function SearchComponent() {
 
   useEffect(() => {
     if (initialQuery) {
-      handleSearch(initialQuery);
+      // For initial query, don't update URL since it's already there
+      // Just perform the search directly
+      performSearch(initialQuery);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialQuery]); // Only run on initial mount if initialQuery exists
