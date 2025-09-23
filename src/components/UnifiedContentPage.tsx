@@ -137,7 +137,7 @@ async function UnifiedContentCard(props: { data: ContentData; contentType: Conte
           delay: 0.5
         }
       }}
-      className="min-h-dvh flex items-center justify-center relative"
+      className="h-dvh flex items-center justify-center relative"
       style={{
         backgroundImage: coverArt ? `url(${coverArt})` : undefined,
         backgroundSize: 'cover',
@@ -146,7 +146,7 @@ async function UnifiedContentCard(props: { data: ContentData; contentType: Conte
     >
       {/* Overlay for better text readability */}
       <div className="absolute inset-0 bg-black/50" />
-      <Card className="w-screen min-h-dvh bg-black/10 backdrop-blur-3xl border-none text-white relative z-10">
+      <Card className="w-screen h-dvh bg-black/10 backdrop-blur-3xl border-none text-white relative z-10">
         <CardContent className="container mx-auto max-w-lg px-2 py-8 flex flex-col items-center">
           <motion.div
             className="flex flex-col items-center space-y-4 w-full"
