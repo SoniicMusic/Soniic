@@ -21,7 +21,7 @@ async function ArtistCard(props: { artistData: any }) {
         }
       }}
 
-      className="min-h-screen flex items-center justify-center relative"
+      className="min-h-dvh flex items-center justify-center relative"
       style={{
         backgroundImage: artistData.background_image ? `url(${artistData.background_image})` : undefined,
         backgroundSize: 'cover',
@@ -30,7 +30,7 @@ async function ArtistCard(props: { artistData: any }) {
     >
       {/* Overlay for better text readability */}
       <div className="absolute inset-0 bg-black/50" />
-      <Card className="w-screen min-h-screen bg-black/10 backdrop-blur-3xl border-none text-white relative z-10">
+      <Card className="w-screen min-h-dvh bg-black/10 backdrop-blur-3xl border-none text-white relative z-10">
         <CardContent className="container mx-auto max-w-lg px-2 py-8 flex flex-col items-center"> {/* Changed max-w-2xl to max-w-lg and px-4 to px-2 */}
           <motion.div className="flex flex-col items-center space-y-6 w-full"
             initial={{ opacity: 0, y: 10 }}
