@@ -137,7 +137,7 @@ async function UnifiedContentCard(props: { data: ContentData; contentType: Conte
           delay: 0.5
         }
       }}
-      className="min-h-screen flex items-center justify-center relative"
+      className="min-h-dvh flex items-center justify-center relative"
       style={{
         backgroundImage: coverArt ? `url(${coverArt})` : undefined,
         backgroundSize: 'cover',
@@ -146,9 +146,9 @@ async function UnifiedContentCard(props: { data: ContentData; contentType: Conte
     >
       {/* Overlay for better text readability */}
       <div className="absolute inset-0 bg-black/50" />
-      <Card className="w-screen min-h-screen bg-black/10 backdrop-blur-3xl border-none text-white relative z-10">
+      <Card className="w-screen min-h-dvh bg-black/10 backdrop-blur-3xl border-none text-white relative z-10">
         <CardContent className="container mx-auto max-w-lg px-2 py-8 flex flex-col items-center">
-          <motion.div 
+          <motion.div
             className="flex flex-col items-center space-y-4 w-full"
             initial={{ opacity: 0, y: 10 }}
             animate={{
@@ -162,7 +162,7 @@ async function UnifiedContentCard(props: { data: ContentData; contentType: Conte
           >
             <motion.div
               initial={{
-                opacity: 0, 
+                opacity: 0,
                 y: 10,
                 filter: 'blur(5px)'
               }}
@@ -184,12 +184,12 @@ async function UnifiedContentCard(props: { data: ContentData; contentType: Conte
                 height={300}
                 className={`shadow-lg ${contentType === 'album' ? 'rounded-md' : 'rounded-md'}`}
               />
-              
+
               {/* Audio Preview for tracks */}
               {contentType === 'track' && isTrackData(data) && data.info.track.preview_url && (
-                <AudioPreview 
+                <AudioPreview
                   key={`audio-${data.info.track.isrc}-${data.info.track.preview_url}`}
-                  src={data.info.track.preview_url} 
+                  src={data.info.track.preview_url}
                   title={title}
                   variant="circular-overlay"
                 />
@@ -198,7 +198,7 @@ async function UnifiedContentCard(props: { data: ContentData; contentType: Conte
 
             <motion.h1
               initial={{
-                opacity: 0, 
+                opacity: 0,
                 y: 10,
                 filter: 'blur(5px)'
               }}
@@ -223,10 +223,10 @@ async function UnifiedContentCard(props: { data: ContentData; contentType: Conte
             {subtitle && (
               <motion.p
                 className="text-center text-lg px-3"
-                initial={{ 
-                  opacity: 0, 
-                  y: 10, 
-                  filter: 'blur(5px)' 
+                initial={{
+                  opacity: 0,
+                  y: 10,
+                  filter: 'blur(5px)'
                 }}
                 animate={{
                   opacity: 1,
@@ -246,10 +246,10 @@ async function UnifiedContentCard(props: { data: ContentData; contentType: Conte
             {data.info.bio && (
               <motion.p
                 className="text-center text-lg px-3"
-                initial={{ 
-                  opacity: 0, 
-                  y: 10, 
-                  filter: 'blur(5px)' 
+                initial={{
+                  opacity: 0,
+                  y: 10,
+                  filter: 'blur(5px)'
                 }}
                 animate={{
                   opacity: 1,
@@ -273,17 +273,17 @@ async function UnifiedContentCard(props: { data: ContentData; contentType: Conte
   );
 }
 
-export default async function UnifiedPage({ 
-  params, 
-  contentType 
-}: { 
-  params: Promise<{ domain: string; slug: string }>; 
+export default async function UnifiedPage({
+  params,
+  contentType
+}: {
+  params: Promise<{ domain: string; slug: string }>;
   contentType: ContentType;
 }) {
   const { domain, slug } = await params;
-  
+
   let data: ContentData | null = null;
-  
+
   if (contentType === 'track') {
     data = await getTrackLinks(slug);
   } else {
@@ -292,7 +292,7 @@ export default async function UnifiedPage({
 
   if (!data) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-black text-white">
+      <div className="min-h-dvh flex items-center justify-center bg-black text-white">
         <p>{contentType === 'track' ? 'Track' : 'Album'} not found</p>
       </div>
     );
@@ -301,11 +301,11 @@ export default async function UnifiedPage({
   return <UnifiedContentCard data={data} contentType={contentType} />;
 }
 
-export async function generateUnifiedMetadata({ 
-  params, 
-  contentType 
-}: { 
-  params: Promise<{ domain: string; slug: string }>; 
+export async function generateUnifiedMetadata({
+  params,
+  contentType
+}: {
+  params: Promise<{ domain: string; slug: string }>;
   contentType: ContentType;
 }) {
   const { domain, slug } = await params;
