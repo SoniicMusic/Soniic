@@ -16,7 +16,7 @@ jobs:
           node-version: 'lts/*'
 
       - name: Install dependencies
-        run: npm install
+        run: pnpm install
 
       - name: Build the Next.js app
-        run: npm run build
+        run: pnpm run build
