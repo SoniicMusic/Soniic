@@ -9,7 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@auth/drizzle-adapter": "^1.11.0",
+    "@auth/drizzle-adapter": "^1.11.1",
     "@icons-pack/react-simple-icons": "^13.8.0",
     "@radix-ui/react-scroll-area": "^1.2.10",
     "@radix-ui/react-slot": "^1.2.3",
