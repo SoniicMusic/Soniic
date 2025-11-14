@@ -14,7 +14,7 @@ services:
     networks:
       - soniic
   db:
-    image: postgres:17.6
+    image: postgres:17.7
     env_file:
       - ./.env
     volumes:
