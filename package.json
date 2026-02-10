@@ -34,7 +34,7 @@
     "@tailwindcss/postcss": "^4.1.18",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/lodash": "^4.17.23",
-    "@types/node": "^24.10.12",
+    "@types/node": "^24.10.13",
     "@types/pg": "^8.16.0",
     "@types/react": "19.2.13",
     "@types/react-dom": "19.2.3",
