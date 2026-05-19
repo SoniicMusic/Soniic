@@ -36,7 +36,7 @@
     "@types/lodash": "^4.17.24",
     "@types/node": "^24.12.4",
     "@types/pg": "^8.20.0",
-    "@types/react": "19.2.14",
+    "@types/react": "19.2.15",
     "@types/react-dom": "19.2.3",
     "drizzle-kit": "^0.31.10",
     "eslint": "^10.4.0",
@@ -49,7 +49,7 @@
   "packageManager": "pnpm@10.33.4+sha512.1c67b3b359b2d408119ba1ed289f34b8fc3c6873412bec6fd264fbdc82489e510fcbecb9ce9d22dae7f3b76269d8441046014bdca53b9979cd7a561ad631b800",
   "pnpm": {
     "overrides": {
-      "@types/react": "19.2.14",
+      "@types/react": "19.2.15",
       "@types/react-dom": "19.2.3"
     }
   }
