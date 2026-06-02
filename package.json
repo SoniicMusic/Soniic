@@ -24,8 +24,8 @@
     "next": "16.2.7",
     "next-themes": "^0.4.6",
     "pg": "^8.21.0",
-    "react": "19.2.6",
-    "react-dom": "19.2.6",
+    "react": "19.2.7",
+    "react-dom": "19.2.7",
     "slugify": "^1.6.9",
     "tailwind-merge": "^3.6.0",
     "tailwindcss-animate": "^1.0.7"
@@ -36,7 +36,7 @@
     "@types/lodash": "^4.17.24",
     "@types/node": "^24.12.4",
     "@types/pg": "^8.20.0",
-    "@types/react": "19.2.15",
+    "@types/react": "19.2.16",
     "@types/react-dom": "19.2.3",
     "drizzle-kit": "^0.31.10",
     "eslint": "^10.4.1",
@@ -49,7 +49,7 @@
   "packageManager": "pnpm@10.34.1+sha512.b58fbde6dca66a929538021581f648b4570b6ca19b18e7cbd7f2c07a7b24454155388dacdf08f2af3678e88a6d1fe04f9d609df24bf51735a060ea041b374ab7",
   "pnpm": {
     "overrides": {
-      "@types/react": "19.2.15",
+      "@types/react": "19.2.16",
       "@types/react-dom": "19.2.3"
     }
   }
