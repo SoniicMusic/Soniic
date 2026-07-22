@@ -25,7 +25,7 @@
     "next-themes": "^0.4.6",
     "pg": "^8.22.0",
     "react": "19.2.8",
-    "react-dom": "19.2.7",
+    "react-dom": "19.2.8",
     "slugify": "^1.6.9",
     "tailwind-merge": "^3.6.0",
     "tailwindcss-animate": "^1.0.7"
