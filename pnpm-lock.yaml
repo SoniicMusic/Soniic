@@ -1,12 +1,109 @@
+---
+lockfileVersion: '9.0'
+
+importers:
+
+  .:
+    configDependencies: {}
+    packageManagerDependencies:
+      pnpm:
+        specifier: 12.3.4
+        version: 12.3.4
+
+packages:
+
+  '@pnpm/exe.darwin-arm64@12.3.4':
+    resolution: {integrity: sha512-PAyUol8T1+/+ViOiXAt51ECA+QnfXCqz6foL4bW+LsoX0NcVd5XVEM2mRQu+LV4oc7uRz9zf9U0P+XFfuQeDAw==}
+    cpu: [arm64]
+    os: [darwin]
+
+  '@pnpm/exe.darwin-x64@12.3.4':
+    resolution: {integrity: sha512-fxP9JCk0Cdye+ePuj+GJJLMUMTqHGWRdb1dtv4How876uQ2ehxvenpgiYAir/ceO9PsYUZkFTtyZdx+rRu5QOA==}
+    cpu: [x64]
+    os: [darwin]
+
+  '@pnpm/exe.linux-arm64-musl@12.3.4':
+    resolution: {integrity: sha512-FBOt0/7ye6O6q4AllVV5QMviB6qE6fqkeczV/+MDWQsmo+QJrlfsh6X7CpH/tClVpBZEyIbjpUoT8bNhCYBxEg==}
+    cpu: [arm64]
+    os: [linux]
+    libc: [musl]
+
+  '@pnpm/exe.linux-arm64@12.3.4':
+    resolution: {integrity: sha512-t71AVA7LRqiKTyZ5xMYaZc2n5DfdpMbfokZuiIOXHBOM03ECnF0t4iYwaBDqJgVjlKYUOwaF/bRQajGNA4cJ4w==}
+    cpu: [arm64]
+    os: [linux]
+    libc: [glibc]
+
+  '@pnpm/exe.linux-x64-musl@12.3.4':
+    resolution: {integrity: sha512-RPmk7Jb/aYaFvL2iyDN/AtMY+hUEsue732WmXpcuQ9tBpMnGyA5py7Z3+e+qmQaJ0zY/4ni9jJiyPBQHujmv6w==}
+    cpu: [x64]
+    os: [linux]
+    libc: [musl]
+
+  '@pnpm/exe.linux-x64@12.3.4':
+    resolution: {integrity: sha512-2ZqOlSPkfwX1h5cR+FPiWf8+F+2hZT/3TvhUK5sigHqwaQCIiq8R7CGxhndKs63JtcLi2a1Qpo+wX/EoyfjyJQ==}
+    cpu: [x64]
+    os: [linux]
+    libc: [glibc]
+
+  '@pnpm/exe.win32-arm64@12.3.4':
+    resolution: {integrity: sha512-ANyrHqyqco6SXBysUTRF74itDyyraea7IbFsKFdNXTjcFnfycTDx37EwuhdpPYFNSIh2JhUG4fByclsRfiHX7w==}
+    cpu: [arm64]
+    os: [win32]
+
+  '@pnpm/exe.win32-x64@12.3.4':
+    resolution: {integrity: sha512-WH/KqBPY/hq2Tb7SgQltEZytimcjgKRaCRL/aM9CI0c67iKc5TVmHUhIiL3Ux9FB4bWn36i6XewUcScQI+zG8w==}
+    cpu: [x64]
+    os: [win32]
+
+  pnpm@12.3.4:
+    resolution: {integrity: sha512-lhqkH7B32joEpEHZ+OFevAyW2o73ELLrZ7+e58sGEOq9SPH9hfUc/+c4RnhfoPh8VqOocqHYk/hEZ0G1zORUVw==}
+    engines: {node: '>=18.*'}
+    hasBin: true
+
+snapshots:
+
+  '@pnpm/exe.darwin-arm64@12.3.4':
+    optional: true
+
+  '@pnpm/exe.darwin-x64@12.3.4':
+    optional: true
+
+  '@pnpm/exe.linux-arm64-musl@12.3.4':
+    optional: true
+
+  '@pnpm/exe.linux-arm64@12.3.4':
+    optional: true
+
+  '@pnpm/exe.linux-x64-musl@12.3.4':
+    optional: true
+
+  '@pnpm/exe.linux-x64@12.3.4':
+    optional: true
+
+  '@pnpm/exe.win32-arm64@12.3.4':
+    optional: true
+
+  '@pnpm/exe.win32-x64@12.3.4':
+    optional: true
+
+  pnpm@12.3.4:
+    optionalDependencies:
+      '@pnpm/exe.darwin-arm64': 12.3.4
+      '@pnpm/exe.darwin-x64': 12.3.4
+      '@pnpm/exe.linux-arm64': 12.3.4
+      '@pnpm/exe.linux-arm64-musl': 12.3.4
+      '@pnpm/exe.linux-x64': 12.3.4
+      '@pnpm/exe.linux-x64-musl': 12.3.4
+      '@pnpm/exe.win32-arm64': 12.3.4
+      '@pnpm/exe.win32-x64': 12.3.4
+
+---
 lockfileVersion: '9.0'
 
 settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
-
-overrides:
-  '@types/react': 19.2.18
-  '@types/react-dom': 19.2.7
 
 importers:
 
@@ -1003,7 +1100,7 @@ packages:
   '@radix-ui/react-compose-refs@1.1.5':
     resolution: {integrity: sha512-+48PbAAbq3didjJxa+OaWY2ZwgAKsNiRGyeHKszblZMQ+kcpd9pAaT11cMkGEie0vsOi3QdeTE6d5Fe3Gn61kA==}
     peerDependencies:
-      '@types/react': 19.2.18
+      '@types/react': '*'
       react: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
     peerDependenciesMeta:
       '@types/react':
@@ -1012,7 +1109,7 @@ packages:
   '@radix-ui/react-context@1.2.2':
     resolution: {integrity: sha512-RHCUGwKHDr0hDGg4X7ma4JG4/+12qxw8rkh5QKdDldlCvtja6nUx1Ef/8HVrJze81lEsgLQlqjzjGNHantgnQA==}
     peerDependencies:
-      '@types/react': 19.2.18
+      '@types/react': '*'
       react: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
     peerDependenciesMeta:
       '@types/react':
@@ -1021,7 +1118,7 @@ packages:
   '@radix-ui/react-direction@1.1.4':
     resolution: {integrity: sha512-5pzg4FGQNpExhnhT2zlrP1wZFaYCd1K0nYWoFAdcYoYK868IEigqMX3B3f8yIoRlAhAeDWciLI6ZdCKHF9P4Vg==}
     peerDependencies:
-      '@types/react': 19.2.18
+      '@types/react': '*'
       react: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
     peerDependenciesMeta:
       '@types/react':
@@ -1030,8 +1127,8 @@ packages:
   '@radix-ui/react-presence@1.1.10':
     resolution: {integrity: sha512-3wyzCQ6+ubRA+D4uv9m95JYLXxmOHp05qjrkjeA7uKHHtjpPggQzc6DAb0URl7j67oR0K2foO4ip27TiX037Bw==}
     peerDependencies:
-      '@types/react': 19.2.18
-      '@types/react-dom': 19.2.7
+      '@types/react': '*'
+      '@types/react-dom': '*'
       react: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
       react-dom: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
     peerDependenciesMeta:
@@ -1043,8 +1140,8 @@ packages:
   '@radix-ui/react-primitive@2.1.10':
     resolution: {integrity: sha512-MucOnzh6hR5mid6VpkbglRAMYMjKLqRnGBbjXkzjK52fuQDd1qbkx78a5P40mkcnVXJdEVxm26E9OPAiUq7nBg==}
     peerDependencies:
-      '@types/react': 19.2.18
-      '@types/react-dom': 19.2.7
+      '@types/react': '*'
+      '@types/react-dom': '*'
       react: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
       react-dom: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
     peerDependenciesMeta:
@@ -1056,8 +1153,8 @@ packages:
   '@radix-ui/react-scroll-area@1.2.18':
     resolution: {integrity: sha512-Zn5Cd171wxsO3Dfg8HaW6RifTb9CYTKQJHs/G4+LN1GfmJpaQMZQyQxMprVPHpaz7QY4l9BxK2JwQuzHsXC8nA==}
     peerDependencies:
-      '@types/react': 19.2.18
-      '@types/react-dom': 19.2.7
+      '@types/react': '*'
+      '@types/react-dom': '*'
       react: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
       react-dom: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
     peerDependenciesMeta:
@@ -1069,7 +1166,7 @@ packages:
   '@radix-ui/react-slot@1.3.3':
     resolution: {integrity: sha512-qx7oqnYbxnK9kYI9m317qmFmEgo6ywqWvbTogdj7cL9p3/yx4M48p7Rnw5z3H890cL/ow/EeWJsuTykeZVXP5Q==}
     peerDependencies:
-      '@types/react': 19.2.18
+      '@types/react': '*'
       react: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
     peerDependenciesMeta:
       '@types/react':
@@ -1078,7 +1175,7 @@ packages:
   '@radix-ui/react-use-callback-ref@1.1.4':
     resolution: {integrity: sha512-R6OUY2e2fA6Yn6s+VSx5KBV6Nx8LQEhu+cz7LCej18rQ1HLyg9PSC9jP/ZNx0o6FAIK9c0F1kHylzSxKsdlkrQ==}
     peerDependencies:
-      '@types/react': 19.2.18
+      '@types/react': '*'
       react: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
     peerDependenciesMeta:
       '@types/react':
@@ -1087,7 +1184,7 @@ packages:
   '@radix-ui/react-use-layout-effect@1.1.4':
     resolution: {integrity: sha512-K20DkRkUwDnxEYMBPcg3Y6voLkEy5p5QQmszZgLngKKiC7dzBR/aEuK3w1qlx2JWDUNH6FluahYdgR3BP+QbYw==}
     peerDependencies:
-      '@types/react': 19.2.18
+      '@types/react': '*'
       react: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
     peerDependenciesMeta:
       '@types/react':
@@ -1224,7 +1321,7 @@ packages:
   '@types/react-dom@19.2.7':
     resolution: {integrity: sha512-I8bPpDLcHBv1qiIiXDCy71Rt8eQDKJP0sMSWJphDdAcdqiJ1sGpZamavoEIRZmYzjia9LuEb2HlYdDpmoENpvQ==}
     peerDependencies:
-      '@types/react': 19.2.18
+      '@types/react': ^19.2.0
 
   '@types/react@19.2.18':
     resolution: {integrity: sha512-AnzbBERsrLKtk2XSfTbYRLjQPdy116Sty4q+T+Bp3IC4l6jNBvreVPAHmpq9qhXQM7CXZPjLVmGMw9sy+hxQ3w==}
