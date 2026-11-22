@@ -31,7 +31,7 @@
     "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4.3.3",
+    "@tailwindcss/postcss": "^4.3.5",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/lodash": "^4.17.27",
     "@types/node": "^26.6.6",
@@ -42,7 +42,7 @@
     "eslint": "^10.14.0",
     "eslint-config-next": "16.4.6",
     "postcss": "^8.5.33",
-    "tailwindcss": "^4.3.3",
+    "tailwindcss": "^4.3.5",
     "tsx": "^4.23.15",
     "typescript": "^7.0.2"
   },
