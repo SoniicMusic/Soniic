@@ -80,8 +80,8 @@ importers:
         specifier: ^9.0.10
         version: 9.0.10
       '@types/lodash':
-        specifier: ^4.17.27
-        version: 4.17.27
+        specifier: ^4.17.28
+        version: 4.17.28
       '@types/node':
         specifier: ^26.6.11
         version: 26.6.11
@@ -1218,8 +1218,8 @@ packages:
   '@types/jsonwebtoken@9.0.10':
     resolution: {integrity: sha512-asx5hIG9Qmf/1oStypjanR7iKTv0gXQ1Ov/jfrX6kS/EO0OFni8orbmGCn0672NHR3kXHwpAwR+B368ZGN/2rA==}
 
-  '@types/lodash@4.17.27':
-    resolution: {integrity: sha512-VenMRv/eKNrspX9v3H4dbmjsrnCOYdYBG3kxXKk3dG6X+urBGcj2Prww3xw1U5K4FV/mE4h5GbWd0szEKf+9ew==}
+  '@types/lodash@4.17.28':
+    resolution: {integrity: sha512-2iP9dTMtHQOGZq086o7CyIVz5h3hCS7xqG1dZg3hfbxqcB5/ZaFD+vOp9ebR8YlbCQr84OQjBiv/qgITjHSrYA==}
 
   '@types/ms@2.1.0':
     resolution: {integrity: sha512-GsCCIZDE/p3i96vtEqx+7dBUGXrc7zeSK3wwPHIaRThS+9OhWIXRqzs4d6k1SVU8g91DrNRWxWUGhp5KXQb2VA==}
@@ -3848,7 +3848,7 @@ snapshots:
       '@types/ms': 2.1.0
       '@types/node': 26.6.11
 
-  '@types/lodash@4.17.27': {}
+  '@types/lodash@4.17.28': {}
 
   '@types/ms@2.1.0': {}
 
